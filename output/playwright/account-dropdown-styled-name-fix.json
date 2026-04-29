@@ -1,0 +1,45 @@
+{
+  "data": {
+    "sessionProfile": null,
+    "dropdownName": "Ghost Admin",
+    "triggerName": "Ghost",
+    "icons": [
+      "+",
+      "⌂",
+      "⏸",
+      "◫",
+      "₪",
+      "◔",
+      "⚠",
+      "✦",
+      "◉",
+      "?",
+      "⏻"
+    ],
+    "labels": [
+      "+צור ארגון",
+      "⌂סקירה",
+      "⏸ארגון מושהה",
+      "◫משתמשים",
+      "₪תשלומים",
+      "◔שימוש",
+      "⚠תקלות",
+      "✦אירועים חיים",
+      "◉התראות",
+      "?עזרה ותמיכה",
+      "⏻יציאה מהמערכת"
+    ],
+    "rect": {
+      "x": 12,
+      "y": 70,
+      "width": 322,
+      "height": 732,
+      "bottom": 802
+    },
+    "viewport": {
+      "width": 375,
+      "height": 812
+    }
+  },
+  "shot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\account-dropdown-styled-name-fix.png"
+}

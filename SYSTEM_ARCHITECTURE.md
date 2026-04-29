@@ -719,7 +719,7 @@ npm run dev
 - **Cloud Function** — `api` (v2, us-central1, 512MiB, 60s timeout, minInstances: 0).
 - **Firestore** — כללי אבטחה: `deny all` — גישה רק דרך Admin SDK.
 - **RTDB** — כללי אבטחה: `deny all` — כתיבה רק מ-`FirebaseRealtimeHub`.
-- **Project:** `ghost-prod-fc874` (hardcoded ב-`functions/src/index.ts`).
+- **Project:** `ghost-test-app-b906c` (resolved from Firebase runtime config / `.firebaserc`).
 
 ### 8.3 משתני סביבה
 
@@ -884,7 +884,7 @@ graph LR
 
 17. **Cold start ב-Cloud Functions** — `minInstances: 0` אומר cold start מלא. אתחול Firestore + Scheduler + bootstrap user בכל cold start.
 
-18. **Project ID hardcoded** — `ghost-prod-fc874` קשוח ב-`functions/src/index.ts`. מקשה על סביבות staging/dev.
+18. **Project ID resolution** — הפרויקט צריך להישאר `ghost-test-app-b906c` דרך Firebase runtime config / `.firebaserc`, ללא hardcode לפרויקט אחר.
 
 19. **`validateCredentials` ו-`TEMP_USER`** — קוד מת ב-`auth-session.ts` עם credentials קבועים. לא בשימוש אך מבלבל.
 

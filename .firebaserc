@@ -1,15 +1,7 @@
 {
   "projects": {
-    "default": "ghost-prod-fc874"
-  },
-  "targets": {
-    "ghost-prod-fc874": {
-      "hosting": {
-        "prod": [
-          "ghost-prod-fc874"
-        ]
-      }
-    }
+    "default": "ghost-test-app-b906c",
+    "test": "ghost-test-app-b906c"
   },
   "etags": {}
 }

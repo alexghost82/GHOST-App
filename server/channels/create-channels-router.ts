@@ -4,6 +4,7 @@ import { extractTenantContext } from '../middleware/tenant-context'
 import type { IAdminRepository } from '../db/repository-types'
 import type { IRealtimeHub } from '../realtime/realtime-hub-types'
 import { syncOrganizationUsage } from '../admin/sync-org-usage'
+import { normalizeChannelLocalAgentState } from '../local-agent/channel-state'
 import {
   CreateChannelSchema,
   CreateMessageSchema,
@@ -39,7 +40,7 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
         channels.map(async (channel) => {
           const messages = await store.listMessages(organizationId, userId, channel.id, { limit: 50 })
           const operations = await store.listChannelOperations(organizationId, channel.id)
-          return { ...channel, messages, operations }
+          return { ...normalizeChannelLocalAgentState(channel), messages, operations }
         }),
       )
       return res.json(enriched)
@@ -56,7 +57,7 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
       if (!channel) return res.status(404).json({ error: 'הערוץ לא נמצא.' })
       const messages = await store.listMessages(organizationId, userId, channel.id)
       const operations = await store.listChannelOperations(organizationId, channel.id)
-      return res.json({ ...channel, messages, operations })
+      return res.json({ ...normalizeChannelLocalAgentState(channel), messages, operations })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'שגיאה פנימית.'
       return res.status(500).json({ error: message })
@@ -68,10 +69,13 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
       const { organizationId } = extractTenantContext(req)
       const parsed = CreateChannelSchema.safeParse(req.body)
       if (!parsed.success) return res.status(400).json({ error: 'קלט לא תקין.', details: parsed.error.flatten() })
-      const channel = await store.createFullChannel(organizationId, parsed.data)
+      const channel = await store.createFullChannel(organizationId, {
+        ...parsed.data,
+        captureMode: parsed.data.captureMode ?? 'browser',
+      })
       await syncOrganizationUsage(store, organizationId)
       publishUsageUpdated(realtimeHub, organizationId, { action: 'channel.created', channelId: channel.id })
-      return res.status(201).json(channel)
+      return res.status(201).json(normalizeChannelLocalAgentState(channel))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'שגיאה פנימית.'
       return res.status(500).json({ error: message })
@@ -83,8 +87,14 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
       const { organizationId } = extractTenantContext(req)
       const parsed = UpdateChannelSchema.safeParse(req.body)
       if (!parsed.success) return res.status(400).json({ error: 'קלט לא תקין.', details: parsed.error.flatten() })
-      const channel = await store.updateChannelData(organizationId, req.params.id, parsed.data)
-      return res.json(channel)
+      const channel = await store.updateChannelData(organizationId, req.params.id, {
+        ...parsed.data,
+        localAgentBinding:
+          parsed.data.localAgentBinding === null ? undefined : parsed.data.localAgentBinding,
+        localAgentStatus:
+          parsed.data.localAgentStatus === null ? undefined : parsed.data.localAgentStatus,
+      })
+      return res.json(normalizeChannelLocalAgentState(channel))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'שגיאה פנימית.'
       return res.status(500).json({ error: message })

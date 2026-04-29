@@ -1,0 +1,34 @@
+[
+  {
+    "name": "operator-mobile-after-fix",
+    "viewport": {
+      "width": 375,
+      "height": 812
+    },
+    "dropdownBox": {
+      "x": 12,
+      "y": 58,
+      "width": 324,
+      "height": 612.578125
+    },
+    "fitsVertically": true,
+    "overflowsBottom": false,
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\operator-mobile-after-fix.png"
+  },
+  {
+    "name": "admin-mobile-after-fix",
+    "viewport": {
+      "width": 375,
+      "height": 812
+    },
+    "dropdownBox": {
+      "x": 12,
+      "y": 58,
+      "width": 324,
+      "height": 612.578125
+    },
+    "fitsVertically": true,
+    "overflowsBottom": false,
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\admin-mobile-after-fix.png"
+  }
+]

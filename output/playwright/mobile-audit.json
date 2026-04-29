@@ -1,0 +1,18 @@
+{
+  "theme": "light",
+  "scrollHeight": 844,
+  "innerHeight": 844,
+  "bodyOverflow": "hidden",
+  "rootOverflow": "hidden",
+  "shellOverflow": "hidden",
+  "topbarRect": {
+    "x": 0,
+    "y": 0,
+    "width": 390,
+    "height": 246,
+    "top": 0,
+    "right": 390,
+    "bottom": 246,
+    "left": 0
+  }
+}

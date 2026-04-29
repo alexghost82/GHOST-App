@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { LIVE_STATE_META, OPERATION_MODE_META, OPERATION_MODES } from '../data/constants'
-import { parseSchedule, describeSchedule } from '../services/schedule-parser'
+import { describeSchedule, parseSchedule } from '../services/schedule-parser'
 import type { Channel, ChannelType, NewChannelDraft, Operation, OperationDraft, OperationMode } from '../types'
 import { StatusDot } from './status-dot'
 
@@ -13,6 +13,8 @@ const SCHEDULE_QUICK_SUGGESTIONS = [
   'כל 10 דקות',
   'כל שעה',
 ] as const
+
+type ChannelWorkspaceTab = 'overview' | 'sources' | 'rules' | 'members'
 
 function GroupChatIcon() {
   return (
@@ -42,7 +44,7 @@ function SchedulePreview({ text }: { text: string }) {
   return parsed ? (
     <p className="schedule-preview schedule-preview-ok">{describeSchedule(parsed)}</p>
   ) : (
-    <p className="schedule-preview schedule-preview-warn">לא זוהתה תבנית — נסה: &quot;כל 30 שניות&quot; / &quot;כל יום ב-09:00&quot;</p>
+    <p className="schedule-preview schedule-preview-warn">השתמש בתזמון תקין כמו "כל 30 שניות" או "כל יום ב־09:00".</p>
   )
 }
 
@@ -73,9 +75,6 @@ interface ChannelsHubProps {
   ) => void
 }
 
-/**
- * מסך מרכז ערוצים: יצירת ערוץ, בחירה לעריכה, הגדרות ערוץ ומבצעים — נקודת הניהול הראשית.
- */
 export function ChannelsHub({
   channels,
   linkedChannelIdSet,
@@ -99,16 +98,12 @@ export function ChannelsHub({
   onUpdateOperationField,
 }: ChannelsHubProps) {
   const [listQuery, setListQuery] = useState('')
+  const [activeTab, setActiveTab] = useState<ChannelWorkspaceTab>('overview')
 
-  const sortedChannels = useMemo(() => {
-    return [...channels].sort((a, b) => a.name.localeCompare(b.name, 'he'))
-  }, [channels])
-
+  const sortedChannels = useMemo(() => [...channels].sort((a, b) => a.name.localeCompare(b.name, 'he')), [channels])
   const filteredChannels = useMemo(() => {
     const q = listQuery.trim().toLowerCase()
-    if (!q) {
-      return sortedChannels
-    }
+    if (!q) return sortedChannels
     return sortedChannels.filter((channel) => {
       const haystack = `${channel.name} ${channel.location} ${channel.watchScope} ${channel.members.join(' ')}`.toLowerCase()
       return haystack.includes(q)
@@ -116,34 +111,40 @@ export function ChannelsHub({
   }, [listQuery, sortedChannels])
 
   const statusLabel = LIVE_STATE_META[selectedChannel.liveState]?.label ?? 'לא זמין'
+  const enabledOpsCount = selectedChannel.operations.filter((operation) => operation.enabled).length
   const isOperationDraftValid = operationDraft.action.trim().length > 0
-  const enabledOpsCount = selectedChannel.operations.filter((op) => op.enabled).length
+  const selectedLinkedChannels = channels.filter((channel) => selectedChannel.linkedChannelIds?.includes(channel.id))
+  const groupChannelsCount = channels.filter((channel) => channel.type === 'group').length
+  const attentionChannelsCount = channels.filter((channel) => channel.liveState === 'OFFLINE' || channel.liveState === 'DEGRADED').length
 
   return (
     <main className="channels-hub-screen">
       <header className="channels-hub-header">
         <div>
-          <p className="eyebrow">Channels Hub</p>
+          <p className="eyebrow">ערוצים</p>
           <h2>ניהול ערוצים</h2>
+          <p className="surface-screen-copy">
+            צור ערוצים, נהל מקור וטווח צפייה וערוך חוקים או קישורים בלי לערבב את העבודה הזו בתוך הפעילות החיה.
+          </p>
         </div>
         <div className="channels-hub-stats">
           <span>{channels.length} ערוצים</span>
-          <span>{selectedChannel.operations.length} מבצעים</span>
-          <span>{enabledOpsCount} פעילים</span>
+          <span>{groupChannelsCount} קבוצות</span>
+          <span>{attentionChannelsCount} דורשים תשומת לב</span>
         </div>
       </header>
 
       <div className="channels-hub-body">
-        <aside aria-label="רשימת ערוצים" className="chub-sidebar">
+        <aside aria-label="רשימת ערוצים ומסננים" className="chub-sidebar">
           <div className="chub-sidebar-toolbar">
-            <button className="ghost-button" onClick={onToggleNewChannelForm} type="button">
-              {showNewChannelForm ? 'סגור' : '+ ערוץ חדש'}
+            <button className="primary-button" onClick={onToggleNewChannelForm} type="button">
+              {showNewChannelForm ? 'סגור יצירה' : 'ערוץ חדש'}
             </button>
             <input
-              aria-label="חיפוש ברשימת ערוצים"
+              aria-label="סינון ערוצים"
               className="chub-sidebar-search"
               onChange={(event) => setListQuery(event.target.value)}
-              placeholder="חיפוש..."
+              placeholder="חיפוש ערוצים..."
               type="search"
               value={listQuery}
             />
@@ -153,7 +154,7 @@ export function ChannelsHub({
             <form className="card stacked-form chub-new-form" onSubmit={onNewChannelSubmit}>
               <div className="section-heading">
                 <h3>יצירת ערוץ</h3>
-                <span>הגדרות בסיס</span>
+                <span>תן שם, בחר סוג, חבר מקור ואז אשר</span>
               </div>
 
               <label>
@@ -162,81 +163,48 @@ export function ChannelsHub({
                   required
                   value={newChannelDraft.name}
                   onChange={(event) => onNewChannelDraftChange('name', event.target.value)}
-                  placeholder="לובי צפוני / קבוצת שערים"
+                  placeholder="לובי צפוני / קבוצת שער"
                 />
               </label>
 
               <label>
                 סוג ערוץ
-                <select
-                  value={newChannelDraft.type}
-                  onChange={(event) => onNewChannelDraftChange('type', event.target.value as ChannelType)}
-                >
+                <select value={newChannelDraft.type} onChange={(event) => onNewChannelDraftChange('type', event.target.value as ChannelType)}>
                   <option value="personal">ערוץ אישי</option>
-                  <option value="group">צ׳אט קבוצתי</option>
+                  <option value="group">ערוץ קבוצה</option>
                 </select>
               </label>
 
               <label>
                 מיקום
-                <input
-                  value={newChannelDraft.location}
-                  onChange={(event) => onNewChannelDraftChange('location', event.target.value)}
-                  placeholder="מפעל ברלב / שער דרומי"
-                />
+                <input value={newChannelDraft.location} onChange={(event) => onNewChannelDraftChange('location', event.target.value)} />
               </label>
 
               <label>
-                היקף ניטור
-                <textarea
-                  rows={2}
-                  value={newChannelDraft.watchScope}
-                  onChange={(event) => onNewChannelDraftChange('watchScope', event.target.value)}
-                  placeholder="רכבים, אנשים, כניסה לא מורשית..."
-                />
+                טווח צפייה
+                <textarea rows={2} value={newChannelDraft.watchScope} onChange={(event) => onNewChannelDraftChange('watchScope', event.target.value)} />
               </label>
 
               <label>
-                תיאור מבצעי
-                <textarea
-                  rows={2}
-                  value={newChannelDraft.description}
-                  onChange={(event) => onNewChannelDraftChange('description', event.target.value)}
-                  placeholder="הקשר תפעולי קצר..."
-                />
-              </label>
-
-              <label>
-                RTSP feed
-                <input
-                  value={newChannelDraft.rtspFeed}
-                  onChange={(event) => onNewChannelDraftChange('rtspFeed', event.target.value)}
-                  placeholder="rtsp://camera-or-group-feed"
-                />
+                תיאור תפעולי
+                <textarea rows={2} value={newChannelDraft.description} onChange={(event) => onNewChannelDraftChange('description', event.target.value)} />
               </label>
 
               {newChannelDraft.type === 'group' ? (
                 <fieldset className="linked-channels-fieldset">
-                  <legend className="linked-channels-legend">צירוף צ׳אטים קיימים</legend>
-                  <p className="linked-channels-hint">סמן אילו מהשיחות הקיימות ייכללו בקבוצה החדשה.</p>
-                  <div className="linked-channels-list" role="group" aria-label="בחירת צ׳אטים לקבוצה">
+                  <legend className="linked-channels-legend">שלב 2: בחר ערוצים לקבוצה</legend>
+                  <div className="linked-channels-list" role="group" aria-label="בחירת ערוצי קבוצה">
                     {availableChannelsForLink.length === 0 ? (
-                      <p className="linked-channels-empty">אין עדיין צ׳אטים לצירוף.</p>
+                      <p className="linked-channels-empty">כרגע אין ערוצים זמינים לצירוף לקבוצה.</p>
                     ) : (
                       availableChannelsForLink.map((channel) => {
                         const checked = newChannelDraft.linkedChannelIds.includes(channel.id)
                         return (
                           <label key={channel.id} className="linked-channel-option">
-                            <input
-                              checked={checked}
-                              onChange={() => onToggleLinkedChannelId(channel.id)}
-                              type="checkbox"
-                            />
+                            <input checked={checked} onChange={() => onToggleLinkedChannelId(channel.id)} type="checkbox" />
                             <span className="linked-channel-option-body">
                               <span className="linked-channel-name">{channel.name}</span>
-                              <span className="linked-channel-meta">
-                                {channel.type === 'group' ? 'קבוצה' : 'ערוץ'} · {channel.location}
-                              </span>
+                              <span className="linked-channel-meta">{channel.location}</span>
                             </span>
                           </label>
                         )
@@ -247,52 +215,37 @@ export function ChannelsHub({
               ) : null}
 
               <label>
-                אינטרוול זיכרון (שניות)
-                <input
-                  type="number"
-                  min="5"
-                  max="300"
-                  step="5"
-                  required
-                  value={newChannelDraft.memoryInterval}
-                  onChange={(event) => onNewChannelDraftChange('memoryInterval', Number(event.target.value))}
-                />
+                כתובת מקור / RTSP
+                <input value={newChannelDraft.rtspFeed} onChange={(event) => onNewChannelDraftChange('rtspFeed', event.target.value)} placeholder="rtsp://camera-feed" />
+              </label>
+
+              <label>
+                מרווח זיכרון (שניות)
+                <input type="number" min="5" max="300" step="5" required value={newChannelDraft.memoryInterval} onChange={(event) => onNewChannelDraftChange('memoryInterval', Number(event.target.value))} />
               </label>
 
               <button className="primary-button" disabled={!newChannelDraft.name.trim()} type="submit">
-                צור ערוץ
+                אשר יצירת ערוץ
               </button>
             </form>
           ) : null}
 
           <div className="chub-channel-list">
             {filteredChannels.length === 0 ? (
-              <p className="chub-empty-hint">לא נמצאו ערוצים תואמים.</p>
+              <p className="chub-empty-hint">אין ערוצים התואמים למסנן הנוכחי.</p>
             ) : (
               filteredChannels.map((channel) => {
                 const meta = LIVE_STATE_META[channel.liveState]
                 const isSelected = channel.id === selectedChannelId
                 const isLinked = linkedChannelIdSet.has(channel.id)
                 return (
-                  <button
-                    key={channel.id}
-                    className={`chub-row ${isSelected ? 'chub-row-active' : ''}`}
-                    onClick={() => onSelectChannel(channel.id)}
-                    type="button"
-                  >
+                  <button key={channel.id} className={`chub-row ${isSelected ? 'chub-row-active' : ''}`} onClick={() => onSelectChannel(channel.id)} type="button">
                     <StatusDot liveState={channel.liveState} className="chub-row-dot" />
-                    <span className="chub-row-type-icon" title={channel.type === 'group' ? 'צ׳אט קבוצתי' : 'מצלמה בודדת'}>
-                      {channel.type === 'group' ? <GroupChatIcon /> : <CameraChannelIcon />}
-                    </span>
+                    <span className="chub-row-type-icon">{channel.type === 'group' ? <GroupChatIcon /> : <CameraChannelIcon />}</span>
                     <span className="chub-row-name">{channel.name}</span>
-                    {isLinked ? <span className="chub-row-badge">מצורף</span> : null}
+                    {isLinked ? <span className="chub-row-badge">מקושר</span> : null}
                     <span className="chub-row-meta">{meta?.label ?? 'לא זמין'}</span>
                     <span className="chub-row-location">{channel.location}</span>
-                    {channel.operations.length > 0 ? (
-                      <span className="chub-row-ops" title="מבצעים">
-                        {channel.operations.length}
-                      </span>
-                    ) : null}
                   </button>
                 )
               })
@@ -300,262 +253,285 @@ export function ChannelsHub({
           </div>
         </aside>
 
-        <div className="chub-main">
-          <section aria-label="הגדרות ערוץ" className="chub-zone chub-settings-zone">
-            <header className="chub-zone-header">
-              <div>
-                <p className="eyebrow">הגדרות</p>
-                <h3>{selectedChannel.name}</h3>
-              </div>
-              <span className="chub-zone-status">
-                <StatusDot className="channel-status-dot" liveState={selectedChannel.liveState} />
-                {`${selectedChannel.liveState} · ${statusLabel}`}
-              </span>
-            </header>
-
-            <div className="chub-settings-grid">
-              <label>
-                שם הערוץ
-                <input
-                  value={selectedChannel.name}
-                  onChange={(event) => onUpdateSelectedChannel('name', event.target.value)}
-                />
-              </label>
-
-              <label>
-                מיקום
-                <input
-                  value={selectedChannel.location}
-                  onChange={(event) => onUpdateSelectedChannel('location', event.target.value)}
-                />
-              </label>
-
-              <label>
-                היקף ניטור
-                <textarea
-                  rows={2}
-                  value={selectedChannel.watchScope}
-                  onChange={(event) => onUpdateSelectedChannel('watchScope', event.target.value)}
-                />
-              </label>
-
-              <label>
-                תיאור מבצעי
-                <textarea
-                  rows={2}
-                  value={selectedChannel.description}
-                  onChange={(event) => onUpdateSelectedChannel('description', event.target.value)}
-                />
-              </label>
-
-              <label>
-                אינטרוול זיכרון (שניות)
-                <input
-                  type="number"
-                  min="5"
-                  max="300"
-                  step="5"
-                  value={selectedChannel.memoryInterval}
-                  onChange={(event) => onUpdateSelectedChannel('memoryInterval', Number(event.target.value))}
-                />
-              </label>
-
-              <label>
-                RTSP feed
-                <input
-                  value={selectedChannel.rtspFeed}
-                  onChange={(event) => onUpdateSelectedChannel('rtspFeed', event.target.value)}
-                  placeholder="rtsp://camera-feed"
-                />
-              </label>
-
-              <div className="channel-members chub-settings-members">
-                <span className="metric-label">
-                  {selectedChannel.type === 'group' ? 'צ׳אטים מצורפים' : 'חברי הערוץ'}
-                </span>
-                <div className="source-tags">
-                  {selectedChannel.members.map((member) => (
-                    <span key={member}>{member}</span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="chub-settings-actions">
-                <button className="danger-button" onClick={onRequestDeleteSelectedChannel} type="button">
-                  מחק ערוץ
-                </button>
-              </div>
+        <section className="chub-main">
+          <header className="chub-zone-header">
+            <div>
+              <p className="eyebrow">ערוץ נבחר</p>
+              <h3>{selectedChannel.name}</h3>
+              <p className="surface-screen-copy">
+                השאר כאן עריכה, הגדרת מקורות וניהול חוקים במקום בתוך סביבת הניטור.
+              </p>
             </div>
-          </section>
+            <span className="chub-zone-status">
+              <StatusDot className="channel-status-dot" liveState={selectedChannel.liveState} />
+              {statusLabel}
+            </span>
+          </header>
 
-          <div aria-hidden="true" className="chub-zone-divider" />
+          <nav className="chub-tabs" aria-label="לשוניות סביבת ערוץ">
+            <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => setActiveTab('overview')} type="button">סקירה</button>
+            <button className={activeTab === 'sources' ? 'active' : ''} onClick={() => setActiveTab('sources')} type="button">מקורות</button>
+            <button className={activeTab === 'rules' ? 'active' : ''} onClick={() => setActiveTab('rules')} type="button">חוקים</button>
+            <button className={activeTab === 'members' ? 'active' : ''} onClick={() => setActiveTab('members')} type="button">חברים / קישורים</button>
+          </nav>
 
-          <section aria-label="מבצעים בערוץ" className="chub-zone chub-ops-zone">
-            <header className="chub-zone-header">
-              <div>
-                <p className="eyebrow">מבצעים</p>
-                <h3>מבצעי ערוץ — {selectedChannel.name}</h3>
-                <p className="chub-zone-hint">{selectedChannel.operations.length} מבצעים · {enabledOpsCount} פעילים</p>
-              </div>
-            </header>
-
-            <div className="chub-ops-content">
-              <section className="chub-ops-create-section" aria-label="הוספת מבצע חדש">
-                <p className="chub-ops-section-kicker">הוספה חדשה</p>
-                <article className="card chub-ops-create-card">
+          <div className="chub-workspace">
+            <section className="chub-zone chub-center-zone">
+              {activeTab === 'overview' ? (
+                <div className="chub-settings-grid">
                   <div className="section-heading">
-                    <h3>מבצע חדש</h3>
-                    <span>סוג · תזמון · טריגר · הנחיות</span>
+                    <h3>זהות וטווח</h3>
+                    <span>עדכן את שם הערוץ, המיקום והתיאור למפעיל</span>
                   </div>
-
-                  <form className="stacked-form chub-ops-create-form" onSubmit={onOperationSubmit}>
-                    <label>
-                      שם מבצע
-                      <input value={operationDraft.name} onChange={(event) => onOperationDraftChange('name', event.target.value)} />
-                    </label>
-
-                    <label>
-                      סוג תגובה
-                      <select
-                        value={operationDraft.mode}
-                        onChange={(event) => onOperationDraftChange('mode', event.target.value as OperationMode)}
-                      >
-                        {OPERATION_MODES.map((m) => (
-                          <option key={m} value={m}>{OPERATION_MODE_META[m].label}</option>
-                        ))}
-                      </select>
-                    </label>
-
-                    <label>
-                      תזמון סריקה
-                      <p className="field-hint">כתוב בשפה חופשית: &quot;כל 10 שניות&quot;, &quot;כל יום ב-09:00&quot;.</p>
-                      <div className="schedule-quick-suggestions" role="group" aria-label="המלצות תזמון מהירות">
-                        {SCHEDULE_QUICK_SUGGESTIONS.map((suggestion) => (
-                          <button
-                            key={suggestion}
-                            className={`schedule-suggestion-chip ${operationDraft.schedule.trim() === suggestion ? 'active' : ''}`}
-                            onClick={() => onOperationDraftChange('schedule', suggestion)}
-                            type="button"
-                          >
-                            {suggestion}
-                          </button>
-                        ))}
-                      </div>
-                      <input
-                        value={operationDraft.schedule}
-                        onChange={(event) => onOperationDraftChange('schedule', event.target.value)}
-                      />
-                      <SchedulePreview text={operationDraft.schedule} />
-                    </label>
-
-                    <label>
-                      {OPERATION_MODE_META[operationDraft.mode].triggerLabel}
-                      <p className="field-hint">{OPERATION_MODE_META[operationDraft.mode].triggerHint}</p>
-                      <input
-                        value={operationDraft.trigger}
-                        onChange={(event) => onOperationDraftChange('trigger', event.target.value)}
-                      />
-                    </label>
-
-                    <label>
-                      מהות / הנחיות
-                      <textarea
-                        rows={2}
-                        value={operationDraft.action}
-                        onChange={(event) => onOperationDraftChange('action', event.target.value)}
-                      />
-                    </label>
-
-                    <button className="primary-button" disabled={!isOperationDraftValid} type="submit">
-                      שמור מבצע
+                  <label>
+                    שם הערוץ
+                    <input value={selectedChannel.name} onChange={(event) => onUpdateSelectedChannel('name', event.target.value)} />
+                  </label>
+                  <label>
+                    מיקום
+                    <input value={selectedChannel.location} onChange={(event) => onUpdateSelectedChannel('location', event.target.value)} />
+                  </label>
+                  <label>
+                    טווח צפייה
+                    <textarea rows={3} value={selectedChannel.watchScope} onChange={(event) => onUpdateSelectedChannel('watchScope', event.target.value)} />
+                  </label>
+                  <label>
+                    תיאור תפעולי
+                    <textarea rows={3} value={selectedChannel.description} onChange={(event) => onUpdateSelectedChannel('description', event.target.value)} />
+                  </label>
+                  <div className="chub-settings-actions">
+                    <button className="danger-button" onClick={onRequestDeleteSelectedChannel} type="button">
+                      מחק ערוץ
                     </button>
-                  </form>
-                </article>
-              </section>
-
-              <section className="chub-ops-existing-section" aria-label="מבצעים קיימים">
-                <div className="chub-ops-existing-head">
-                  <p className="chub-ops-section-kicker">מבצעים קיימים</p>
-                  <span>{selectedChannel.operations.length} סה״כ</span>
+                  </div>
                 </div>
+              ) : null}
 
-                <div className="chub-ops-list">
-                  {selectedChannel.operations.length === 0 ? (
-                    <p className="chub-empty-hint">אין מבצעים בערוץ זה.</p>
-                  ) : (
-                    selectedChannel.operations.map((operation) => (
-                      <article className="card operations-hub-item" key={operation.id}>
-                      <div className="operations-hub-item-head">
-                        <div>
-                          <p className="eyebrow">{operation.enabled ? 'פעיל' : 'מושהה'} · {OPERATION_MODE_META[operation.mode].label}</p>
-                          <h3>{operation.name}</h3>
-                        </div>
-                        <div className="operations-hub-item-actions">
-                          <button
-                            className={`operation-toggle ${operation.enabled ? 'enabled' : ''}`}
-                            onClick={() => onToggleOperation(operation.id)}
-                            type="button"
-                          >
-                            <span className="operation-toggle-thumb" />
-                          </button>
-                          <button className="danger-button" onClick={() => onDeleteOperation(operation.id)} type="button">
-                            מחק
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="stacked-form operations-hub-form">
-                        <label>
-                          שם מבצע
-                          <input
-                            value={operation.name}
-                            onChange={(event) => onUpdateOperationField(operation.id, 'name', event.target.value)}
-                          />
-                        </label>
-                        <label>
-                          סוג תגובה
-                          <select
-                            value={operation.mode}
-                            onChange={(event) => onUpdateOperationField(operation.id, 'mode', event.target.value)}
-                          >
-                            {OPERATION_MODES.map((m) => (
-                              <option key={m} value={m}>{OPERATION_MODE_META[m].label}</option>
-                            ))}
-                          </select>
-                        </label>
-                        <label>
-                          תזמון סריקה
-                          <p className="field-hint">כתוב בשפה חופשית.</p>
-                          <input
-                            value={operation.schedule}
-                            onChange={(event) => onUpdateOperationField(operation.id, 'schedule', event.target.value)}
-                          />
-                          <SchedulePreview text={operation.schedule} />
-                        </label>
-                        <label>
-                          {OPERATION_MODE_META[operation.mode].triggerLabel}
-                          <input
-                            value={operation.trigger}
-                            onChange={(event) => onUpdateOperationField(operation.id, 'trigger', event.target.value)}
-                          />
-                        </label>
-                        <label>
-                          מהות / הנחיות
-                          <textarea
-                            rows={2}
-                            value={operation.action}
-                            onChange={(event) => onUpdateOperationField(operation.id, 'action', event.target.value)}
-                          />
-                        </label>
-                      </div>
-                      </article>
-                    ))
-                  )}
+              {activeTab === 'sources' ? (
+                <div className="chub-settings-grid">
+                  <div className="section-heading">
+                    <h3>מקור וקליטה</h3>
+                    <span>שלוט בכתובת המקור, מצב הלכידה, מצב הכשירות ומרווח הזיכרון</span>
+                  </div>
+                  <label>
+                    זרם RTSP
+                    <input value={selectedChannel.rtspFeed} onChange={(event) => onUpdateSelectedChannel('rtspFeed', event.target.value)} placeholder="rtsp://camera-feed" />
+                  </label>
+                  <label>
+                    מרווח זיכרון (שניות)
+                    <input type="number" min="5" max="300" step="5" value={selectedChannel.memoryInterval} onChange={(event) => onUpdateSelectedChannel('memoryInterval', Number(event.target.value))} />
+                  </label>
+                  <label>
+                    מצב חי
+                    <select value={selectedChannel.liveState} onChange={(event) => onUpdateSelectedChannel('liveState', event.target.value as Channel['liveState'])}>
+                      <option value="LIVE">חי</option>
+                      <option value="SYNC">סנכרון</option>
+                      <option value="DEGRADED">מוגבל</option>
+                      <option value="OFFLINE">לא מקוון</option>
+                    </select>
+                  </label>
+                  <label>
+                    מצב לכידה
+                    <select value={selectedChannel.captureMode ?? 'browser'} onChange={(event) => onUpdateSelectedChannel('captureMode', event.target.value as Channel['captureMode'])}>
+                      <option value="browser">דפדפן</option>
+                      <option value="local_agent">סוכן מקומי</option>
+                    </select>
+                  </label>
                 </div>
-              </section>
-            </div>
-          </section>
-        </div>
+              ) : null}
+
+              {activeTab === 'rules' ? (
+                <div className="chub-rules-grid">
+                  <article className="card chub-ops-create-card">
+                    <div className="section-heading">
+                      <h3>בונה חוקים</h3>
+                      <span>צור חוק, קבע תזמון, הגדר טריגר ושמור אותו בערוץ הזה</span>
+                    </div>
+
+                    <form className="stacked-form chub-ops-create-form" onSubmit={onOperationSubmit}>
+                      <label>
+                        שם החוק
+                        <input value={operationDraft.name} onChange={(event) => onOperationDraftChange('name', event.target.value)} />
+                      </label>
+
+                      <label>
+                        סוג החוק
+                        <select value={operationDraft.mode} onChange={(event) => onOperationDraftChange('mode', event.target.value as OperationMode)}>
+                          {OPERATION_MODES.map((mode) => (
+                            <option key={mode} value={mode}>{OPERATION_MODE_META[mode].label}</option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label>
+                        תזמון
+                        <div className="schedule-quick-suggestions" role="group" aria-label="הצעות תזמון מהירות">
+                          {SCHEDULE_QUICK_SUGGESTIONS.map((suggestion) => (
+                            <button key={suggestion} className={`schedule-suggestion-chip ${operationDraft.schedule.trim() === suggestion ? 'active' : ''}`} onClick={() => onOperationDraftChange('schedule', suggestion)} type="button">
+                              {suggestion}
+                            </button>
+                          ))}
+                        </div>
+                        <input value={operationDraft.schedule} onChange={(event) => onOperationDraftChange('schedule', event.target.value)} />
+                        <SchedulePreview text={operationDraft.schedule} />
+                      </label>
+
+                      <label>
+                        {OPERATION_MODE_META[operationDraft.mode].triggerLabel}
+                        <input value={operationDraft.trigger} onChange={(event) => onOperationDraftChange('trigger', event.target.value)} />
+                      </label>
+
+                      <label>
+                        פעולה / הוראה
+                        <textarea rows={3} value={operationDraft.action} onChange={(event) => onOperationDraftChange('action', event.target.value)} />
+                      </label>
+
+                      <button className="primary-button" disabled={!isOperationDraftValid} type="submit">
+                        שמור חוק
+                      </button>
+                    </form>
+                  </article>
+
+                  <div className="chub-ops-list">
+                    {selectedChannel.operations.length === 0 ? (
+                      <p className="chub-empty-hint">אין חוקים לערוץ הזה.</p>
+                    ) : (
+                      selectedChannel.operations.map((operation) => (
+                        <article className="card operations-hub-item" key={operation.id}>
+                          <div className="operations-hub-item-head">
+                            <div>
+                              <p className="eyebrow">{operation.enabled ? 'פעיל' : 'מושהה'} · {OPERATION_MODE_META[operation.mode].label}</p>
+                              <h3>{operation.name}</h3>
+                            </div>
+                            <div className="operations-hub-item-actions">
+                              <button className={`operation-toggle ${operation.enabled ? 'enabled' : ''}`} onClick={() => onToggleOperation(operation.id)} type="button">
+                                <span className="operation-toggle-thumb" />
+                              </button>
+                              <button className="danger-button" onClick={() => onDeleteOperation(operation.id)} type="button">
+                                מחק חוק
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="stacked-form operations-hub-form">
+                            <label>
+                              שם החוק
+                              <input value={operation.name} onChange={(event) => onUpdateOperationField(operation.id, 'name', event.target.value)} />
+                            </label>
+                            <label>
+                              מצב
+                              <select value={operation.mode} onChange={(event) => onUpdateOperationField(operation.id, 'mode', event.target.value)}>
+                                {OPERATION_MODES.map((mode) => (
+                                  <option key={mode} value={mode}>{OPERATION_MODE_META[mode].label}</option>
+                                ))}
+                              </select>
+                            </label>
+                            <label>
+                              תזמון
+                              <input value={operation.schedule} onChange={(event) => onUpdateOperationField(operation.id, 'schedule', event.target.value)} />
+                              <SchedulePreview text={operation.schedule} />
+                            </label>
+                            <label>
+                              {OPERATION_MODE_META[operation.mode].triggerLabel}
+                              <input value={operation.trigger} onChange={(event) => onUpdateOperationField(operation.id, 'trigger', event.target.value)} />
+                            </label>
+                            <label>
+                              פעולה / הוראה
+                              <textarea rows={2} value={operation.action} onChange={(event) => onUpdateOperationField(operation.id, 'action', event.target.value)} />
+                            </label>
+                          </div>
+                        </article>
+                      ))
+                    )}
+                  </div>
+                </div>
+              ) : null}
+
+              {activeTab === 'members' ? (
+                <div className="chub-settings-grid">
+                  <div className="section-heading">
+                    <h3>חברים וקישורים</h3>
+                    <span>בדוק מי שייך לערוץ הזה ואילו ערוצים אחרים מחוברים אליו</span>
+                  </div>
+                  <div className="channel-members chub-settings-members">
+                    <span className="metric-label">חברים</span>
+                    <div className="source-tags">
+                      {selectedChannel.members.length > 0 ? selectedChannel.members.map((member) => <span key={member}>{member}</span>) : <span>אין חברים</span>}
+                    </div>
+                  </div>
+                  <div className="channel-members chub-settings-members">
+                    <span className="metric-label">ערוצים מקושרים</span>
+                    <div className="source-tags">
+                      {selectedLinkedChannels.length > 0 ? selectedLinkedChannels.map((channel) => <span key={channel.id}>{channel.name}</span>) : <span>אין ערוצים מקושרים</span>}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </section>
+
+            <aside className="chub-zone chub-context-zone">
+              {activeTab === 'overview' ? (
+                <div className="overview-rule-list">
+                  <article className="utility-card">
+                    <strong>סיכום החלטה</strong>
+                    <p>{selectedChannel.type === 'group' ? 'ערוץ קבוצה' : 'ערוץ אישי'} · {selectedChannel.location || 'אין מיקום'}</p>
+                  </article>
+                  <article className="utility-card">
+                    <strong>כשירות חיה</strong>
+                    <p>{statusLabel}</p>
+                  </article>
+                  <article className="utility-card">
+                    <strong>כיסוי חוקים</strong>
+                    <p>{enabledOpsCount} פעילים מתוך {selectedChannel.operations.length}</p>
+                  </article>
+                </div>
+              ) : null}
+
+              {activeTab === 'sources' ? (
+                <div className="overview-rule-list">
+                  <article className="utility-card">
+                    <strong>מצב צינור</strong>
+                    <p>{selectedChannel.captureMode === 'local_agent' ? 'צינור סוכן מקומי' : 'צינור לכידה מהדפדפן'}</p>
+                  </article>
+                  <article className="utility-card">
+                    <strong>חלון זיכרון</strong>
+                    <p>{selectedChannel.memoryInterval} שניות</p>
+                  </article>
+                  <article className="utility-card">
+                    <strong>כתובת מקור</strong>
+                    <p>{selectedChannel.rtspFeed || 'לא הוגדרה כתובת RTSP.'}</p>
+                  </article>
+                </div>
+              ) : null}
+
+              {activeTab === 'rules' ? (
+                <div className="overview-rule-list">
+                  <article className="utility-card">
+                    <strong>הנחיית בונה חוקים</strong>
+                    <p>השתמש בשדה התזמון עבור העיתוי ושמור את שדה הטריגר ממוקד באירוע שברצונך לזהות.</p>
+                  </article>
+                  <article className="utility-card">
+                    <strong>תמהיל מצבים נוכחי</strong>
+                    <p>{selectedChannel.operations.map((operation) => OPERATION_MODE_META[operation.mode].label).join(' · ') || 'עדיין אין חוקים'}</p>
+                  </article>
+                </div>
+              ) : null}
+
+              {activeTab === 'members' ? (
+                <div className="overview-rule-list">
+                  <article className="utility-card">
+                    <strong>מספר חברים</strong>
+                    <p>{selectedChannel.members.length} חברים מחוברים כרגע לערוץ הזה.</p>
+                  </article>
+                  <article className="utility-card">
+                    <strong>ערוצים מקושרים</strong>
+                    <p>{selectedLinkedChannels.length} ערוצים מקושרים מחוברים למרחב העבודה הזה.</p>
+                  </article>
+                </div>
+              ) : null}
+            </aside>
+          </div>
+        </section>
       </div>
     </main>
   )

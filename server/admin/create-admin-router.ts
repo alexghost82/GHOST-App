@@ -20,6 +20,7 @@ import type { ChannelUsageField } from '../db/repository-types'
 import { USER_ROLES } from './types'
 import type { IRealtimeHub } from '../realtime/realtime-hub-types'
 import { createFirebaseUser } from '../auth/firebase-auth-service'
+import { hasFirebaseProjectConfig } from '../lib/firebase-env'
 import { syncOrganizationUsage, reconcileAllOrganizations } from './sync-org-usage'
 
 interface CreateAdminRouterOptions {
@@ -28,7 +29,7 @@ interface CreateAdminRouterOptions {
 }
 
 const SENSITIVE_ADMIN_CODE = process.env.SUPER_ADMIN_MANAGER_CODE?.trim() || '1553'
-const IS_FIREBASE_AUTH_MODE = Boolean(process.env.FIREBASE_PROJECT_ID)
+const IS_FIREBASE_AUTH_MODE = hasFirebaseProjectConfig()
 
 function isSuperAdminRole(role: string): boolean {
   return role === USER_ROLES.superAdmin

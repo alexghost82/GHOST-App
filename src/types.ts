@@ -3,8 +3,24 @@ export type MessageAuthor = 'user' | 'ghost' | 'system'
 export type ChannelType = 'personal' | 'group'
 
 export type LiveState = 'LIVE' | 'SYNC' | 'DEGRADED' | 'OFFLINE'
+export type CaptureMode = 'browser' | 'local_agent'
+export type LocalAgentConnectionState = 'connected' | 'degraded' | 'offline'
 
 export type OperationMode = 'alert' | 'report' | 'rating' | 'assessment'
+
+export interface LocalAgentBinding {
+  deviceId: string
+  deviceName: string
+  cameraName: string
+  channelId: string
+  boundAtIso: string
+}
+
+export interface LocalAgentStatus {
+  state: LocalAgentConnectionState
+  lastHeartbeatAtIso: string
+  lastError?: string
+}
 
 export interface Message {
   id: string
@@ -92,10 +108,13 @@ export interface Channel {
   rtspFeed: string
   unread: number
   liveState: LiveState
+  captureMode?: CaptureMode
   /** תמונת הפריים האחרונה שנלכדה מהמצלמה המקומית (Data URL). */
   lastFrameDataUrl?: string
   /** האם למצלמה יש הרשאה/גישה עבור הערוץ הנוכחי. */
   cameraEnabled?: boolean
+  localAgentBinding?: LocalAgentBinding
+  localAgentStatus?: LocalAgentStatus
   /** בצ׳אט קבוצתי: מזהי צ׳אטים קיימים שצורפו לקבוצה */
   linkedChannelIds?: string[]
   /** מצב פיצ'ר דגימת ציר-זמן והיסטוריית ניתוחי קולאז'. */

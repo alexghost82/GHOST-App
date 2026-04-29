@@ -5,9 +5,12 @@ import { randomUUID } from 'node:crypto'
 import type {
   AuditLogRecord,
   CampaignRecord,
+  ChannelCaptureMode,
   ChannelRecord,
   FullChannelRecord,
   IssueRecord,
+  LocalAgentBindingRecord,
+  LocalAgentStatusRecord,
   MessageRecord,
   OperationRecord,
   OperationRunRecord,
@@ -27,7 +30,7 @@ import type {
   IAdminRepository,
   UsageEventRecord,
 } from '../repository-types'
-import { CREATE_TABLES_SQL, MIGRATE_V1_TO_V2_SQL, MIGRATE_V2_TO_V3_SQL, MIGRATE_V3_TO_V4_SQL, SCHEMA_VERSION } from './schema'
+import { CREATE_TABLES_SQL, MIGRATE_V1_TO_V2_SQL, MIGRATE_V2_TO_V3_SQL, MIGRATE_V3_TO_V4_SQL, MIGRATE_V4_TO_V5_SQL, SCHEMA_VERSION } from './schema'
 
 /** נתיב ברירת מחדל לקובץ DB לפי סביבה */
 function resolveDbPath(): string {
@@ -179,6 +182,9 @@ interface FullChannelRow {
   rtsp_feed: string
   live_state: string
   camera_enabled: number
+  capture_mode: string
+  local_agent_binding: string | null
+  local_agent_status: string | null
   linked_channel_ids: string
   members: string
   is_blocked: number
@@ -391,6 +397,13 @@ function rowToFullChannel(row: FullChannelRow): FullChannelRecord {
     rtspFeed: row.rtsp_feed,
     liveState: row.live_state as FullChannelRecord['liveState'],
     cameraEnabled: row.camera_enabled === 1,
+    captureMode: (row.capture_mode as ChannelCaptureMode) ?? 'browser',
+    localAgentBinding: row.local_agent_binding
+      ? (JSON.parse(row.local_agent_binding) as LocalAgentBindingRecord)
+      : undefined,
+    localAgentStatus: row.local_agent_status
+      ? (JSON.parse(row.local_agent_status) as LocalAgentStatusRecord)
+      : undefined,
     linkedChannelIds: JSON.parse(row.linked_channel_ids) as string[],
     members: JSON.parse(row.members) as string[],
     isBlocked: row.is_blocked === 1,
@@ -482,6 +495,9 @@ export class SQLiteAdminRepository implements IAdminRepository {
       }
       if (versionRow < 4) {
         this.db.exec(MIGRATE_V3_TO_V4_SQL)
+      }
+      if (versionRow < 5) {
+        this.db.exec(MIGRATE_V4_TO_V5_SQL)
       }
     }
   }
@@ -1054,13 +1070,17 @@ export class SQLiteAdminRepository implements IAdminRepository {
         `INSERT INTO channel_data (
           id, organization_id, name, type, subtitle, location, watch_scope,
           description, memory_interval, rtsp_feed, live_state, camera_enabled,
+          capture_mode, local_agent_binding, local_agent_status,
           linked_channel_ids, members, is_blocked, created_at_iso, updated_at_iso
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         id, organizationId, data.name, data.type, data.subtitle, data.location,
         data.watchScope, data.description, data.memoryInterval, data.rtspFeed,
         data.liveState, data.cameraEnabled ? 1 : 0,
+        data.captureMode ?? 'browser',
+        data.localAgentBinding ? JSON.stringify(data.localAgentBinding) : null,
+        data.localAgentStatus ? JSON.stringify(data.localAgentStatus) : null,
         JSON.stringify(data.linkedChannelIds), JSON.stringify(data.members),
         data.isBlocked ? 1 : 0, nowIso, nowIso,
       )
@@ -1081,14 +1101,17 @@ export class SQLiteAdminRepository implements IAdminRepository {
         `UPDATE channel_data SET
           name = ?, type = ?, subtitle = ?, location = ?, watch_scope = ?,
           description = ?, memory_interval = ?, rtsp_feed = ?, live_state = ?,
-          camera_enabled = ?, linked_channel_ids = ?, members = ?,
-          is_blocked = ?, updated_at_iso = ?
+          camera_enabled = ?, capture_mode = ?, local_agent_binding = ?, local_agent_status = ?,
+          linked_channel_ids = ?, members = ?, is_blocked = ?, updated_at_iso = ?
         WHERE id = ? AND organization_id = ?`,
       )
       .run(
         merged.name, merged.type, merged.subtitle, merged.location, merged.watchScope,
         merged.description, merged.memoryInterval, merged.rtspFeed, merged.liveState,
         merged.cameraEnabled ? 1 : 0,
+        merged.captureMode ?? 'browser',
+        merged.localAgentBinding ? JSON.stringify(merged.localAgentBinding) : null,
+        merged.localAgentStatus ? JSON.stringify(merged.localAgentStatus) : null,
         JSON.stringify(merged.linkedChannelIds), JSON.stringify(merged.members),
         merged.isBlocked ? 1 : 0, merged.updatedAtIso,
         channelId, organizationId,

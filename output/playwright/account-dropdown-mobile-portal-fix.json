@@ -1,0 +1,14 @@
+{
+  "viewport": {
+    "width": 375,
+    "height": 812
+  },
+  "dropdownBox": {
+    "x": 65,
+    "y": 882,
+    "width": 322,
+    "height": 611.578125
+  },
+  "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\account-dropdown-mobile-portal-fix.png",
+  "bodyHeight": 812
+}

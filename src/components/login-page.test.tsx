@@ -57,7 +57,7 @@ describe('LoginPage', () => {
 
     expect(icon).toBeTruthy()
     expect(icon?.getAttribute('src')).toBe('/ghost-icon-128.png')
-    expect(icon?.getAttribute('alt')).toBe('Ghost icon')
+    expect(icon?.getAttribute('alt')).toBe('אייקון Ghost')
     unmount()
   })
 
@@ -81,7 +81,7 @@ describe('LoginPage', () => {
     })
 
     const errorElement = container.querySelector('[role="alert"]')
-    expect(errorElement?.textContent).toContain('Invalid credentials')
+    expect(errorElement?.textContent).toContain('פרטי ההתחברות שגויים')
     unmount()
   })
 

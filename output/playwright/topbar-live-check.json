@@ -1,0 +1,22 @@
+{
+  "operatorUrl": "http://localhost:8888/",
+  "adminUrl": "http://localhost:8888/",
+  "operatorTopbarExists": 1,
+  "adminTopbarExists": 1,
+  "operatorCommandVisible": 1,
+  "adminCommandVisible": 1,
+  "operatorMenuItems": [
+    "◫ערוצים",
+    "◎התראות",
+    "⌘ניהול",
+    "?עזרה ותמיכה",
+    "⏻יציאה מהמערכת"
+  ],
+  "adminMenuItems": [
+    "◫ערוצים",
+    "◎התראות",
+    "⌘ניהול",
+    "?עזרה ותמיכה",
+    "⏻יציאה מהמערכת"
+  ]
+}

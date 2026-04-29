@@ -1,40 +1,36 @@
-import { useEffect, useMemo, useState, type RefObject } from 'react'
+import type { RefObject } from 'react'
 import { LIVE_STATE_META, QUICK_PROMPTS } from '../data/constants'
-import type { Channel, TimelineSamplerState } from '../types'
+import type { Channel } from '../types'
 import { MessageRow } from './message-row'
 import { StatusDot } from './status-dot'
-import { TimelineControls } from './timeline-controls'
-
-interface NextScanInfo {
-  deadline: number
-  operationName: string
-  totalCycleMs: number
-}
 
 interface ChatPanelProps {
   selectedChannel: Channel
   isSending: boolean
   messageDraft: string
   messageStreamRef: RefObject<HTMLDivElement | null>
-  activeOpsCount: number
-  nextScanInfo: NextScanInfo | null
-  timelineSamplerState: TimelineSamplerState
   onDismissFrame: (messageId: string) => void
   onMessageDraftChange: (value: string) => void
   onMessageSubmit: (event: React.FormEvent<HTMLFormElement>) => void
-  onStartTimelineSampling: (intervalSeconds: 2 | 4 | 8) => void
-  onStopTimelineSampling: () => void
   onShowInbox: () => void
   onShowDetails: () => void
+  onShowOps: () => void
   onSuggestionClick: (prompt: string) => void
-  onMessageStreamScroll: () => void
 }
 
-interface CountdownState {
-  minutes: number
-  seconds: number
-  progress: number
-  operationName: string
+function getCaptureLabel(channel: Channel): string {
+  if (channel.captureMode === 'local_agent') {
+    switch (channel.localAgentStatus?.state) {
+      case 'connected':
+        return 'Local Agent Connected'
+      case 'degraded':
+        return 'Local Agent Limited'
+      default:
+        return 'Waiting For Local Agent'
+    }
+  }
+
+  return 'Browser Camera Active'
 }
 
 export function ChatPanel({
@@ -42,64 +38,31 @@ export function ChatPanel({
   isSending,
   messageDraft,
   messageStreamRef,
-  activeOpsCount,
-  nextScanInfo,
-  timelineSamplerState,
   onDismissFrame,
   onMessageDraftChange,
   onMessageSubmit,
-  onStartTimelineSampling,
-  onStopTimelineSampling,
   onShowInbox,
   onShowDetails,
+  onShowOps,
   onSuggestionClick,
-  onMessageStreamScroll,
 }: ChatPanelProps) {
-  const statusLabel = LIVE_STATE_META[selectedChannel.liveState]?.label ?? 'לא זמין'
-  const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now())
-
-  useEffect(() => {
-    if (activeOpsCount === 0) {
-      return
-    }
-    const timer = setInterval(() => setCountdownNowMs(Date.now()), 1_000)
-    return () => clearInterval(timer)
-  }, [activeOpsCount])
-
-  useEffect(() => {
-    if (!nextScanInfo) {
-      return
-    }
-    setCountdownNowMs(Date.now())
-  }, [nextScanInfo?.deadline, nextScanInfo?.operationName])
-
-  const countdown = useMemo<CountdownState | null>(() => {
-    if (!nextScanInfo || activeOpsCount === 0) {
-      return null
-    }
-    const remaining = Math.max(0, nextScanInfo.deadline - countdownNowMs)
-    const totalSec = Math.floor((remaining + 999) / 1_000)
-    const progress = nextScanInfo.totalCycleMs > 0 ? Math.min(1, remaining / nextScanInfo.totalCycleMs) : 0
-    return {
-      minutes: Math.floor(totalSec / 60),
-      seconds: totalSec % 60,
-      progress,
-      operationName: nextScanInfo.operationName,
-    }
-  }, [activeOpsCount, countdownNowMs, nextScanInfo])
+  const statusLabel = LIVE_STATE_META[selectedChannel.liveState]?.label ?? 'Unavailable'
+  const captureLabel = getCaptureLabel(selectedChannel)
+  const enabledOperationsCount = selectedChannel.operations.filter((operation) => operation.enabled).length
+  const latestMessage = selectedChannel.messages.at(-1)
 
   return (
-    <section className="panel chat-panel">
+    <section className="panel chat-panel chat-panel-wa">
       <div className="chat-header">
         <div className="chat-header-actions mobile-only">
           <button className="ghost-button" onClick={onShowInbox} type="button">
-            שיחות
+            Chats
           </button>
         </div>
 
         <div className="chat-title-block">
           <button
-            aria-label="פתיחת פאנל פרטי ערוץ"
+            aria-label="×¤×ª×™×—×ª ×¤×¨×˜×™ ×”×¢×¨×•×¥"
             className="title-cluster"
             onClick={onShowDetails}
             type="button"
@@ -108,73 +71,74 @@ export function ChatPanel({
               <img
                 className="channel-badge channel-badge-image"
                 src={selectedChannel.lastFrameDataUrl}
-                alt={`פריים אחרון של ${selectedChannel.name}`}
+                alt={`Latest frame from ${selectedChannel.name}`}
               />
             ) : (
-              <div className="channel-badge">{selectedChannel.type === 'group' ? 'קבוצה' : 'ערוץ'}</div>
+              <div className="channel-badge">{selectedChannel.type === 'group' ? 'Group' : 'Channel'}</div>
             )}
             <div className="title-cluster-text">
               <h2>{selectedChannel.name}</h2>
               <p className="route">{selectedChannel.location}</p>
             </div>
           </button>
-          <div className="live-status">
-            <StatusDot liveState={selectedChannel.liveState} className="live-dot" />
-            <span>{`${selectedChannel.liveState} · ${statusLabel}`}</span>
+
+          <div className="live-status-band">
+            <div className="live-status">
+              <StatusDot liveState={selectedChannel.liveState} className="live-dot" />
+              <span>
+                {statusLabel} / {captureLabel}
+              </span>
+            </div>
+            <div className="chat-header-pills" aria-label="channel context">
+              <span className="chat-header-pill">OPS {enabledOperationsCount}</span>
+              <span className="chat-header-pill">MEM {selectedChannel.memoryInterval}s</span>
+              <span className="chat-header-pill">TEAM {selectedChannel.members.length}</span>
+            </div>
           </div>
         </div>
 
-        <TimelineControls
-          samplerState={timelineSamplerState}
-          onStartSampling={onStartTimelineSampling}
-          onStopSampling={onStopTimelineSampling}
-        />
-
-        {activeOpsCount > 0 ? (
-          <div className="ops-status-bar">
-            <span className="ops-count-pill">{activeOpsCount} מבצעים פעילים</span>
-            {countdown ? (
-              <div className="ops-countdown">
-                <div className="ops-countdown-track">
-                  <div
-                    className="ops-countdown-fill"
-                    style={{ transform: `scaleX(${countdown.progress})` }}
-                  />
-                </div>
-                <div className="ops-countdown-text">
-                  <span className="ops-countdown-label">{countdown.operationName}</span>
-                  <span className="ops-countdown-time">
-                    {countdown.minutes > 0 ? `${countdown.minutes}m ` : ''}
-                    <strong className="ops-countdown-seconds">
-                      {String(countdown.seconds).padStart(2, '0')}s
-                    </strong>
-                  </span>
-                </div>
-              </div>
-            ) : null}
+        <div className="chat-header-utility">
+          <button className="ghost-button chat-ops-trigger" onClick={onShowOps} type="button">
+            Ops
+          </button>
+          <div className="chat-header-actions desktop-only">
+            <button className="ghost-button" onClick={onShowDetails} type="button">
+              Details
+            </button>
           </div>
-        ) : null}
+        </div>
       </div>
 
-      <div className="message-stream" onScroll={onMessageStreamScroll} ref={messageStreamRef}>
-        {selectedChannel.messages.map((message) => (
-          <MessageRow key={message.id} message={message} onDismissFrame={onDismissFrame} />
-        ))}
+      <div className="chat-context-strip" aria-label="chat summary">
+        <article className="chat-context-card">
+          <span className="chat-context-label">WATCH</span>
+          <strong>{selectedChannel.watchScope}</strong>
+        </article>
+        <article className="chat-context-card">
+          <span className="chat-context-label">LAST UPDATE</span>
+          <strong>{latestMessage?.time ?? '--:--'}</strong>
+        </article>
+        <article className="chat-context-card">
+          <span className="chat-context-label">MODE</span>
+          <strong>{selectedChannel.type === 'group' ? 'GROUP' : 'DIRECT'}</strong>
+        </article>
+      </div>
+
+      <div className="message-stream" ref={messageStreamRef}>
+        {selectedChannel.messages.length > 0 ? (
+          selectedChannel.messages.map((message) => (
+            <MessageRow key={message.id} message={message} onDismissFrame={onDismissFrame} />
+          ))
+        ) : (
+          <div className="chat-empty-state">
+            <span className="chat-empty-kicker">READY</span>
+            <h3>{selectedChannel.name}</h3>
+            <p>{selectedChannel.description || selectedChannel.watchScope}</p>
+          </div>
+        )}
       </div>
 
       <form className="composer" onSubmit={onMessageSubmit}>
-        <textarea
-          rows={2}
-          value={messageDraft}
-          onChange={(event) => onMessageDraftChange(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-              event.preventDefault()
-              event.currentTarget.form?.requestSubmit()
-            }
-          }}
-          placeholder="כתוב שאלה או בקשה — יישלח ניתוח פריים, ואם יש מבצעים מופעלים גם סריקת התראות..."
-        />
         <div className="composer-suggestions">
           {QUICK_PROMPTS.map((prompt) => (
             <button key={prompt} className="chip-button" onClick={() => onSuggestionClick(prompt)} type="button">
@@ -182,12 +146,35 @@ export function ChatPanel({
             </button>
           ))}
         </div>
-        <div className="composer-actions">
-          <button className="ghost-button mobile-only" onClick={onShowDetails} type="button">
-            הגדרות ערוץ
+
+        <div className="composer-shell">
+          <button className="ghost-button composer-utility mobile-only" onClick={onShowDetails} type="button">
+            Channel
           </button>
-          <button className="primary-button" disabled={isSending || !messageDraft.trim()} type="submit">
-            {isSending ? 'שולח...' : 'שלח'}
+          <div className="composer-input-shell">
+            <span className="composer-input-label">PROMPT</span>
+            <textarea
+              rows={1}
+              value={messageDraft}
+              onChange={(event) => onMessageDraftChange(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                  event.preventDefault()
+                  event.currentTarget.form?.requestSubmit()
+                }
+              }}
+              placeholder="Ask a question or request an operational scan..."
+            />
+          </div>
+          <button className="primary-button composer-send-button" disabled={isSending || !messageDraft.trim()} type="submit">
+            {isSending ? 'Sending...' : 'Send'}
+          </button>
+        </div>
+
+        <div className="composer-actions">
+          <span className="composer-hint">Enter to send · Shift+Enter for a new line</span>
+          <button className="ghost-button" onClick={onShowOps} type="button">
+            Live Ops
           </button>
         </div>
       </form>

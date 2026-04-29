@@ -27,12 +27,16 @@ import {
 } from '../services/admin-api'
 import { impersonateUser } from '../services/auth-api'
 import { connectAdminRealtime, type RealtimeEvent, type RealtimeMode } from '../services/realtime-socket'
+import { SurfaceDialog } from './surface-dialog'
 import { Topbar } from './topbar'
-import type { TopbarNavItem } from './topbar'
 import './super-admin-panel.css'
 
 interface SuperAdminPanelProps {
   profile: AuthProfile
+  onOpenCommandCenter: () => void
+  onOpenGhostLive: () => void
+  themeMode?: 'dark' | 'light'
+  onToggleTheme?: () => void
   onLogout: () => void
 }
 
@@ -90,7 +94,9 @@ const DEFAULT_LIMITS: OrganizationLimits = {
 /**
  * מסך ניהול־על מרכזי לסופר־אדמין עם מדדים חיים ופעולות תפעוליות.
  */
-export function SuperAdminPanel({ profile, onLogout }: SuperAdminPanelProps) {
+type AdminUtilityPanel = 'command' | 'alerts' | 'support' | 'shortcuts' | null
+
+export function SuperAdminPanel({ profile, onOpenCommandCenter, onOpenGhostLive, themeMode = 'dark', onToggleTheme, onLogout }: SuperAdminPanelProps) {
   const [overview, setOverview] = useState<SuperAdminOverviewResponse | null>(null)
   const [allUsers, setAllUsers] = useState<OrganizationUser[]>([])
   const [issues, setIssues] = useState<SuperAdminIssue[]>([])
@@ -100,14 +106,16 @@ export function SuperAdminPanel({ profile, onLogout }: SuperAdminPanelProps) {
   const [selectedTab, setSelectedTab] = useState<
     'overview' | 'suspendedOrganizations' | 'users' | 'billing' | 'usage' | 'issues' | 'events'
   >('overview')
-  const [activeTopbarNav, setActiveTopbarNav] = useState<TopbarNavItem>('Command Center')
   const [isInitialLoad, setIsInitialLoad] = useState(true)
   const [realtimeMode, setRealtimeMode] = useState<RealtimeMode>('disconnected')
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [isBusy, setIsBusy] = useState(false)
+  const [isCreateOrganizationDialogOpen, setIsCreateOrganizationDialogOpen] = useState(false)
+  const [activeUtilityPanel, setActiveUtilityPanel] = useState<AdminUtilityPanel>(null)
   const [organizationSearch, setOrganizationSearch] = useState('')
   const [organizationName, setOrganizationName] = useState('')
+  const [newOrganizationName, setNewOrganizationName] = useState('')
   const [organizationStatusDraft, setOrganizationStatusDraft] = useState<'active' | 'suspended'>('active')
   const [organizationLimitsDraft, setOrganizationLimitsDraft] = useState<OrganizationLimits>(DEFAULT_LIMITS)
   const [newUserOrgId, setNewUserOrgId] = useState('')
@@ -238,23 +246,88 @@ export function SuperAdminPanel({ profile, onLogout }: SuperAdminPanelProps) {
   }, [issueFilterOrgId, issues])
   const superAdminFullName = [profile.firstName, profile.lastName].filter(Boolean).join(' ') || profile.username
   const openIssuesCount = useMemo(() => issues.filter((issue) => issue.status !== 'resolved').length, [issues])
+  const adminSectionMenuItems = useMemo(
+    () => [
+      { id: 'create_organization', label: 'צור ארגון', icon: '+' },
+      { id: 'tab_overview', label: 'סקירה', icon: '⌂' },
+      { id: 'tab_suspendedOrganizations', label: 'ארגון מושהה', icon: '⏸' },
+      { id: 'tab_users', label: 'משתמשים', icon: '◫' },
+      { id: 'tab_billing', label: 'תשלומים', icon: '₪' },
+      { id: 'tab_usage', label: 'שימוש', icon: '◔' },
+      { id: 'tab_issues', label: 'תקלות', icon: '⚠' },
+      { id: 'tab_events', label: 'אירועים חיים', icon: '✦' },
+      { id: 'notifications', label: 'התראות', icon: '◉' },
+      { id: 'help', label: 'עזרה ותמיכה', icon: '?' },
+      { id: 'logout', label: 'יציאה מהמערכת', icon: '⏻', danger: true },
+    ],
+    [],
+  )
 
-  function handleTopbarNavChange(nextNav: TopbarNavItem) {
-    setActiveTopbarNav(nextNav)
-    if (nextNav === 'Command Center') {
-      setSelectedTab('overview')
+  function handleTopbarNavChange(nextNav: string) {
+    if (nextNav === 'ghost-live') {
+      onOpenGhostLive()
       return
     }
-    setSelectedTab('events')
+    onOpenCommandCenter()
   }
 
   function handleOpenNotificationsCenter() {
     setIssueFilterOrgId('')
-    setSelectedTab('issues')
+    setActiveUtilityPanel('alerts')
+  }
+
+  function handleTopbarAccountAction(actionId: string) {
+    if (actionId === 'create_organization') {
+      setErrorMessage('')
+      setSuccessMessage('')
+      setNewOrganizationName('')
+      setIsCreateOrganizationDialogOpen(true)
+      return
+    }
+    if (actionId === 'notifications') {
+      handleOpenNotificationsCenter()
+      return
+    }
+    if (actionId === 'help') {
+      setActiveUtilityPanel('support')
+    }
+  }
+
+  function handleAdminMenuAction(actionId: string) {
+    if (actionId === 'tab_overview') {
+      setSelectedTab('overview')
+      return
+    }
+    if (actionId === 'tab_suspendedOrganizations') {
+      setSelectedTab('suspendedOrganizations')
+      return
+    }
+    if (actionId === 'tab_users') {
+      setSelectedTab('users')
+      return
+    }
+    if (actionId === 'tab_billing') {
+      setSelectedTab('billing')
+      return
+    }
+    if (actionId === 'tab_usage') {
+      setSelectedTab('usage')
+      return
+    }
+    if (actionId === 'tab_issues') {
+      setSelectedTab('issues')
+      return
+    }
+    if (actionId === 'tab_events') {
+      setSelectedTab('events')
+      return
+    }
+
+    handleTopbarAccountAction(actionId)
   }
 
   async function handleCreateOrganization() {
-    if (!organizationName.trim()) {
+    if (!newOrganizationName.trim()) {
       setErrorMessage('נדרש שם ארגון.')
       return
     }
@@ -262,8 +335,9 @@ export function SuperAdminPanel({ profile, onLogout }: SuperAdminPanelProps) {
     setErrorMessage('')
     setSuccessMessage('')
     try {
-      const createdOrganization = await createOrganization(organizationName.trim(), DEFAULT_LIMITS)
-      setOrganizationName('')
+      const createdOrganization = await createOrganization(newOrganizationName.trim(), DEFAULT_LIMITS)
+      setNewOrganizationName('')
+      setIsCreateOrganizationDialogOpen(false)
       setSuccessMessage('הארגון נוצר בהצלחה.')
       await reloadData()
       setSelectedOrganizationId(createdOrganization.id)
@@ -1037,15 +1111,25 @@ export function SuperAdminPanel({ profile, onLogout }: SuperAdminPanelProps) {
   return (
     <div className="sa-root">
       <Topbar
-        activeNav={activeTopbarNav}
-        canAccessCommandCenter
+        activeNav="ניהול"
         channelsCount={overview?.totals.channelsCount ?? 0}
         fullName={superAdminFullName}
+        accountItems={adminSectionMenuItems}
+        onAccountAction={handleAdminMenuAction}
+        themeMode={themeMode}
+        onToggleTheme={onToggleTheme}
+        navItems={[]}
+        onOpenAlerts={handleOpenNotificationsCenter}
+        onOpenCommandPalette={() => setActiveUtilityPanel('command')}
+        onOpenHelp={() => setActiveUtilityPanel('support')}
+        onOpenQuickActions={() => setActiveUtilityPanel('shortcuts')}
         onLogout={onLogout}
         onNavChange={handleTopbarNavChange}
         onOpenNotificationsCenter={handleOpenNotificationsCenter}
-        organizationName="Ghost Control"
+        organizationName="בקרת Ghost"
         role={profile.role}
+        subtitle="ארגוני מערכת, גישה, חיוב ואירועים חיים"
+        title="חדר בקרה ניהולי"
         totalLiveFeeds={overview?.totals.channelsCount ?? 0}
         totalOperations={overview?.totals.operationsCount ?? 0}
         totalUnreadAlerts={openIssuesCount}
@@ -1055,22 +1139,12 @@ export function SuperAdminPanel({ profile, onLogout }: SuperAdminPanelProps) {
         <aside className="sa-sidebar">
           <header className="sa-sidebar-header">
             <p className="eyebrow">סופר אדמין</p>
-            <h2>חדר בקרה Ghost</h2>
+            <h2>חדר בקרה ניהולי</h2>
             <p className="sa-subtle">מחובר כ־{superAdminFullName}</p>
           </header>
 
-          <section className="sa-sidebar-create">
-            <input
-              value={organizationName}
-              onChange={(event) => setOrganizationName(event.target.value)}
-              placeholder="שם ארגון חדש"
-            />
-            <button className="primary-button" type="button" disabled={isBusy} onClick={() => void handleCreateOrganization()}>
-              צור ארגון
-            </button>
-          </section>
-
         <section className="sa-sidebar-search">
+          <p className="sa-subtle">חפש ברשימת הארגונים לפני מעבר בין לשוניות או עריכת מגבלות, משתמשים, חיוב ואירועים.</p>
           <input
             value={organizationSearch}
             onChange={(event) => setOrganizationSearch(event.target.value)}
@@ -1079,7 +1153,7 @@ export function SuperAdminPanel({ profile, onLogout }: SuperAdminPanelProps) {
         </section>
 
         <section className="sa-org-list-wrap">
-          <h3>ארגונים פעילים ({activeOrganizations.length})</h3>
+          <h3>ארגונים ({activeOrganizations.length})</h3>
           {activeOrganizations.length === 0 ? (
             <p className="sa-sidebar-empty">אין ארגונים פעילים להצגה.</p>
           ) : (
@@ -1090,7 +1164,8 @@ export function SuperAdminPanel({ profile, onLogout }: SuperAdminPanelProps) {
         </section>
 
         <section className="sa-sidebar-kpis">
-          <h3>מדדי מערכת כלליים</h3>
+          <h3>סיכום מערכת</h3>
+          <p className="sa-subtle">השאר את סיכומי המערכת בסרגל הצד כדי שהתוכן הראשי יישאר ממוקד במשימת הניהול שנבחרה.</p>
           <div className="sa-kpi-grid">
             <div><span>ארגונים</span><strong>{isInitialLoad ? '--' : (overview?.totals.organizationsCount ?? 0)}</strong></div>
             <div><span>משתמשים</span><strong>{isInitialLoad ? '--' : allUsers.length}</strong></div>
@@ -1107,8 +1182,13 @@ export function SuperAdminPanel({ profile, onLogout }: SuperAdminPanelProps) {
       <section className="sa-content">
         <header className="sa-content-header">
           <div>
-            <p className="eyebrow">עמוד ארגון</p>
+            <p className="eyebrow">מרחב ניהול</p>
             <h2>{selectedOrganization?.name ?? 'בחר ארגון'}</h2>
+            <p className="sa-subtle">
+              {selectedOrganization
+                ? 'השתמש בלשוניות שלמטה כדי לנהל את הארגון שנבחר בלי לצאת ממשטח הניהול הזה.'
+                : 'בחר ארגון מסרגל הצד כדי לפתוח את מרחב הניהול.'}
+            </p>
           </div>
           <nav className="sa-tabs">
             <button className={selectedTab === 'overview' ? 'active' : ''} onClick={() => setSelectedTab('overview')} type="button">סקירה</button>
@@ -1127,6 +1207,187 @@ export function SuperAdminPanel({ profile, onLogout }: SuperAdminPanelProps) {
         <div className="sa-content-scroll">{renderTabContent()}</div>
         </section>
       </main>
+
+      {activeUtilityPanel === 'alerts' ? (
+        <SurfaceDialog
+          eyebrow="Alerts"
+          title="התראות ניהוליות"
+          description="פתח את מסך התקלות או עבור ישירות לאירועים החיים."
+          onClose={() => setActiveUtilityPanel(null)}
+          width="wide"
+        >
+          <div className="command-grid">
+            <button
+              className="command-card"
+              onClick={() => {
+                setSelectedTab('issues')
+                setActiveUtilityPanel(null)
+              }}
+              type="button"
+            >
+              <strong>פתח תקלות</strong>
+              <span>{openIssuesCount > 0 ? `${openIssuesCount} תקלות פתוחות מחכות לטיפול` : 'אין כרגע תקלות פתוחות.'}</span>
+            </button>
+            <button
+              className="command-card"
+              onClick={() => {
+                setSelectedTab('events')
+                setActiveUtilityPanel(null)
+              }}
+              type="button"
+            >
+              <strong>אירועים חיים</strong>
+              <span>מעבר ישיר ליומן ה-WebSocket והאירועים החיים.</span>
+            </button>
+          </div>
+        </SurfaceDialog>
+      ) : null}
+
+      {activeUtilityPanel === 'support' ? (
+        <SurfaceDialog
+          eyebrow="Support"
+          title="עזרה ותמיכה"
+          description="בחר פעולה אמיתית: פתיחת תקלות, יצירת ארגון או מעבר למסך הסקירה."
+          onClose={() => setActiveUtilityPanel(null)}
+          width="wide"
+        >
+          <div className="command-grid">
+            <button
+              className="command-card"
+              onClick={() => {
+                setSelectedTab('issues')
+                setActiveUtilityPanel(null)
+              }}
+              type="button"
+            >
+              <strong>פתח תקלות</strong>
+              <span>מעבר לתקלות ובאגים שדווחו על ידי ארגונים.</span>
+            </button>
+            <button
+              className="command-card"
+              onClick={() => {
+                setErrorMessage('')
+                setSuccessMessage('')
+                setNewOrganizationName('')
+                setIsCreateOrganizationDialogOpen(true)
+                setActiveUtilityPanel(null)
+              }}
+              type="button"
+            >
+              <strong>צור ארגון</strong>
+              <span>פתח את חלון יצירת הארגון.</span>
+            </button>
+            <button
+              className="command-card"
+              onClick={() => {
+                setSelectedTab('overview')
+                setActiveUtilityPanel(null)
+              }}
+              type="button"
+            >
+              <strong>סקירה</strong>
+              <span>חזור למבט העל של חדר הבקרה הניהולי.</span>
+            </button>
+          </div>
+        </SurfaceDialog>
+      ) : null}
+
+      {activeUtilityPanel === 'shortcuts' ? (
+        <SurfaceDialog
+          eyebrow="Quick actions"
+          title="פעולות מהירות"
+          description="הפעולות כאן מחליפות את שורת הלשוניות הישנה."
+          onClose={() => setActiveUtilityPanel(null)}
+          width="wide"
+        >
+          <div className="command-grid">
+            <button className="command-card" onClick={() => { setSelectedTab('overview'); setActiveUtilityPanel(null) }} type="button">
+              <strong>סקירה</strong>
+              <span>מעבר לסיכום הכללי של המערכת.</span>
+            </button>
+            <button className="command-card" onClick={() => { setSelectedTab('users'); setActiveUtilityPanel(null) }} type="button">
+              <strong>משתמשים</strong>
+              <span>ניהול משתמשים והרשאות בארגונים.</span>
+            </button>
+            <button className="command-card" onClick={() => { setSelectedTab('billing'); setActiveUtilityPanel(null) }} type="button">
+              <strong>תשלומים</strong>
+              <span>מסך כרטיסים, חיובים ומפתחות AI.</span>
+            </button>
+            <button className="command-card" onClick={() => { setSelectedTab('events'); setActiveUtilityPanel(null) }} type="button">
+              <strong>אירועים חיים</strong>
+              <span>יומן real-time מלא של הסופר אדמין.</span>
+            </button>
+          </div>
+        </SurfaceDialog>
+      ) : null}
+
+      {activeUtilityPanel === 'command' ? (
+        <SurfaceDialog
+          eyebrow="Quick command"
+          title="Quick command"
+          description="הפקודות כאן פותחות אזורי ניהול אמיתיים או מעבירות למשטח ההפעלה."
+          onClose={() => setActiveUtilityPanel(null)}
+          width="wide"
+        >
+          <div className="command-grid">
+            <button className="command-card" onClick={() => { setSelectedTab('overview'); setActiveUtilityPanel(null) }} type="button">
+              <strong>סקירה</strong>
+              <span>סיכום ארגונים, שימוש ותקלות.</span>
+            </button>
+            <button className="command-card" onClick={() => { setSelectedTab('suspendedOrganizations'); setActiveUtilityPanel(null) }} type="button">
+              <strong>ארגון מושהה</strong>
+              <span>פתח את רשימת הארגונים המושהים.</span>
+            </button>
+            <button className="command-card" onClick={() => { setSelectedTab('users'); setActiveUtilityPanel(null) }} type="button">
+              <strong>משתמשים</strong>
+              <span>ניהול משתמשי מערכת וארגונים.</span>
+            </button>
+            <button className="command-card" onClick={() => { setSelectedTab('issues'); setActiveUtilityPanel(null) }} type="button">
+              <strong>תקלות</strong>
+              <span>מעבר ישיר למסך התקלות.</span>
+            </button>
+            <button className="command-card" onClick={() => { onOpenGhostLive(); setActiveUtilityPanel(null) }} type="button">
+              <strong>Ghost Live</strong>
+              <span>מעבר למשטח הפעילות החיה של המערכת.</span>
+            </button>
+          </div>
+        </SurfaceDialog>
+      ) : null}
+
+      {isCreateOrganizationDialogOpen ? (
+        <SurfaceDialog
+          eyebrow="יצירת ארגון"
+          title="צור ארגון חדש"
+          description="הזן שם ברור לארגון החדש. לאחר היצירה תועבר ישירות למסך הניהול של הארגון."
+          onClose={() => {
+            if (!isBusy) {
+              setIsCreateOrganizationDialogOpen(false)
+            }
+          }}
+          width="narrow"
+          actions={
+            <>
+              <button className="ghost-button" disabled={isBusy} onClick={() => setIsCreateOrganizationDialogOpen(false)} type="button">
+                ביטול
+              </button>
+              <button className="primary-button" disabled={isBusy} onClick={() => void handleCreateOrganization()} type="button">
+                צור ארגון
+              </button>
+            </>
+          }
+        >
+          <label className="sa-dialog-field">
+            <span>שם הארגון</span>
+            <input
+              autoFocus
+              value={newOrganizationName}
+              onChange={(event) => setNewOrganizationName(event.target.value)}
+              placeholder="לדוגמה: Ghost HQ"
+            />
+          </label>
+        </SurfaceDialog>
+      ) : null}
     </div>
   )
 }
+

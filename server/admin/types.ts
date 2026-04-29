@@ -119,6 +119,23 @@ export interface RefreshTokenRecord {
   expiresAtUnix: number
 }
 
+export type ChannelCaptureMode = 'browser' | 'local_agent'
+export type LocalAgentConnectionState = 'connected' | 'degraded' | 'offline'
+
+export interface LocalAgentBindingRecord {
+  deviceId: string
+  deviceName: string
+  cameraName: string
+  channelId: string
+  boundAtIso: string
+}
+
+export interface LocalAgentStatusRecord {
+  state: LocalAgentConnectionState
+  lastHeartbeatAtIso: string
+  lastError?: string
+}
+
 export interface FullChannelRecord {
   id: string
   organizationId: string
@@ -132,6 +149,9 @@ export interface FullChannelRecord {
   rtspFeed: string
   liveState: 'LIVE' | 'SYNC' | 'DEGRADED' | 'OFFLINE'
   cameraEnabled: boolean
+  captureMode?: ChannelCaptureMode
+  localAgentBinding?: LocalAgentBindingRecord
+  localAgentStatus?: LocalAgentStatusRecord
   linkedChannelIds: string[]
   members: string[]
   isBlocked: boolean

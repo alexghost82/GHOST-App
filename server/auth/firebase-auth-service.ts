@@ -1,5 +1,6 @@
 import { hashPassword } from '../security/crypto-utils'
 import { adminAuth } from '../lib/firebase-admin'
+import { hasFirebaseProjectConfig } from '../lib/firebase-env'
 import { USER_ROLES } from '../admin/types'
 import type { IAdminRepository } from '../db/repository-types'
 
@@ -7,7 +8,7 @@ const FIREBASE_AUTH_DOMAIN = 'https://identitytoolkit.googleapis.com/v1'
 const INTERNAL_EMAIL_SUFFIX = '@ghost.internal'
 
 function isFirebaseAuthEnabled(): boolean {
-  return Boolean(process.env.FIREBASE_PROJECT_ID)
+  return hasFirebaseProjectConfig()
 }
 
 function normalizeUsername(username: string): string {

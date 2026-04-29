@@ -12,6 +12,8 @@ import { createAuthRouter } from './admin/create-auth-router'
 import { createAdminRouter } from './admin/create-admin-router'
 import { createIssuesRouter } from './issues/create-issues-router'
 import { createChannelsRouter } from './channels/create-channels-router'
+import { createLocalAgentRouter } from './local-agent/create-local-agent-router'
+import { LocalAgentCaptureBroker } from './local-agent/capture-broker'
 import { requireAuth } from './middleware/auth-guard'
 import type { IAdminRepository } from './db/repository-types'
 import type { IRealtimeHub } from './realtime/realtime-hub-types'
@@ -256,6 +258,7 @@ async function requestCollageAnalysisWithRetry(
  */
 export function createApp(store: IAdminRepository, realtimeHub: IRealtimeHub): express.Application {
   const app = express()
+  const localAgentCaptureBroker = new LocalAgentCaptureBroker()
 
   app.use(cors())
   app.use(express.json({ limit: '12mb' }))
@@ -263,6 +266,7 @@ export function createApp(store: IAdminRepository, realtimeHub: IRealtimeHub): e
   app.use('/api/admin', createAdminRouter({ store, realtimeHub }))
   app.use('/api/issues', createIssuesRouter({ store, realtimeHub }))
   app.use('/api/channels', createChannelsRouter({ store, realtimeHub }))
+  app.use('/api/local-agent', createLocalAgentRouter({ store, realtimeHub, captureBroker: localAgentCaptureBroker }))
 
   app.post('/api/chat-vision', requireAuth, async (request, response) => {
     const parsed = SharedChatVisionRequestSchema.safeParse(request.body)

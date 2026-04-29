@@ -1,4 +1,5 @@
-import { adminRtdb } from '../lib/firebase-admin'
+import { getAdminRtdb } from '../lib/firebase-admin'
+import { stripUndefinedDeep } from '../db/firestore/firestore-sanitize'
 import type { IRealtimeHub, LiveEventPayload } from './realtime-hub-types'
 
 const EVENTS_PATH_PREFIX = 'realtime'
@@ -10,11 +11,11 @@ const EVENT_TTL_MS = 60_000
  */
 export class FirebaseRealtimeHub implements IRealtimeHub {
   publish(event: LiveEventPayload): void {
-    const ref = adminRtdb.ref(`${EVENTS_PATH_PREFIX}/${event.organizationId}/events`)
-    const entry = {
+    const ref = getAdminRtdb().ref(`${EVENTS_PATH_PREFIX}/${event.organizationId}/events`)
+    const entry = stripUndefinedDeep({
       ...event,
       expiresAtMs: Date.now() + EVENT_TTL_MS,
-    }
+    })
     ref.push(entry).catch((error: unknown) => {
       const message = error instanceof Error ? error.message : String(error)
       console.error(`[FirebaseRealtimeHub] שגיאה בשידור אירוע: ${message}`)

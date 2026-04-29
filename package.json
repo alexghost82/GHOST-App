@@ -9,6 +9,12 @@
     "dev:server": "tsx watch server/index.ts",
     "dev:all": "npm run dev",
     "build": "tsc -b && vite build",
+    "build:test": "tsc -b && vite build --mode test",
+    "local-client:build": "set \"PATH=C:\\Program Files\\nodejs;%PATH%\" && cd local-camera-client && npm run build",
+    "local-client:exe": "set \"PATH=C:\\Program Files\\nodejs;%PATH%\" && cd local-camera-client && npm install && npm run build:exe",
+    "local-client:dev": "set \"PATH=C:\\Program Files\\nodejs;%PATH%\" && cd local-camera-client && npm run dev",
+    "local-client:start": "set \"PATH=C:\\Program Files\\nodejs;%PATH%\" && cd local-camera-client && npm run start",
+    "deploy:server": "cd functions && npm run build && cd .. && firebase deploy --only functions",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run"

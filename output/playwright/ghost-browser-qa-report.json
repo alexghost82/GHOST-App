@@ -1,0 +1,117 @@
+{
+  "baseUrl": "http://localhost:8888",
+  "timestamp": "2026-04-28T10:24:26.934Z",
+  "runs": [
+    {
+      "name": "operator-desktop",
+      "viewport": "desktop-1440",
+      "screenshots": {
+        "login": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\login-desktop.png",
+        "overview": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\overview-desktop.png",
+        "liveOps": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-desktop.png",
+        "channels": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\channels-desktop.png",
+        "alerts": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\alerts-desktop.png"
+      },
+      "navLabels": [
+        "סקירה",
+        "פעילות חיה",
+        "ערוצים",
+        "התראות"
+      ],
+      "issues": [
+        "Command palette trigger not found"
+      ],
+      "console": [
+        {
+          "type": "debug",
+          "text": "[vite] connecting..."
+        },
+        {
+          "type": "debug",
+          "text": "[vite] connected."
+        },
+        {
+          "type": "info",
+          "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+        },
+        {
+          "type": "debug",
+          "text": "[vite] connecting..."
+        },
+        {
+          "type": "debug",
+          "text": "[vite] connected."
+        },
+        {
+          "type": "info",
+          "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+        }
+      ],
+      "pageErrors": [],
+      "requestFailures": []
+    },
+    {
+      "name": "operator-mobile",
+      "viewport": "mobile-390",
+      "screenshots": {
+        "overview": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\overview-mobile.png",
+        "liveOps": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-mobile.png"
+      },
+      "bottomNavLabels": [],
+      "issues": [],
+      "console": [
+        {
+          "type": "debug",
+          "text": "[vite] connecting..."
+        },
+        {
+          "type": "debug",
+          "text": "[vite] connected."
+        },
+        {
+          "type": "info",
+          "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+        }
+      ],
+      "pageErrors": [],
+      "requestFailures": []
+    },
+    {
+      "name": "admin-desktop",
+      "viewport": "desktop-1440",
+      "screenshots": {
+        "adminOverview": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\admin-overview-desktop.png"
+      },
+      "adminTabs": [
+        "סקירה",
+        "ארגון מושהה",
+        "משתמשים",
+        "תשלומים",
+        "שימוש",
+        "תקלות",
+        "אירועים חיים"
+      ],
+      "issues": [],
+      "console": [
+        {
+          "type": "debug",
+          "text": "[vite] connecting..."
+        },
+        {
+          "type": "debug",
+          "text": "[vite] connected."
+        },
+        {
+          "type": "info",
+          "text": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"
+        },
+        {
+          "type": "warning",
+          "text": "WebSocket connection to 'ws://localhost:8888/ws/admin-realtime' failed: WebSocket is closed before the connection is established."
+        }
+      ],
+      "pageErrors": [],
+      "requestFailures": []
+    }
+  ]
+}

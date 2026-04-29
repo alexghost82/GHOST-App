@@ -3,7 +3,7 @@
  * מותאמת למעבר עתידי ל-Firebase Realtime + Firestore.
  */
 
-export const SCHEMA_VERSION = 4
+export const SCHEMA_VERSION = 5
 
 export const MIGRATE_V2_TO_V3_SQL = `
 ALTER TABLE organizations ADD COLUMN operations_count INTEGER NOT NULL DEFAULT 0;
@@ -14,6 +14,13 @@ export const MIGRATE_V3_TO_V4_SQL = `
 ALTER TABLE users ADD COLUMN first_name TEXT NOT NULL DEFAULT '';
 ALTER TABLE users ADD COLUMN last_name TEXT NOT NULL DEFAULT '';
 UPDATE schema_version SET version = 4;
+`
+
+export const MIGRATE_V4_TO_V5_SQL = `
+ALTER TABLE channel_data ADD COLUMN capture_mode TEXT NOT NULL DEFAULT 'browser' CHECK(capture_mode IN ('browser', 'local_agent'));
+ALTER TABLE channel_data ADD COLUMN local_agent_binding TEXT;
+ALTER TABLE channel_data ADD COLUMN local_agent_status TEXT;
+UPDATE schema_version SET version = 5;
 `
 
 /** SQL מיגרציה מגרסה 1 לגרסה 2 — טבלאות ערוצים עשירים, הודעות, מבצעים והרצות. */
@@ -31,6 +38,9 @@ CREATE TABLE IF NOT EXISTS channel_data (
   rtsp_feed TEXT NOT NULL DEFAULT 'rtsp://',
   live_state TEXT NOT NULL DEFAULT 'LIVE' CHECK(live_state IN ('LIVE', 'SYNC', 'DEGRADED', 'OFFLINE')),
   camera_enabled INTEGER NOT NULL DEFAULT 0,
+  capture_mode TEXT NOT NULL DEFAULT 'browser' CHECK(capture_mode IN ('browser', 'local_agent')),
+  local_agent_binding TEXT,
+  local_agent_status TEXT,
   linked_channel_ids TEXT NOT NULL DEFAULT '[]',
   members TEXT NOT NULL DEFAULT '[]',
   is_blocked INTEGER NOT NULL DEFAULT 0,
@@ -249,6 +259,9 @@ CREATE TABLE IF NOT EXISTS channel_data (
   rtsp_feed TEXT NOT NULL DEFAULT 'rtsp://',
   live_state TEXT NOT NULL DEFAULT 'LIVE' CHECK(live_state IN ('LIVE', 'SYNC', 'DEGRADED', 'OFFLINE')),
   camera_enabled INTEGER NOT NULL DEFAULT 0,
+  capture_mode TEXT NOT NULL DEFAULT 'browser' CHECK(capture_mode IN ('browser', 'local_agent')),
+  local_agent_binding TEXT,
+  local_agent_status TEXT,
   linked_channel_ids TEXT NOT NULL DEFAULT '[]',
   members TEXT NOT NULL DEFAULT '[]',
   is_blocked INTEGER NOT NULL DEFAULT 0,

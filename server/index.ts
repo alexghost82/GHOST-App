@@ -9,6 +9,7 @@ import type { IAdminRepository } from './db/repository-types'
 import type { IRealtimeHub } from './realtime/realtime-hub-types'
 import { ensureFirebaseBootstrapUser } from './auth/firebase-auth-service'
 import { ServerOperationScheduler } from './operations/operation-scheduler'
+import { hasFirebaseProjectConfig } from './lib/firebase-env'
 
 function readBootstrapCredentials(): { username: string; password: string } {
   return {
@@ -18,7 +19,7 @@ function readBootstrapCredentials(): { username: string; password: string } {
 }
 
 const SERVER_PORT = Number(process.env.PORT ?? 7722)
-const IS_FIREBASE = Boolean(process.env.FIREBASE_PROJECT_ID)
+const IS_FIREBASE = hasFirebaseProjectConfig()
 
 async function bootstrap(): Promise<void> {
   let store: IAdminRepository

@@ -12,9 +12,14 @@ dist
 dist-ssr
 *.local
 .env
+/.env.test
 functions/.env
+functions/.env.test
 functions/lib
 functions/node_modules
+local-camera-client/dist
+local-camera-client/build
+local-camera-client/ghost-agent.runtime.json
 
 # SQLite local DB files
 server/db/sqlite/*.db

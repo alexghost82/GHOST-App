@@ -138,7 +138,7 @@ ghost_prod/
 ├── index.html              # SPA entry point (RTL, he)
 ├── package.json            # תלויות וסקריפטים
 ├── firebase.json           # הגדרות Firebase (Hosting, Functions, Firestore, RTDB)
-├── .firebaserc             # פרויקט Firebase: ghost-prod-fc874
+├── .firebaserc             # פרויקט Firebase: ghost-test-app-b906c
 ├── firestore.rules         # כללי Firestore (הכל false — גישה רק מ-Functions)
 ├── firestore.indexes.json  # אינדקסים מורכבים
 ├── database.rules.json     # כללי Realtime Database
@@ -644,15 +644,15 @@ organizations/{orgId}
 
 ### Cloud Function (`functions/src/index.ts`)
 
-- קובע `FIREBASE_PROJECT_ID = 'ghost-prod-fc874'`.
+- משתמש בפרויקט Firebase מתוך סביבת הריצה או `.firebaserc` (`ghost-test-app-b906c`).
 - יוצר `FirestoreAdminRepository` + `FirebaseRealtimeHub` + `ServerOperationScheduler`.
 - מייצא `api` כ-`onRequest` — מעביר כל בקשה לאותו Express app.
 - `minInstances: 0` — cold start אפשרי.
 
 ### פרויקט Firebase
 
-- Default: `ghost-prod-fc874` (מ-`.firebaserc`).
-- Hosting target: `prod`.
+- Default: `ghost-test-app-b906c` (מ-`.firebaserc`).
+- Hosting site: `ghost-test-app-b906c`.
 
 ---
 

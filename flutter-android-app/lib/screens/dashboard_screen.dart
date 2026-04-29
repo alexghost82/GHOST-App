@@ -22,7 +22,8 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProviderStateMixin {
+class _DashboardScreenState extends State<DashboardScreen>
+    with SingleTickerProviderStateMixin {
   DashboardOverview? _overview;
   OrganizationDetails? _organizationDetails;
   List<SuperAdminIssue> _issues = const [];
@@ -52,12 +53,18 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
       _errorMessage = null;
     });
     try {
-      final overview = await widget.apiClient.fetchDashboardOverview(accessToken: widget.accessToken);
-      final users = await widget.apiClient.fetchUsers(accessToken: widget.accessToken);
-      final issues = await widget.apiClient.fetchIssues(accessToken: widget.accessToken);
+      final overview = await widget.apiClient
+          .fetchDashboardOverview(accessToken: widget.accessToken);
+      final users =
+          await widget.apiClient.fetchUsers(accessToken: widget.accessToken);
+      final issues =
+          await widget.apiClient.fetchIssues(accessToken: widget.accessToken);
       String? selectedId = _selectedOrganizationId;
-      if (selectedId == null || !overview.organizations.any((org) => org.id == selectedId)) {
-        selectedId = overview.organizations.isNotEmpty ? overview.organizations.first.id : null;
+      if (selectedId == null ||
+          !overview.organizations.any((org) => org.id == selectedId)) {
+        selectedId = overview.organizations.isNotEmpty
+            ? overview.organizations.first.id
+            : null;
       }
       OrganizationDetails? details;
       if (selectedId != null) {
@@ -160,24 +167,42 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextField(controller: firstNameController, decoration: const InputDecoration(labelText: 'First name')),
-                    TextField(controller: lastNameController, decoration: const InputDecoration(labelText: 'Last name')),
-                    TextField(controller: usernameController, decoration: const InputDecoration(labelText: 'Username')),
-                    TextField(controller: passwordController, decoration: const InputDecoration(labelText: 'Password (min 8)')),
+                    TextField(
+                        controller: firstNameController,
+                        decoration:
+                            const InputDecoration(labelText: 'First name')),
+                    TextField(
+                        controller: lastNameController,
+                        decoration:
+                            const InputDecoration(labelText: 'Last name')),
+                    TextField(
+                        controller: usernameController,
+                        decoration:
+                            const InputDecoration(labelText: 'Username')),
+                    TextField(
+                        controller: passwordController,
+                        decoration: const InputDecoration(
+                            labelText: 'Password (min 8)')),
                     DropdownButtonFormField<String>(
-                      value: role,
+                      initialValue: role,
                       decoration: const InputDecoration(labelText: 'Role'),
                       items: const [
-                        DropdownMenuItem(value: 'system_manager', child: Text('System manager')),
-                        DropdownMenuItem(value: 'regular_user', child: Text('Regular user')),
+                        DropdownMenuItem(
+                            value: 'system_manager',
+                            child: Text('System manager')),
+                        DropdownMenuItem(
+                            value: 'regular_user', child: Text('Regular user')),
                       ],
-                      onChanged: (value) => setModalState(() => role = value ?? 'regular_user'),
+                      onChanged: (value) =>
+                          setModalState(() => role = value ?? 'regular_user'),
                     ),
                   ],
                 ),
               ),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel')),
                 FilledButton(
                   onPressed: () async {
                     try {
@@ -192,11 +217,13 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                       );
                       if (!mounted) return;
                       Navigator.pop(context);
-                      setState(() => _successMessage = 'User created successfully');
+                      setState(
+                          () => _successMessage = 'User created successfully');
                       await _reloadAll();
                     } catch (error) {
                       if (!mounted) return;
-                      setState(() => _errorMessage = error.toString().replaceFirst('Exception: ', ''));
+                      setState(() => _errorMessage =
+                          error.toString().replaceFirst('Exception: ', ''));
                     }
                   },
                   child: const Text('Create'),
@@ -210,7 +237,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   }
 
   Future<void> _showEditUserDialog(OrganizationUser user) async {
-    String role = user.role == 'system_manager' ? 'system_manager' : 'regular_user';
+    String role =
+        user.role == 'system_manager' ? 'system_manager' : 'regular_user';
     bool isActive = user.isActive;
     await showDialog<void>(
       context: context,
@@ -223,13 +251,17 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
-                    value: role,
+                    initialValue: role,
                     decoration: const InputDecoration(labelText: 'Role'),
                     items: const [
-                      DropdownMenuItem(value: 'system_manager', child: Text('System manager')),
-                      DropdownMenuItem(value: 'regular_user', child: Text('Regular user')),
+                      DropdownMenuItem(
+                          value: 'system_manager',
+                          child: Text('System manager')),
+                      DropdownMenuItem(
+                          value: 'regular_user', child: Text('Regular user')),
                     ],
-                    onChanged: (value) => setModalState(() => role = value ?? role),
+                    onChanged: (value) =>
+                        setModalState(() => role = value ?? role),
                   ),
                   SwitchListTile(
                     value: isActive,
@@ -239,7 +271,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 ],
               ),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel')),
                 FilledButton(
                   onPressed: () async {
                     try {
@@ -255,7 +289,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                       await _reloadAll();
                     } catch (error) {
                       if (!mounted) return;
-                      setState(() => _errorMessage = error.toString().replaceFirst('Exception: ', ''));
+                      setState(() => _errorMessage =
+                          error.toString().replaceFirst('Exception: ', ''));
                     }
                   },
                   child: const Text('Save'),
@@ -280,7 +315,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             decoration: const InputDecoration(labelText: 'Organization name'),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel')),
             FilledButton(
               onPressed: () async {
                 try {
@@ -302,7 +339,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                   await _reloadAll();
                 } catch (error) {
                   if (!mounted) return;
-                  setState(() => _errorMessage = error.toString().replaceFirst('Exception: ', ''));
+                  setState(() => _errorMessage =
+                      error.toString().replaceFirst('Exception: ', ''));
                 }
               },
               child: const Text('Create'),
@@ -328,8 +366,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           maxApiTotalCost: 2500,
         );
 
-    final maxChannelsController = TextEditingController(text: limits.maxChannels.toString());
-    final maxMessagesController = TextEditingController(text: limits.maxMessagesPerChannelPerMonth.toString());
+    final maxChannelsController =
+        TextEditingController(text: limits.maxChannels.toString());
+    final maxMessagesController = TextEditingController(
+        text: limits.maxMessagesPerChannelPerMonth.toString());
 
     await showDialog<void>(
       context: context,
@@ -342,37 +382,49 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextField(controller: nameController, decoration: const InputDecoration(labelText: 'Name')),
+                    TextField(
+                        controller: nameController,
+                        decoration: const InputDecoration(labelText: 'Name')),
                     DropdownButtonFormField<String>(
-                      value: status,
+                      initialValue: status,
                       decoration: const InputDecoration(labelText: 'Status'),
                       items: const [
-                        DropdownMenuItem(value: 'active', child: Text('Active')),
-                        DropdownMenuItem(value: 'suspended', child: Text('Suspended')),
+                        DropdownMenuItem(
+                            value: 'active', child: Text('Active')),
+                        DropdownMenuItem(
+                            value: 'suspended', child: Text('Suspended')),
                       ],
-                      onChanged: (value) => setModalState(() => status = value ?? status),
+                      onChanged: (value) =>
+                          setModalState(() => status = value ?? status),
                     ),
                     TextField(
                       controller: maxChannelsController,
-                      decoration: const InputDecoration(labelText: 'Max channels'),
+                      decoration:
+                          const InputDecoration(labelText: 'Max channels'),
                       keyboardType: TextInputType.number,
                     ),
                     TextField(
                       controller: maxMessagesController,
-                      decoration: const InputDecoration(labelText: 'Max messages per channel / month'),
+                      decoration: const InputDecoration(
+                          labelText: 'Max messages per channel / month'),
                       keyboardType: TextInputType.number,
                     ),
                   ],
                 ),
               ),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel')),
                 FilledButton(
                   onPressed: () async {
                     try {
                       limits = limits.copyWith(
-                        maxChannels: int.tryParse(maxChannelsController.text) ?? limits.maxChannels,
-                        maxMessagesPerChannelPerMonth: int.tryParse(maxMessagesController.text) ?? limits.maxMessagesPerChannelPerMonth,
+                        maxChannels: int.tryParse(maxChannelsController.text) ??
+                            limits.maxChannels,
+                        maxMessagesPerChannelPerMonth:
+                            int.tryParse(maxMessagesController.text) ??
+                                limits.maxMessagesPerChannelPerMonth,
                       );
                       await widget.apiClient.updateOrganization(
                         accessToken: widget.accessToken,
@@ -387,7 +439,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                       await _reloadAll();
                     } catch (error) {
                       if (!mounted) return;
-                      setState(() => _errorMessage = error.toString().replaceFirst('Exception: ', ''));
+                      setState(() => _errorMessage =
+                          error.toString().replaceFirst('Exception: ', ''));
                     }
                   },
                   child: const Text('Save'),
@@ -403,8 +456,11 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     final totals = _overview?.totals;
-    final organizations = _overview?.organizations ?? const <DashboardOrganization>[];
-    final selectedOrgUsers = _users.where((u) => u.organizationId == _selectedOrganizationId).toList();
+    final organizations =
+        _overview?.organizations ?? const <DashboardOrganization>[];
+    final selectedOrgUsers = _users
+        .where((u) => u.organizationId == _selectedOrganizationId)
+        .toList();
     final selectedOrgIssues = _issues.where((i) {
       if (_selectedOrganizationId == null) return true;
       return i.organizationId == _selectedOrganizationId;
@@ -414,7 +470,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         title: const Text('Ghost Super Admin'),
         actions: [
           IconButton(onPressed: _reloadAll, icon: const Icon(Icons.refresh)),
-          IconButton(onPressed: widget.onLogout, icon: const Icon(Icons.logout)),
+          IconButton(
+              onPressed: widget.onLogout, icon: const Icon(Icons.logout)),
         ],
         bottom: TabBar(
           controller: _tabController,
@@ -436,20 +493,26 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
             if (_errorMessage != null && _errorMessage!.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: Text(_errorMessage!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                child: Text(_errorMessage!,
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.error)),
               ),
             if (_successMessage != null && _successMessage!.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: Text(_successMessage!, style: const TextStyle(color: Colors.green)),
+                child: Text(_successMessage!,
+                    style: const TextStyle(color: Colors.green)),
               ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               child: DropdownButtonFormField<String>(
-                value: _selectedOrganizationId,
-                decoration: const InputDecoration(labelText: 'Selected organization'),
+                initialValue: _selectedOrganizationId,
+                decoration:
+                    const InputDecoration(labelText: 'Selected organization'),
                 items: organizations
-                    .map((org) => DropdownMenuItem(value: org.id, child: Text('${org.name} (${org.status})')))
+                    .map((org) => DropdownMenuItem(
+                        value: org.id,
+                        child: Text('${org.name} (${org.status})')))
                     .toList(),
                 onChanged: (value) {
                   if (value == null) return;
@@ -470,12 +533,15 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('${widget.profile.firstName} ${widget.profile.lastName}'.trim().isEmpty
+                              Text('${widget.profile.firstName} ${widget.profile.lastName}'
+                                      .trim()
+                                      .isEmpty
                                   ? widget.profile.username
                                   : '${widget.profile.firstName} ${widget.profile.lastName}'),
                               const SizedBox(height: 6),
                               Text('Role: ${widget.profile.role}'),
-                              Text('Organization: ${widget.profile.organizationName}'),
+                              Text(
+                                  'Organization: ${widget.profile.organizationName}'),
                             ],
                           ),
                         ),
@@ -489,10 +555,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             children: [
                               const Text('Totals'),
                               const SizedBox(height: 8),
-                              Text('Organizations: ${totals?.organizationsCount ?? 0}'),
+                              Text(
+                                  'Organizations: ${totals?.organizationsCount ?? 0}'),
                               Text('Channels: ${totals?.channelsCount ?? 0}'),
                               Text('Devices: ${totals?.devicesCount ?? 0}'),
-                              Text('Operations: ${totals?.operationsCount ?? 0}'),
+                              Text(
+                                  'Operations: ${totals?.operationsCount ?? 0}'),
                               Text('AI Cost: ${totals?.aiTotalCost ?? 0}'),
                             ],
                           ),
@@ -518,10 +586,14 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     children: [
                       Card(
                         child: ListTile(
-                          title: Text(_organizationDetails?.organization.name ?? 'No organization'),
-                          subtitle: Text(_organizationDetails?.organization.id ?? ''),
+                          title: Text(_organizationDetails?.organization.name ??
+                              'No organization'),
+                          subtitle:
+                              Text(_organizationDetails?.organization.id ?? ''),
                           trailing: FilledButton(
-                            onPressed: _organizationDetails == null ? null : _showEditOrganizationDialog,
+                            onPressed: _organizationDetails == null
+                                ? null
+                                : _showEditOrganizationDialog,
                             child: const Text('Edit'),
                           ),
                         ),
@@ -535,8 +607,10 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                             children: [
                               const Text('Channels'),
                               const SizedBox(height: 6),
-                              ...(_organizationDetails?.channels ?? const <OrganizationChannel>[])
-                                  .map((channel) => Text('- ${channel.name}${channel.isBlocked ? " (blocked)" : ""}')),
+                              ...(_organizationDetails?.channels ??
+                                      const <OrganizationChannel>[])
+                                  .map((channel) => Text(
+                                      '- ${channel.name}${channel.isBlocked ? " (blocked)" : ""}')),
                             ],
                           ),
                         ),
@@ -553,8 +627,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(issue.title, style: Theme.of(context).textTheme.titleMedium),
-                                  Text('Severity: ${issue.severity} | Status: ${issue.status}'),
+                                  Text(issue.title,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium),
+                                  Text(
+                                      'Severity: ${issue.severity} | Status: ${issue.status}'),
                                   const SizedBox(height: 6),
                                   Text(issue.description),
                                   const SizedBox(height: 10),
@@ -562,11 +640,13 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                     spacing: 8,
                                     children: [
                                       OutlinedButton(
-                                        onPressed: () => _updateIssueStatus(issue, 'in_progress'),
+                                        onPressed: () => _updateIssueStatus(
+                                            issue, 'in_progress'),
                                         child: const Text('In progress'),
                                       ),
                                       FilledButton(
-                                        onPressed: () => _updateIssueStatus(issue, 'resolved'),
+                                        onPressed: () => _updateIssueStatus(
+                                            issue, 'resolved'),
                                         child: const Text('Resolve'),
                                       ),
                                     ],
@@ -593,7 +673,8 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                         (user) => Card(
                           child: ListTile(
                             title: Text(user.username),
-                            subtitle: Text('${user.role} | ${user.isActive ? "active" : "inactive"}'),
+                            subtitle: Text(
+                                '${user.role} | ${user.isActive ? "active" : "inactive"}'),
                             onTap: () => _showEditUserDialog(user),
                           ),
                         ),

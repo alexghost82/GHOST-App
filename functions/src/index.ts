@@ -1,12 +1,18 @@
 import { setGlobalOptions } from 'firebase-functions/v2'
 import { onRequest } from 'firebase-functions/v2/https'
+import { defineSecret } from 'firebase-functions/params'
 import { createApp } from '../../server/app'
 import { FirestoreAdminRepository } from '../../server/db/firestore/firestore-repository'
 import { FirebaseRealtimeHub } from '../../server/realtime/firebase-hub'
 import { ensureFirebaseBootstrapUser } from '../../server/auth/firebase-auth-service'
 import { ServerOperationScheduler } from '../../server/operations/operation-scheduler'
 
-process.env.FIREBASE_PROJECT_ID = 'ghost-prod-fc874'
+const openAiApiKey = defineSecret('OPENAI_API_KEY')
+const jwtAccessSecret = defineSecret('JWT_ACCESS_SECRET')
+const jwtRefreshSecret = defineSecret('JWT_REFRESH_SECRET')
+const adminEncryptionSecret = defineSecret('ADMIN_ENCRYPTION_SECRET')
+const superAdminPassword = defineSecret('SUPER_ADMIN_PASSWORD')
+const superAdminManagerCode = defineSecret('SUPER_ADMIN_MANAGER_CODE')
 
 let appPromise: Promise<ReturnType<typeof createApp>> | null = null
 
@@ -43,10 +49,17 @@ export const api = onRequest(
     memory: '512MiB',
     timeoutSeconds: 60,
     minInstances: 0,
+    secrets: [
+      openAiApiKey,
+      jwtAccessSecret,
+      jwtRefreshSecret,
+      adminEncryptionSecret,
+      superAdminPassword,
+      superAdminManagerCode,
+    ],
   },
   async (req, res) => {
     const app = await getApp()
     app(req, res)
   },
 )
-

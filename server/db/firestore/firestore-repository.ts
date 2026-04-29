@@ -26,6 +26,7 @@ import type {
   IAdminRepository,
   UsageEventRecord,
 } from '../repository-types'
+import { stripUndefinedDeep } from './firestore-sanitize'
 
 const COLLECTIONS = {
   organizations: 'organizations',
@@ -568,7 +569,7 @@ export class FirestoreAdminRepository implements IAdminRepository {
     const record: FullChannelRecord = {
       ...data, id, organizationId, createdAtIso: nowIso, updatedAtIso: nowIso,
     }
-    await this.channelDataCol(organizationId).doc(id).set(record)
+    await this.channelDataCol(organizationId).doc(id).set(stripUndefinedDeep(record))
     return record
   }
 
@@ -578,7 +579,7 @@ export class FirestoreAdminRepository implements IAdminRepository {
     fields: Partial<Omit<FullChannelRecord, 'id' | 'organizationId' | 'createdAtIso'>>,
   ): Promise<FullChannelRecord> {
     const nowIso = new Date().toISOString()
-    const update = { ...fields, updatedAtIso: nowIso }
+    const update = stripUndefinedDeep({ ...fields, updatedAtIso: nowIso })
     await this.channelDataCol(organizationId).doc(channelId).update(update)
     const snap = await this.channelDataCol(organizationId).doc(channelId).get()
     return snap.data() as FullChannelRecord

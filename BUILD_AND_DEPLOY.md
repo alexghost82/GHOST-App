@@ -2,7 +2,7 @@
 
 > **תאריך:** 29.03.2026  
 > **מבוסס על:** [SYSTEM_ARCHITECTURE.md](./SYSTEM_ARCHITECTURE.md)  
-> **פרויקט Firebase:** `ghost-prod-fc874`
+> **פרויקט Firebase:** `ghost-test-app-b906c`
 
 ---
 
@@ -64,10 +64,10 @@ firebase login
 
 # אימות שהפרויקט הנכון מוגדר
 firebase projects:list
-# צריך לראות: ghost-prod-fc874
+# צריך לראות: ghost-test-app-b906c
 
 # אימות שה-CLI מחובר לפרויקט הנכון
-firebase use ghost-prod-fc874
+firebase use ghost-test-app-b906c
 ```
 
 ### שירותים שחייבים להיות פעילים בפרויקט Firebase
@@ -362,7 +362,7 @@ firebase deploy --only firestore:indexes
 ### 8.1 בדיקות מיידיות (0-2 דקות אחרי דיפלוי)
 
 ```bash
-PROJECT_URL="https://ghost-prod-fc874.web.app"
+PROJECT_URL="https://ghost-test-app-b906c.web.app"
 
 # 1. הדף נטען
 curl -s -o /dev/null -w "%{http_code}" $PROJECT_URL
@@ -385,7 +385,7 @@ curl -s -X POST "$PROJECT_URL/api/auth/login" \
 
 ### 8.2 בדיקות פונקציונליות (2-10 דקות)
 
-1. **פתח את הדף בדפדפן** — `https://ghost-prod-fc874.web.app`
+1. **פתח את הדף בדפדפן** — `https://ghost-test-app-b906c.web.app`
 2. **התחבר** עם המשתמש bootstrap
 3. **בדוק שהדשבורד נטען** (סופר-אדמין → דשבורד ניהולי)
 4. **צור ערוץ חדש** → וודא שנשמר ומופיע
@@ -399,7 +399,7 @@ curl -s -X POST "$PROJECT_URL/api/auth/login" \
 firebase functions:log --only api
 
 # או דרך GCP Console:
-# https://console.cloud.google.com/functions/details/us-central1/api?project=ghost-prod-fc874
+# https://console.cloud.google.com/functions/details/us-central1/api?project=ghost-test-app-b906c
 ```
 
 **מה לחפש:**
@@ -576,10 +576,10 @@ npm run build && cd functions && npm run build && cd ..
 firebase deploy
 
 # 5. אימות
-curl -s "https://ghost-prod-fc874.web.app/api/health"
+curl -s "https://ghost-test-app-b906c.web.app/api/health"
 
 # 6. בדיקה בדפדפן
-open "https://ghost-prod-fc874.web.app"
+open "https://ghost-test-app-b906c.web.app"
 
 # 7. Tag בגיט
 git tag -a "deploy-$(date +%Y%m%d-%H%M)" -m "Production deploy"
@@ -628,7 +628,7 @@ test -f dist/index.html && test -f functions/lib/functions/src/index.js && echo 
 firebase deploy                    # הכל
 
 # === POST-DEPLOY ===
-curl -s "https://ghost-prod-fc874.web.app/api/health"  # health check
+curl -s "https://ghost-test-app-b906c.web.app/api/health"  # health check
 firebase functions:log --only api  # לוגים
 
 # === TAG ===

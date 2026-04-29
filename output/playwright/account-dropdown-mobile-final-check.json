@@ -1,0 +1,18 @@
+{
+  "data": {
+    "rect": {
+      "x": 12,
+      "y": 70,
+      "width": 322,
+      "height": 732,
+      "bottom": 802
+    },
+    "styleTop": "70px",
+    "styleLeft": "12px",
+    "position": "fixed",
+    "scrollY": 0,
+    "clientHeight": 812,
+    "visualViewportHeight": 812
+  },
+  "shot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\account-dropdown-mobile-final-check.png"
+}

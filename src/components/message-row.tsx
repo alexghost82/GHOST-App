@@ -11,6 +11,12 @@ const AUTHOR_LABELS: Record<string, string> = {
   user: 'ME',
 }
 
+const AUTHOR_TITLES: Record<string, string> = {
+  ghost: 'Ghost',
+  system: 'System',
+  user: 'You',
+}
+
 const ALERT_LEVEL_CLASS: Record<string, string> = {
   critical: 'alert-critical',
   routine: 'alert-routine',
@@ -20,23 +26,23 @@ const ALERT_LEVEL_CLASS: Record<string, string> = {
 }
 
 const SCAN_LABEL_MAP: Record<string, { className: string; text: string }> = {
-  critical:   { className: 'scan-label-critical',   text: 'CRITICAL' },
-  routine:    { className: 'scan-label-routine',    text: 'SCAN OK' },
-  report:     { className: 'scan-label-report',     text: 'REPORT' },
-  rating:     { className: 'scan-label-rating',     text: 'RATING' },
+  critical: { className: 'scan-label-critical', text: 'CRITICAL' },
+  routine: { className: 'scan-label-routine', text: 'SCAN OK' },
+  report: { className: 'scan-label-report', text: 'REPORT' },
+  rating: { className: 'scan-label-rating', text: 'RATING' },
   assessment: { className: 'scan-label-assessment', text: 'ASSESSMENT' },
 }
 
 const AVATAR_MAP: Record<string, string> = {
   critical: '!',
-  routine: '✓',
-  report: '📋',
-  rating: '★',
-  assessment: '◉',
+  routine: 'OK',
+  report: 'R',
+  rating: '*',
+  assessment: 'A',
 }
 
 /**
- * מציג שורת הודעה בצ׳אט — מבנה היררכי ברור לפי סוג: user / ghost / system / scan.
+ * Renders a chat message row with clear hierarchy for user, Ghost, and system scan states.
  */
 export function MessageRow({ message, onDismissFrame }: MessageRowProps) {
   const isScan = Boolean(message.alertLevel)
@@ -51,15 +57,21 @@ export function MessageRow({ message, onDismissFrame }: MessageRowProps) {
   }
 
   const scanLabelInfo = message.alertLevel ? SCAN_LABEL_MAP[message.alertLevel] : null
+  const authorTitle = AUTHOR_TITLES[message.author] ?? 'Message'
 
   return (
     <article className={`message-row ${message.author} ${levelClass}`}>
       {isGhostAvatar ? (
-        <img className="message-avatar message-avatar-ghost-logo" src="/ghost-logo.png" alt="Ghost" />
+        <img className="message-avatar message-avatar-ghost-logo" src="/ghost-logo.png" alt="Ghost logo" />
       ) : (
         <div className="message-avatar">{avatarLabel()}</div>
       )}
       <div className="message-body">
+        <div className="message-meta">
+          <span className="message-author">{authorTitle}</span>
+          <span className="message-meta-separator">/</span>
+          <span className="message-time-inline">{message.time}</span>
+        </div>
         {isScan && scanLabelInfo ? (
           <span className={`message-scan-label ${scanLabelInfo.className}`}>
             {scanLabelInfo.text}
@@ -84,21 +96,18 @@ export function MessageRow({ message, onDismissFrame }: MessageRowProps) {
         </div>
         {message.frameDataUrl ? (
           <div className="message-frame-wrap">
-            <img
-              alt="פריים סריקה"
-              className="message-frame-preview"
-              src={message.frameDataUrl}
-            />
+            <img alt="Captured scan frame" className="message-frame-preview" src={message.frameDataUrl} />
             {onDismissFrame ? (
               <button
                 className="message-frame-dismiss"
                 onClick={() => onDismissFrame(message.id)}
-                title="ראיתי — הסתר פריים"
+                title="Hide attached frame"
                 type="button"
               >
-                ✕
+                x
               </button>
             ) : null}
+            <div className="message-frame-caption">Captured frame attached</div>
           </div>
         ) : null}
       </div>
