@@ -9,12 +9,15 @@ export interface AgentRuntimeState {
   scannedOperations: number
   cameraStatuses?: Array<{
     cameraId: string
+    cameraLabel: string
     label: string
     sourceType: string
     status: 'online' | 'degraded' | 'offline'
     lastCaptureAtIso?: string
+    lastSuccessfulCaptureAtIso?: string
     lastSuccessAtIso?: string
     lastError?: string
+    latencyMs?: number
     lastLatencyMs?: number
   }>
 }

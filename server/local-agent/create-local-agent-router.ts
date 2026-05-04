@@ -254,6 +254,13 @@ export function createLocalAgentRouter({ store, realtimeHub, captureBroker }: Lo
       if (channel.localAgentBinding?.deviceId !== parsed.data.deviceId) {
         return res.status(409).json({ error: 'This channel is not bound to the specified device.' })
       }
+      if (
+        parsed.data.cameraId
+        && channel.localAgentBinding?.cameraId
+        && channel.localAgentBinding.cameraId !== parsed.data.cameraId
+      ) {
+        return res.status(409).json({ error: 'This channel is not bound to the specified camera.' })
+      }
 
       const updated = await store.updateChannelData(organizationId, channel.id, {
         captureMode: 'browser',
@@ -291,6 +298,12 @@ export function createLocalAgentRouter({ store, realtimeHub, captureBroker }: Lo
       if (channel.localAgentBinding?.deviceId !== parsed.data.deviceId) {
         return res.status(409).json({ error: 'This channel is not bound to the specified device.' })
       }
+      if (
+        channel.localAgentBinding?.cameraId
+        && channel.localAgentBinding.cameraId !== parsed.data.cameraId
+      ) {
+        return res.status(409).json({ error: 'This channel is not bound to the specified camera.' })
+      }
 
       const heartbeatAtIso = new Date().toISOString()
       const liveState = mapAgentStatusToLiveState(parsed.data.status)
@@ -315,6 +328,7 @@ export function createLocalAgentRouter({ store, realtimeHub, captureBroker }: Lo
                 ? 'offline'
                 : 'connected',
           lastHeartbeatAtIso: heartbeatAtIso,
+          cameras: parsed.data.cameras,
           ...(parsed.data.message ? { lastError: parsed.data.message } : {}),
         },
       })
@@ -330,6 +344,7 @@ export function createLocalAgentRouter({ store, realtimeHub, captureBroker }: Lo
         state: updated.localAgentStatus?.state ?? 'offline',
         liveState,
         message: parsed.data.message,
+        cameras: parsed.data.cameras,
       }, parsed.data.status === 'degraded' || parsed.data.status === 'offline' ? 'warning' : 'info')
 
       return res.json({

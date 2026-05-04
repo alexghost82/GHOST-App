@@ -14,13 +14,15 @@ export function createManualRtspDiscovery(url: string, label?: string): Discover
   return {
     id: `rtsp-${host ?? 'manual'}`,
     label: label?.trim() || host || 'Manual RTSP camera',
-    sourceType: 'rtsp-ffmpeg',
+    discoveryType: 'manual',
+    sourceType: 'rtsp',
     host,
     port,
+    requiresCredentials: true,
+    suggestedRtspUrls: [url],
     suggestedSource: {
-      type: 'rtsp-ffmpeg',
+      type: 'rtsp',
       url,
-      label,
     },
     status: 'requires-auth',
   }

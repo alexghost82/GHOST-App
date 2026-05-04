@@ -68,6 +68,10 @@ async function loadStore() {
   return import('./local-store.js')
 }
 
+async function loadCameraStore() {
+  return import('./cameras/camera-store.js')
+}
+
 async function loadApiClient() {
   return import('./api-client.js')
 }
@@ -190,10 +194,11 @@ function startTelemetryLoop(): void {
 }
 
 async function startWorkerFromSaved(saved: SavedAgentConfig): Promise<void> {
-  const [{ buildConfigFromSaved }, { startHealthServer }, { LocalCameraWorker }] = await Promise.all([
+  const [{ buildConfigFromSaved }, { startHealthServer }, { LocalCameraWorker }, { resolveAgentSecrets }] = await Promise.all([
     import('./config.js'),
     import('./health-server.js'),
     import('./worker.js'),
+    loadCameraStore(),
   ])
 
   if (worker) {
@@ -205,7 +210,8 @@ async function startWorkerFromSaved(saved: SavedAgentConfig): Promise<void> {
     healthServer = null
   }
 
-  const config = buildConfigFromSaved(saved)
+  const runtimeSaved = await resolveAgentSecrets(saved)
+  const config = buildConfigFromSaved(runtimeSaved)
   runtimeState = {
     startedAtIso: new Date().toISOString(),
     status: 'starting',
@@ -535,29 +541,172 @@ ipcMain.handle('get-cameras', async () => {
   return listDShowCameras(resolveFfmpegPath())
 })
 
-ipcMain.handle('save-binding', async (_event: IpcMainInvokeEvent, payload: SavedAgentConfig) => {
-  const [{ GhostApiClient }, { DEFAULT_API_BASE_URL, loadLocalConfig, saveLocalConfig }] = await Promise.all([
-    loadApiClient(),
-    loadStore(),
+ipcMain.handle('get-saved-cameras', async () => {
+  const { loadMaskedAgentConfig } = await loadCameraStore()
+  return loadMaskedAgentConfig()?.cameras ?? []
+})
+
+ipcMain.handle('discover-cameras', async () => {
+  const [
+    { listDShowCameras },
+    { resolveFfmpegPath },
+    { discoverCameras },
+  ] = await Promise.all([
+    import('./camera-list.js'),
+    import('./ffmpeg-resolver.js'),
+    import('./cameras/discovery/discovery-service.js'),
+  ])
+  const usbCameras = await listDShowCameras(resolveFfmpegPath())
+  return discoverCameras({ usbCameras })
+})
+
+ipcMain.handle('save-camera', async (_event: IpcMainInvokeEvent, payload: {
+  cameraId?: string
+  label: string
+  source: {
+    type: 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
+    name?: string
+    url?: string
+    transport?: 'tcp' | 'udp'
+    username?: string
+    password?: string
+    host?: string
+    port?: number
+    channel?: number
+    useHttps?: boolean
+  }
+  enabled?: boolean
+}) => {
+  const { loadMaskedAgentConfig, upsertCamera } = await loadCameraStore()
+  const existing = loadMaskedAgentConfig()
+  if (!existing) {
+    throw new Error('Connect the local agent before saving cameras.')
+  }
+
+  const nowIso = new Date().toISOString()
+  const cameraId = payload.cameraId?.trim() || `camera-${Math.random().toString(36).slice(2, 10)}`
+  const previousCamera = existing.cameras.find((camera) => camera.cameraId === cameraId)
+  const source = mergeCameraSourceWithExisting(
+    normalizeCameraSourcePayload(payload.source),
+    previousCamera?.source,
+  )
+  const savedCamera = {
+    cameraId,
+    label: payload.label.trim() || cameraId,
+    source,
+    enabled: payload.enabled ?? true,
+    createdAtIso: existing.cameras.find((camera) => camera.cameraId === cameraId)?.createdAtIso ?? nowIso,
+    updatedAtIso: nowIso,
+  }
+
+  await upsertCamera(existing, savedCamera)
+  return {
+    ...savedCamera,
+    source: stripSecretFields(savedCamera.source),
+  }
+})
+
+ipcMain.handle('delete-camera', async (_event: IpcMainInvokeEvent, cameraId: string) => {
+  const { deleteCamera, loadMaskedAgentConfig } = await loadCameraStore()
+  const existing = loadMaskedAgentConfig()
+  if (!existing) {
+    return { ok: true }
+  }
+  deleteCamera(existing, cameraId)
+  return { ok: true }
+})
+
+ipcMain.handle('test-camera', async (_event: IpcMainInvokeEvent, payload: {
+  cameraId?: string
+  label: string
+  source: {
+    type: 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
+    name?: string
+    url?: string
+    transport?: 'tcp' | 'udp'
+    username?: string
+    password?: string
+    host?: string
+    port?: number
+    channel?: number
+    useHttps?: boolean
+  }
+}) => {
+  const [{ buildConfigFromSaved }, { CameraRegistry }, { loadMaskedAgentConfig, resolveAgentSecrets }] = await Promise.all([
+    import('./config.js'),
+    import('./cameras/camera-registry.js'),
+    loadCameraStore(),
   ])
 
-  const existing = loadLocalConfig()
+  const existing = loadMaskedAgentConfig()
+  if (!existing) {
+    throw new Error('Connect the local agent before testing cameras.')
+  }
+
+  const cameraId = payload.cameraId?.trim() || `test-${Date.now()}`
+  const previousCamera = existing.cameras.find((camera) => camera.cameraId === cameraId)
+  const source = mergeCameraSourceWithExisting(
+    normalizeCameraSourcePayload(payload.source),
+    previousCamera?.source,
+  )
+  const testCamera = {
+    cameraId,
+    label: payload.label.trim() || cameraId,
+    source,
+    enabled: true,
+    createdAtIso: new Date().toISOString(),
+    updatedAtIso: new Date().toISOString(),
+  }
+  const runtimeSaved = await resolveAgentSecrets({
+    ...existing,
+    cameras: [
+      ...existing.cameras.filter((camera) => camera.cameraId !== cameraId),
+      testCamera,
+    ],
+    defaultCameraId: cameraId,
+  })
+  const config = buildConfigFromSaved(runtimeSaved)
+  const registry = new CameraRegistry(config)
+  const startedAt = Date.now()
+  const buffer = await registry.captureJpeg(cameraId, 'preview', 10_000)
+  return {
+    ok: true,
+    latencyMs: Date.now() - startedAt,
+    frameDataUrl: `data:image/jpeg;base64,${buffer.toString('base64')}`,
+  }
+})
+
+ipcMain.handle('save-binding', async (_event: IpcMainInvokeEvent, payload: SavedAgentConfig) => {
+  const [{ GhostApiClient }, { DEFAULT_API_BASE_URL, saveLocalConfig }, { loadMaskedAgentConfig, upsertCamera }] = await Promise.all([
+    loadApiClient(),
+    loadStore(),
+    loadCameraStore(),
+  ])
+
+  const existing = loadMaskedAgentConfig()
   const nowIso = new Date().toISOString()
+  const requestedCameraId = (payload as SavedAgentConfig & { selectedCameraId?: string }).selectedCameraId?.trim()
   const cameraName = payload.cameraName?.trim()
-  if (!payload.channelId || !cameraName) {
+  if (!payload.channelId || (!requestedCameraId && !cameraName)) {
     throw new Error('Channel and camera selection are required.')
   }
 
-  const nextCameraId = `usb-${cameraName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'camera'}`
-  const nextCamera = {
-    cameraId: nextCameraId,
-    label: cameraName,
-    source: {
-      type: 'usb-dshow' as const,
-      name: cameraName,
-    },
-    createdAtIso: existing?.cameras.find((camera) => camera.cameraId === nextCameraId)?.createdAtIso ?? nowIso,
-    updatedAtIso: nowIso,
+  const nextCamera =
+    requestedCameraId
+      ? existing?.cameras.find((camera) => camera.cameraId === requestedCameraId)
+      : {
+          cameraId: `usb-${cameraName!.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'camera'}`,
+          label: cameraName!,
+          source: {
+            type: 'usb-dshow' as const,
+            name: cameraName!,
+          },
+          enabled: true,
+          createdAtIso: existing?.cameras.find((camera) => camera.cameraId === `usb-${cameraName!.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'camera'}`)?.createdAtIso ?? nowIso,
+          updatedAtIso: nowIso,
+        }
+  if (!nextCamera) {
+    throw new Error('Selected camera was not found in local storage.')
   }
 
   const api = new GhostApiClient({
@@ -569,10 +718,10 @@ ipcMain.handle('save-binding', async (_event: IpcMainInvokeEvent, payload: Saved
     channelId: payload.channelId,
     deviceId: payload.deviceId,
     deviceName: payload.deviceName,
-    cameraId: nextCameraId,
+    cameraId: nextCamera.cameraId,
     cameraLabel: nextCamera.label,
     cameraSourceType: nextCamera.source.type,
-    cameraName,
+    cameraName: nextCamera.source.type === 'usb-dshow' ? nextCamera.source.name : undefined,
   })
 
   const normalizedPayload = {
@@ -580,15 +729,19 @@ ipcMain.handle('save-binding', async (_event: IpcMainInvokeEvent, payload: Saved
     ...payload,
     apiBaseUrl: DEFAULT_API_BASE_URL,
     cameras: [
-      ...(existing?.cameras.filter((camera) => camera.cameraId !== nextCameraId) ?? []),
+      ...(existing?.cameras.filter((camera) => camera.cameraId !== nextCamera.cameraId) ?? []),
       nextCamera,
     ],
     bindings: [
       ...(existing?.bindings.filter((binding) => binding.channelId !== payload.channelId) ?? []),
-      { channelId: payload.channelId, cameraId: nextCameraId },
+      { channelId: payload.channelId, cameraId: nextCamera.cameraId },
     ],
-    defaultCameraId: existing?.defaultCameraId ?? nextCameraId,
+    defaultCameraId: existing?.defaultCameraId ?? nextCamera.cameraId,
     boundAtIso: nowIso,
+    cameraName: nextCamera.source.type === 'usb-dshow' ? nextCamera.source.name : nextCamera.label,
+  }
+  if (existing) {
+    await upsertCamera(existing, nextCamera)
   }
   saveLocalConfig(normalizedPayload)
   await startWorkerFromSaved(normalizedPayload)
@@ -598,8 +751,8 @@ ipcMain.handle('save-binding', async (_event: IpcMainInvokeEvent, payload: Saved
 })
 
 ipcMain.handle('unbind-agent', async () => {
-  const { loadLocalConfig, clearLocalConfig } = await loadStore()
-  const saved = loadLocalConfig()
+  const { loadMaskedAgentConfig, clearAgentStorage } = await loadCameraStore()
+  const saved = loadMaskedAgentConfig()
   if (!saved) {
     return { ok: true }
   }
@@ -611,14 +764,14 @@ ipcMain.handle('unbind-agent', async () => {
     refreshToken: saved.refreshToken,
   })
   for (const binding of saved.bindings) {
-    await api.unbindChannel(binding.channelId, saved.deviceId)
+    await api.unbindChannel(binding.channelId, saved.deviceId, binding.cameraId)
   }
   worker?.stop()
   worker = null
   healthServer?.close()
   healthServer = null
   runtimeState = null
-  clearLocalConfig()
+  clearAgentStorage()
   clearSessionTelemetry()
   updateTrayPresentation()
   return { ok: true }
@@ -656,3 +809,85 @@ ipcMain.handle('get-dashboard-data', async () => {
     sessionTelemetry,
   }
 })
+
+function normalizeCameraSourcePayload(payload: {
+  type: 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
+  name?: string
+  url?: string
+  transport?: 'tcp' | 'udp'
+  username?: string
+  password?: string
+  host?: string
+  port?: number
+  channel?: number
+  useHttps?: boolean
+}) {
+  switch (payload.type) {
+    case 'usb-dshow':
+      if (!payload.name?.trim()) {
+        throw new Error('USB camera name is required.')
+      }
+      return {
+        type: 'usb-dshow' as const,
+        name: payload.name.trim(),
+      }
+    case 'rtsp':
+      if (!payload.url?.trim()) {
+        throw new Error('RTSP URL is required.')
+      }
+      return {
+        type: 'rtsp' as const,
+        url: payload.url.trim(),
+        transport: payload.transport ?? 'tcp',
+        username: payload.username?.trim() || undefined,
+        password: payload.password || undefined,
+      }
+    case 'hikvision-sdk':
+      if (!payload.host?.trim() || !payload.username?.trim() || !payload.password || !payload.channel) {
+        throw new Error('Hikvision host, username, password, and channel are required.')
+      }
+      return {
+        type: 'hikvision-sdk' as const,
+        host: payload.host.trim(),
+        port: payload.port ?? 8000,
+        username: payload.username.trim(),
+        password: payload.password,
+        channel: payload.channel,
+        useHttps: payload.useHttps ?? false,
+      }
+  }
+}
+
+function stripSecretFields(source: ReturnType<typeof normalizeCameraSourcePayload>) {
+  if (source.type === 'usb-dshow') {
+    return source
+  }
+  return {
+    ...source,
+    password: undefined,
+  }
+}
+
+function mergeCameraSourceWithExisting(
+  source: ReturnType<typeof normalizeCameraSourcePayload>,
+  previousSource: SavedAgentConfig['cameras'][number]['source'] | undefined,
+) {
+  if (!previousSource || previousSource.type !== source.type) {
+    return source
+  }
+  if (source.type === 'rtsp') {
+    const previousRtsp = previousSource.type === 'rtsp' ? previousSource : undefined
+    return {
+      ...source,
+      passwordRef: source.password ? undefined : previousRtsp?.passwordRef,
+    }
+  }
+  if (source.type === 'hikvision-sdk') {
+    const previousHikvision = previousSource.type === 'hikvision-sdk' ? previousSource : undefined
+    return {
+      ...source,
+      passwordRef: source.password ? undefined : previousHikvision?.passwordRef,
+    }
+  }
+  return source
+}

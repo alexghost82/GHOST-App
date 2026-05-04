@@ -1,17 +1,19 @@
-import type { CameraSource } from '../../types.js'
+import type { CameraSource, RtspCameraSource } from '../../types.js'
 import type { CameraAdapter } from './camera-adapter.js'
-import { getCaptureDimensions, maskRtspUrl, type CaptureOptions } from '../camera-source.js'
+import { getCaptureDimensions, type CaptureOptions } from '../camera-source.js'
+import { maskRtspUrl } from '../security/mask-url.js'
 import { runFfmpegCapture } from './usb-dshow-ffmpeg-adapter.js'
 
-export class RtspFfmpegAdapter implements CameraAdapter<Extract<CameraSource, { type: 'rtsp-ffmpeg' }>> {
+export class RtspFfmpegAdapter implements CameraAdapter<RtspCameraSource> {
   constructor(private readonly ffmpegPath: string) {}
 
-  supports(source: CameraSource): source is Extract<CameraSource, { type: 'rtsp-ffmpeg' }> {
-    return source.type === 'rtsp-ffmpeg'
+  supports(source: CameraSource): source is RtspCameraSource {
+    return source.type === 'rtsp'
   }
 
-  async captureJpeg(source: Extract<CameraSource, { type: 'rtsp-ffmpeg' }>, options: CaptureOptions): Promise<Buffer> {
+  async captureJpeg(source: RtspCameraSource, options: CaptureOptions): Promise<Buffer> {
     const { width, height } = getCaptureDimensions(options)
+    const inputUrl = buildRtspInputUrl(source)
     const args = [
       '-hide_banner',
       '-loglevel',
@@ -21,7 +23,7 @@ export class RtspFfmpegAdapter implements CameraAdapter<Extract<CameraSource, { 
       '-timeout',
       `${Math.max(1, Math.floor(options.timeoutMs / 2)) * 1000}`,
       '-i',
-      source.url,
+      inputUrl,
       '-frames:v',
       '1',
       '-vf',
@@ -36,8 +38,23 @@ export class RtspFfmpegAdapter implements CameraAdapter<Extract<CameraSource, { 
     try {
       return await runFfmpegCapture(this.ffmpegPath, args, options.timeoutMs)
     } catch (error) {
-      throw new Error(mapRtspCaptureError(source.url, error))
+      throw new Error(mapRtspCaptureError(inputUrl, error))
     }
+  }
+}
+
+function buildRtspInputUrl(source: RtspCameraSource): string {
+  try {
+    const url = new URL(source.url)
+    if (source.username) {
+      url.username = source.username
+    }
+    if (source.password) {
+      url.password = source.password
+    }
+    return url.toString()
+  } catch {
+    return source.url
   }
 }
 

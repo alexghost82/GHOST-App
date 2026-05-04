@@ -1,4 +1,6 @@
 import type { CameraSource, CaptureProfile } from '../types.js'
+import { maskRtspUrl } from './security/mask-url.js'
+export { maskRtspUrl } from './security/mask-url.js'
 
 export interface CaptureOptions {
   profile: CaptureProfile
@@ -37,7 +39,7 @@ export function getCameraSourceHost(source: CameraSource): string | undefined {
   if (source.type === 'hikvision-sdk') {
     return source.host
   }
-  if (source.type !== 'rtsp-ffmpeg') {
+  if (source.type !== 'rtsp') {
     return undefined
   }
 
@@ -48,26 +50,11 @@ export function getCameraSourceHost(source: CameraSource): string | undefined {
   }
 }
 
-export function maskRtspUrl(value: string): string {
-  try {
-    const url = new URL(value)
-    if (url.password) {
-      url.password = '***'
-    }
-    if (url.username && !url.password) {
-      url.username = `${url.username.slice(0, 2)}***`
-    }
-    return url.toString()
-  } catch {
-    return value.replace(/:\/\/([^:/?#]+):([^@/?#]+)@/, '://$1:***@')
-  }
-}
-
 export function describeCameraSource(source: CameraSource): string {
   switch (source.type) {
     case 'usb-dshow':
       return `USB camera "${source.name}"`
-    case 'rtsp-ffmpeg':
+    case 'rtsp':
       return `RTSP camera ${maskRtspUrl(source.url)}`
     case 'hikvision-sdk':
       return `Hikvision camera ${source.username}@${source.host}:${source.port}/channel/${source.channel}`

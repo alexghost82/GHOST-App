@@ -60,14 +60,18 @@ export class GhostApiClient {
     deviceName: string
     cameraId: string
     cameraLabel: string
-    cameraSourceType: 'usb-dshow' | 'rtsp-ffmpeg' | 'hikvision-sdk'
+    cameraSourceType: 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
     cameraName?: string
   }): Promise<{ channel: AgentChannelSummary }> {
     return this.post('/api/local-agent/bind', input)
   }
 
-  async unbindChannel(channelId: string, deviceId: string): Promise<void> {
-    await this.post('/api/local-agent/unbind', { channelId, deviceId })
+  async unbindChannel(channelId: string, deviceId: string, cameraId?: string): Promise<void> {
+    await this.post('/api/local-agent/unbind', {
+      channelId,
+      deviceId,
+      ...(cameraId ? { cameraId } : {}),
+    })
   }
 
   async sendHeartbeat(input: {
@@ -76,10 +80,20 @@ export class GhostApiClient {
     deviceName: string
     cameraId: string
     cameraLabel: string
-    cameraSourceType: 'usb-dshow' | 'rtsp-ffmpeg' | 'hikvision-sdk'
+    cameraSourceType: 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
     cameraName?: string
     status: 'online' | 'scanning' | 'degraded' | 'offline'
     message?: string
+    cameras?: Array<{
+      cameraId: string
+      cameraLabel: string
+      sourceType: 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
+      status: 'online' | 'degraded' | 'offline'
+      lastCaptureAtIso?: string
+      lastSuccessfulCaptureAtIso?: string
+      lastError?: string
+      latencyMs?: number
+    }>
   }): Promise<void> {
     await this.post('/api/local-agent/heartbeat', input)
   }

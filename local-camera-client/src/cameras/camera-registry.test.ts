@@ -24,7 +24,7 @@ function buildConfig(): LocalCameraConfig {
       {
         cameraId: 'rtsp-1',
         label: 'RTSP One',
-        source: { type: 'rtsp-ffmpeg', url: 'rtsp://cam.local/stream' },
+        source: { type: 'rtsp', url: 'rtsp://cam.local/stream' },
         createdAtIso: '2026-05-03T10:00:00.000Z',
         updatedAtIso: '2026-05-03T10:00:00.000Z',
       },

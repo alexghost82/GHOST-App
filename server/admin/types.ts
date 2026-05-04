@@ -127,7 +127,7 @@ export interface LocalAgentBindingRecord {
   deviceName: string
   cameraId: string
   cameraLabel: string
-  cameraSourceType: 'usb-dshow' | 'rtsp-ffmpeg' | 'hikvision-sdk'
+  cameraSourceType: 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
   cameraName?: string
   channelId: string
   boundAtIso: string
@@ -137,6 +137,16 @@ export interface LocalAgentStatusRecord {
   state: LocalAgentConnectionState
   lastHeartbeatAtIso: string
   lastError?: string
+  cameras?: Array<{
+    cameraId: string
+    cameraLabel: string
+    sourceType: 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
+    status: 'online' | 'degraded' | 'offline'
+    lastCaptureAtIso?: string
+    lastSuccessfulCaptureAtIso?: string
+    lastError?: string
+    latencyMs?: number
+  }>
 }
 
 export interface FullChannelRecord {

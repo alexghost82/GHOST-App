@@ -1,13 +1,14 @@
 import type { LocalCameraConfig } from './config.js'
 import { GhostApiClient } from './api-client.js'
-import { captureFrameDataUrl } from './camera.js'
 import type { AgentRuntimeState } from './health-server.js'
 import { buildScanMessage } from './messages.js'
 import { getDueOperations, markOperationsRan } from './scheduler.js'
 import type { CameraRuntimeStatus, Channel, CaptureProfile } from './types.js'
+import { CaptureService } from './cameras/capture-service.js'
 
 export class LocalCameraWorker {
   private readonly api: GhostApiClient
+  private readonly captureService: CaptureService
   private readonly lastRunByOperationId = new Map<string, number>()
   private timer: ReturnType<typeof setInterval> | null = null
   private workLoopPromise: Promise<void> | null = null
@@ -20,6 +21,7 @@ export class LocalCameraWorker {
     private readonly state: AgentRuntimeState,
   ) {
     this.api = new GhostApiClient(config)
+    this.captureService = new CaptureService(config)
   }
 
   async start(): Promise<void> {
@@ -106,6 +108,7 @@ export class LocalCameraWorker {
     for (const camera of this.config.cameras) {
       this.cameraStatuses.set(camera.cameraId, {
         cameraId: camera.cameraId,
+        cameraLabel: camera.label,
         label: camera.label,
         sourceType: camera.source.type,
         status: 'offline',
@@ -117,21 +120,27 @@ export class LocalCameraWorker {
   private async captureFrame(cameraId: string, profile: CaptureProfile): Promise<string> {
     const startedAt = Date.now()
     try {
-      const frameDataUrl = await captureFrameDataUrl(this.config, cameraId, profile)
+      const camera = this.captureService.getCamera(cameraId)
+      const frameDataUrl = await this.captureService.captureFrameDataUrl(camera, profile)
+      const finishedAt = Date.now()
       this.updateCameraStatus(cameraId, {
         status: 'online',
         lastCaptureAtIso: new Date().toISOString(),
         lastSuccessAtIso: new Date().toISOString(),
+        lastSuccessfulCaptureAtIso: new Date().toISOString(),
         lastError: undefined,
-        lastLatencyMs: Date.now() - startedAt,
+        lastLatencyMs: finishedAt - startedAt,
+        latencyMs: finishedAt - startedAt,
       })
       return frameDataUrl
     } catch (error) {
+      const finishedAt = Date.now()
       this.updateCameraStatus(cameraId, {
         status: 'degraded',
         lastCaptureAtIso: new Date().toISOString(),
         lastError: error instanceof Error ? error.message : String(error),
-        lastLatencyMs: Date.now() - startedAt,
+        lastLatencyMs: finishedAt - startedAt,
+        latencyMs: finishedAt - startedAt,
       })
       throw error
     }
@@ -185,9 +194,19 @@ export class LocalCameraWorker {
         cameraId: camera.cameraId,
         cameraLabel: camera.label,
         cameraSourceType: camera.source.type,
-        cameraName: camera.source.type === 'usb-dshow' ? camera.source.name : this.config.cameraName,
+        cameraName: camera.source.type === 'usb-dshow' ? camera.source.name : undefined,
         status,
         message,
+        cameras: Array.from(this.cameraStatuses.values()).map((item) => ({
+          cameraId: item.cameraId,
+          cameraLabel: item.cameraLabel,
+          sourceType: item.sourceType,
+          status: item.status,
+          lastCaptureAtIso: item.lastCaptureAtIso,
+          lastSuccessfulCaptureAtIso: item.lastSuccessfulCaptureAtIso ?? item.lastSuccessAtIso,
+          lastError: item.lastError,
+          latencyMs: item.latencyMs ?? item.lastLatencyMs,
+        })),
       })
     } catch (error) {
       this.state.lastError = error instanceof Error ? error.message : String(error)

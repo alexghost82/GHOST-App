@@ -85,7 +85,7 @@ export function buildConfigFromSaved(saved: SavedAgentConfig): LocalCameraConfig
     healthPort: readPositiveInt('GHOST_HEALTH_PORT', 8791),
     maxParallelCaptures: readPositiveInt('GHOST_MAX_PARALLEL_CAPTURES', 4),
     maxParallelFfmpegCaptures: readPositiveInt('GHOST_MAX_PARALLEL_FFMPEG_CAPTURES', 3),
-    maxParallelHikvisionCaptures: readPositiveInt('GHOST_MAX_PARALLEL_HIKVISION_CAPTURES', 6),
+    maxParallelHikvisionCaptures: readPositiveInt('GHOST_MAX_PARALLEL_HIKVISION_CAPTURES', 8),
     maxParallelPerCamera: readPositiveInt('GHOST_MAX_PARALLEL_PER_CAMERA', 1),
     maxParallelPerHost: readPositiveInt('GHOST_MAX_PARALLEL_PER_HOST', 1),
     testFrame: process.env.GHOST_CAMERA_TEST_FRAME?.trim() || undefined,

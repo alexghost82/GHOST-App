@@ -5,7 +5,7 @@ const LocalAgentBindingSchema = z.object({
   deviceName: z.string().min(1).max(160),
   cameraId: z.string().min(1).max(120),
   cameraLabel: z.string().min(1).max(180),
-  cameraSourceType: z.enum(['usb-dshow', 'rtsp-ffmpeg', 'hikvision-sdk']),
+  cameraSourceType: z.enum(['usb-dshow', 'rtsp', 'hikvision-sdk']),
   cameraName: z.string().min(1).max(180).optional(),
   channelId: z.string().min(1),
   boundAtIso: z.string().min(1),

@@ -33,6 +33,9 @@ export class CameraRegistry {
     if (!camera) {
       throw new Error(`Camera "${cameraId}" is not configured in the local agent.`)
     }
+    if (camera.enabled === false) {
+      throw new Error(`Camera "${camera.label}" is disabled in the local agent.`)
+    }
     return camera
   }
 
@@ -48,7 +51,7 @@ export class CameraRegistry {
     const camera = this.getCamera(cameraId)
     const adapter = this.resolveAdapter(camera.source)
     const host = getCameraSourceHost(camera.source)
-    const kind = camera.source.type === 'hikvision-sdk' ? 'hikvision' : camera.source.type === 'usb-dshow' || camera.source.type === 'rtsp-ffmpeg' ? 'ffmpeg' : 'other'
+    const kind = camera.source.type === 'hikvision-sdk' ? 'hikvision' : camera.source.type === 'usb-dshow' || camera.source.type === 'rtsp' ? 'ffmpeg' : 'other'
     const options: CaptureOptions = { profile, timeoutMs }
 
     return this.queue.enqueue(

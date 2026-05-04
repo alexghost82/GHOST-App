@@ -1,10 +1,10 @@
 import { buildConfigFromSaved } from './config.js'
 import { startHealthServer, type AgentRuntimeState } from './health-server.js'
-import { loadLocalConfig } from './local-store.js'
+import { loadRuntimeAgentConfig } from './cameras/camera-store.js'
 import { LocalCameraWorker } from './worker.js'
 
 async function main(): Promise<void> {
-  const saved = loadLocalConfig()
+  const saved = await loadRuntimeAgentConfig()
   if (!saved) {
     throw new Error('No saved local-agent binding found. Start the Electron app and complete setup first.')
   }

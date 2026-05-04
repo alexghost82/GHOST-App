@@ -70,7 +70,7 @@ export function normalizeSavedConfig(config: SavedAgentConfig): SavedAgentConfig
   const legacyChannelId = config.channelId?.trim()
   const legacyChannelName = config.channelName?.trim()
   const boundAtIso = config.boundAtIso ?? new Date().toISOString()
-  const cameras = Array.isArray(config.cameras) ? config.cameras.filter(Boolean) : []
+  const cameras = Array.isArray(config.cameras) ? config.cameras.filter(Boolean).map(normalizeCameraConfig) : []
   const bindings = Array.isArray(config.bindings) ? config.bindings.filter(Boolean) : []
 
   if (cameras.length === 0 && legacyCameraName) {
@@ -82,6 +82,7 @@ export function normalizeSavedConfig(config: SavedAgentConfig): SavedAgentConfig
         type: 'usb-dshow',
         name: legacyCameraName,
       },
+      enabled: true,
       createdAtIso: boundAtIso,
       updatedAtIso: boundAtIso,
     })
@@ -132,6 +133,29 @@ export function resolveBindingDetails(
     })
   }
   return resolved
+}
+
+function normalizeCameraConfig(camera: SavedCameraConfig): SavedCameraConfig {
+  const source = normalizeCameraSource(camera.source as SavedCameraConfig['source'])
+  return {
+    ...camera,
+    source,
+    enabled: camera.enabled ?? true,
+  }
+}
+
+function normalizeCameraSource(source: SavedCameraConfig['source']): SavedCameraConfig['source'] {
+  if ((source as { type?: string }).type === 'rtsp-ffmpeg') {
+    const legacy = source as unknown as { url: string; transport?: 'tcp' | 'udp'; username?: string; password?: string }
+    return {
+      type: 'rtsp',
+      url: legacy.url,
+      transport: legacy.transport,
+      username: legacy.username,
+      password: legacy.password,
+    }
+  }
+  return source
 }
 
 function slugify(value: string): string {
