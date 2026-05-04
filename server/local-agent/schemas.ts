@@ -13,7 +13,10 @@ export const LocalAgentBindSchema = z.object({
   channelId: z.string().min(1),
   deviceId: z.string().min(1).max(120),
   deviceName: z.string().min(1).max(160),
-  cameraName: z.string().min(1).max(180),
+  cameraId: z.string().min(1).max(120),
+  cameraLabel: z.string().min(1).max(180),
+  cameraSourceType: z.enum(['usb-dshow', 'rtsp-ffmpeg', 'hikvision-sdk']),
+  cameraName: z.string().min(1).max(180).optional(),
 })
 
 export const LocalAgentUnbindSchema = z.object({
@@ -25,7 +28,10 @@ export const LocalAgentHeartbeatSchema = z.object({
   channelId: z.string().min(1),
   deviceId: z.string().min(1).max(120),
   deviceName: z.string().min(1).max(160),
-  cameraName: z.string().min(1).max(180),
+  cameraId: z.string().min(1).max(120),
+  cameraLabel: z.string().min(1).max(180),
+  cameraSourceType: z.enum(['usb-dshow', 'rtsp-ffmpeg', 'hikvision-sdk']),
+  cameraName: z.string().min(1).max(180).optional(),
   status: z.enum(['online', 'scanning', 'degraded', 'offline']),
   message: z.string().max(500).optional(),
 })
@@ -44,6 +50,7 @@ export const LocalAgentWorkPollSchema = z.object({
 
 export const LocalAgentWorkResultSchema = z.object({
   deviceId: z.string().min(1).max(120),
+  cameraId: z.string().min(1).max(120),
   frameDataUrl: z.string().startsWith('data:image/'),
   capturedAtIso: z.string().min(1),
 })

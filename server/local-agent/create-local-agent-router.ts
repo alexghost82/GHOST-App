@@ -92,6 +92,14 @@ async function findBoundChannelByDeviceId(
   return channels.find((channel) => channel.localAgentBinding?.deviceId === deviceId)
 }
 
+async function hasBoundChannelForDeviceId(
+  store: IAdminRepository,
+  organizationId: string,
+  deviceId: string,
+): Promise<boolean> {
+  return Boolean(await findBoundChannelByDeviceId(store, organizationId, deviceId))
+}
+
 async function issueAgentSession(
   store: IAdminRepository,
   organizationName: string,
@@ -201,6 +209,9 @@ export function createLocalAgentRouter({ store, realtimeHub, captureBroker }: Lo
         localAgentBinding: {
           deviceId: parsed.data.deviceId,
           deviceName: parsed.data.deviceName,
+          cameraId: parsed.data.cameraId,
+          cameraLabel: parsed.data.cameraLabel,
+          cameraSourceType: parsed.data.cameraSourceType,
           cameraName: parsed.data.cameraName,
           channelId: channel.id,
           boundAtIso,
@@ -216,7 +227,9 @@ export function createLocalAgentRouter({ store, realtimeHub, captureBroker }: Lo
         channelId: updated.id,
         deviceId: parsed.data.deviceId,
         deviceName: parsed.data.deviceName,
-        cameraName: parsed.data.cameraName,
+        cameraId: parsed.data.cameraId,
+        cameraLabel: parsed.data.cameraLabel,
+        cameraSourceType: parsed.data.cameraSourceType,
       })
 
       return res.json({ ok: true, channel: buildChannelSummary(updated) })
@@ -287,6 +300,9 @@ export function createLocalAgentRouter({ store, realtimeHub, captureBroker }: Lo
         localAgentBinding: {
           deviceId: parsed.data.deviceId,
           deviceName: parsed.data.deviceName,
+          cameraId: parsed.data.cameraId,
+          cameraLabel: parsed.data.cameraLabel,
+          cameraSourceType: parsed.data.cameraSourceType,
           cameraName: parsed.data.cameraName,
           channelId: channel.id,
           boundAtIso: channel.localAgentBinding?.boundAtIso ?? heartbeatAtIso,
@@ -308,7 +324,9 @@ export function createLocalAgentRouter({ store, realtimeHub, captureBroker }: Lo
         channelId: updated.id,
         deviceId: parsed.data.deviceId,
         deviceName: parsed.data.deviceName,
-        cameraName: parsed.data.cameraName,
+        cameraId: parsed.data.cameraId,
+        cameraLabel: parsed.data.cameraLabel,
+        cameraSourceType: parsed.data.cameraSourceType,
         state: updated.localAgentStatus?.state ?? 'offline',
         liveState,
         message: parsed.data.message,
@@ -350,6 +368,7 @@ export function createLocalAgentRouter({ store, realtimeHub, captureBroker }: Lo
         organizationId,
         channelId: normalized.id,
         deviceId: normalized.localAgentBinding.deviceId,
+        cameraId: normalized.localAgentBinding.cameraId,
         profile: parsed.data.profile,
         purpose: parsed.data.purpose,
         timeoutMs: parsed.data.timeoutMs,
@@ -378,8 +397,7 @@ export function createLocalAgentRouter({ store, realtimeHub, captureBroker }: Lo
         return res.status(400).json({ error: 'Invalid local agent work poll request.', details: parsed.error.flatten() })
       }
 
-      const boundChannel = await findBoundChannelByDeviceId(store, organizationId, parsed.data.deviceId)
-      if (!boundChannel) {
+      if (!await hasBoundChannelForDeviceId(store, organizationId, parsed.data.deviceId)) {
         return res.status(403).json({ error: 'This device is not currently bound to any channel.' })
       }
 
@@ -399,14 +417,14 @@ export function createLocalAgentRouter({ store, realtimeHub, captureBroker }: Lo
         return res.status(400).json({ error: 'Invalid local agent work result payload.', details: parsed.error.flatten() })
       }
 
-      const boundChannel = await findBoundChannelByDeviceId(store, organizationId, parsed.data.deviceId)
-      if (!boundChannel) {
+      if (!await hasBoundChannelForDeviceId(store, organizationId, parsed.data.deviceId)) {
         return res.status(403).json({ error: 'This device is not currently bound to any channel.' })
       }
 
       captureBroker.submitResult(
         req.params.workId,
         parsed.data.deviceId,
+        parsed.data.cameraId,
         parsed.data.frameDataUrl,
         parsed.data.capturedAtIso,
       )

@@ -1,5 +1,6 @@
 import { httpRequest } from './http-client'
 import type { Channel, Message, Operation } from '../types'
+import { resolveChannelAvatarDataUrl } from '../utils/channel-avatar'
 
 const BASE = '/api/channels'
 
@@ -11,7 +12,7 @@ interface ChannelApiResponse extends Record<string, unknown> {
 }
 
 function mapServerChannelToClient(raw: ChannelApiResponse): Channel {
-  return {
+  const channel: Channel = {
     id: raw.id as string,
     name: raw.name as string,
     type: (raw.type as Channel['type']) ?? 'personal',
@@ -23,14 +24,16 @@ function mapServerChannelToClient(raw: ChannelApiResponse): Channel {
     rtspFeed: (raw.rtspFeed as string) ?? 'rtsp://',
     unread: 0,
     liveState: (raw.liveState as Channel['liveState']) ?? 'LIVE',
-    captureMode: (raw.captureMode as Channel['captureMode']) ?? 'browser',
     cameraEnabled: (raw.cameraEnabled as boolean) ?? false,
-    localAgentBinding: raw.localAgentBinding as Channel['localAgentBinding'],
-    localAgentStatus: raw.localAgentStatus as Channel['localAgentStatus'],
     linkedChannelIds: (raw.linkedChannelIds as string[]) ?? undefined,
     members: (raw.members as string[]) ?? [],
     messages: (raw.messages ?? []).map(mapServerMessageToClient),
     operations: (raw.operations ?? []).map(mapServerOperationToClient),
+    lastFrameDataUrl: (raw.lastFrameDataUrl as string | undefined) ?? undefined,
+  }
+  return {
+    ...channel,
+    lastFrameDataUrl: resolveChannelAvatarDataUrl(channel),
   }
 }
 
@@ -93,9 +96,6 @@ export async function createChannel(
       rtspFeed: channel.rtspFeed,
       liveState: channel.liveState,
       cameraEnabled: channel.cameraEnabled ?? false,
-      captureMode: channel.captureMode ?? 'browser',
-      localAgentBinding: channel.localAgentBinding,
-      localAgentStatus: channel.localAgentStatus,
       linkedChannelIds: channel.linkedChannelIds ?? [],
       members: channel.members,
     }),

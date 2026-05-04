@@ -29,7 +29,7 @@ async function main(): Promise<void> {
   process.on('SIGTERM', shutdown)
 
   await worker.start()
-  console.log(`[GHOST] Local camera worker running for channel ${config.channelName}. Health: http://127.0.0.1:${config.healthPort}/health`)
+  console.log(`[GHOST] Local camera worker running for ${config.bindings.length} channel binding(s). Health: http://127.0.0.1:${config.healthPort}/health`)
 }
 
 main().catch((error: unknown) => {

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import type { PropsWithChildren, ReactNode } from 'react'
 
 interface SurfaceDialogProps extends PropsWithChildren {
@@ -18,6 +19,17 @@ export function SurfaceDialog({
   width = 'medium',
   children,
 }: SurfaceDialogProps) {
+  useEffect(() => {
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [onClose])
+
   return (
     <div
       aria-modal

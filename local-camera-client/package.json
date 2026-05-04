@@ -9,7 +9,7 @@
     "build": "tsc -p tsconfig.json && node scripts/copy-preload.cjs",
     "start": "set \"ELECTRON_RUN_AS_NODE=\" && electron .",
     "start:worker": "node dist/index.js",
-    "test": "vitest run src/scheduler.test.ts",
+    "test": "vitest run",
     "build:exe": "npm run build && electron-builder --win nsis",
     "build:portable": "npm run build && electron-builder --win portable"
   },

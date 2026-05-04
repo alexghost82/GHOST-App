@@ -1,6 +1,30 @@
 export type OperationMode = 'alert' | 'report' | 'rating' | 'assessment'
 export type LiveState = 'LIVE' | 'SYNC' | 'DEGRADED' | 'OFFLINE'
 export type CaptureMode = 'browser' | 'local_agent'
+export type CameraSourceType = 'usb-dshow' | 'rtsp-ffmpeg' | 'hikvision-sdk'
+export type CaptureProfile = 'scan-low' | 'scan-standard' | 'chat-high' | 'preview'
+
+export type CameraSource =
+  | {
+      type: 'usb-dshow'
+      name: string
+    }
+  | {
+      type: 'rtsp-ffmpeg'
+      url: string
+      transport?: 'tcp' | 'udp'
+      label?: string
+    }
+  | {
+      type: 'hikvision-sdk'
+      host: string
+      port: number
+      username: string
+      passwordRef?: string
+      password?: string
+      channel: number
+      label?: string
+    }
 
 export interface CameraDevice {
   id: string
@@ -43,7 +67,10 @@ export interface Operation {
 export interface LocalAgentBinding {
   deviceId: string
   deviceName: string
-  cameraName: string
+  cameraId: string
+  cameraLabel: string
+  cameraSourceType: CameraSourceType
+  cameraName?: string
   channelId: string
   boundAtIso: string
 }
@@ -52,6 +79,38 @@ export interface LocalAgentStatus {
   state: 'connected' | 'degraded' | 'offline'
   lastHeartbeatAtIso: string
   lastError?: string
+}
+
+export interface CameraRuntimeStatus {
+  cameraId: string
+  label: string
+  sourceType: CameraSourceType
+  status: 'online' | 'degraded' | 'offline'
+  lastCaptureAtIso?: string
+  lastSuccessAtIso?: string
+  lastError?: string
+  lastLatencyMs?: number
+}
+
+export interface SavedCameraConfig {
+  cameraId: string
+  label: string
+  source: CameraSource
+  createdAtIso: string
+  updatedAtIso: string
+}
+
+export interface DiscoveredCamera {
+  id: string
+  label: string
+  sourceType: CameraSourceType
+  host?: string
+  port?: number
+  model?: string
+  serial?: string
+  manufacturer?: string
+  suggestedSource?: Partial<CameraSource>
+  status: 'found' | 'requires-auth' | 'tested' | 'unreachable'
 }
 
 export interface Channel {
@@ -116,6 +175,7 @@ export interface CaptureWorkItem {
   organizationId: string
   channelId: string
   deviceId: string
+  cameraId: string
   profile: 'scan-low' | 'scan-standard' | 'chat-high'
   purpose: 'chat' | 'timeline' | 'preview'
   createdAtIso: string

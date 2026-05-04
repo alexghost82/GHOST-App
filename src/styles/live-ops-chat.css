@@ -1,0 +1,1475 @@
+.app-shell.surface-live-ops {
+  --ops-shell-width: 100vw;
+  --ops-shell-height: 100vh;
+  --ops-shell-height: 100dvh;
+  --ops-sidebar-width: 380px;
+  --ops-details-width: 332px;
+  --ops-composer-safe-space: 120px;
+  --ops-shell-radius: 0;
+  --ops-shell-border: transparent;
+  --ops-topbar-bg: rgba(247, 249, 251, 0.76);
+  --ops-topbar-text: #182229;
+  --ops-topbar-border: rgba(255, 255, 255, 0.56);
+  --ops-topbar-chip-bg: rgba(255, 255, 255, 0.34);
+  --ops-topbar-chip-hover: rgba(255, 255, 255, 0.52);
+  --ops-topbar-divider: rgba(24, 34, 41, 0.12);
+  --ops-surface-bg:
+    radial-gradient(circle at 18% 22%, rgba(255, 243, 213, 0.64), transparent 20%),
+    radial-gradient(circle at 74% 18%, rgba(207, 231, 255, 0.78), transparent 26%),
+    radial-gradient(circle at 68% 78%, rgba(219, 208, 255, 0.54), transparent 24%),
+    radial-gradient(circle at 22% 86%, rgba(255, 231, 214, 0.48), transparent 18%),
+    linear-gradient(180deg, #eff6fb 0%, #edf3f8 42%, #e9eff4 100%);
+  --ops-panel-bg: rgba(244, 250, 255, 0.34);
+  --ops-panel-muted: rgba(246, 251, 255, 0.26);
+  --ops-panel-border: rgba(255, 255, 255, 0.58);
+  --ops-text: #182229;
+  --ops-text-muted: #6c7b86;
+  --ops-text-faint: #8b98a2;
+  --ops-accent: #00a884;
+  --ops-accent-strong: #25d366;
+  --ops-bubble-in: rgba(255, 255, 255, 0.52);
+  --ops-bubble-out: rgba(227, 255, 214, 0.58);
+  --ops-glass-shadow: 0 18px 48px rgba(133, 145, 161, 0.18);
+  --ops-glass-shadow-strong: 0 24px 64px rgba(120, 132, 145, 0.24);
+  --ops-glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.42);
+  --ops-glass-blur: blur(22px) saturate(160%);
+  --ops-panel-blur: blur(24px) saturate(175%);
+  --ops-panel-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.04));
+  --ops-hover-glow: rgba(255, 255, 255, 0.2);
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--ops-surface-bg);
+  color: var(--ops-text);
+}
+
+html[data-theme='dark'] .app-shell.surface-live-ops {
+  --ops-shell-border: rgba(214, 224, 232, 0.08);
+  --ops-topbar-bg: rgba(13, 20, 26, 0.72);
+  --ops-topbar-text: rgba(241, 245, 249, 0.92);
+  --ops-topbar-border: rgba(255, 255, 255, 0.12);
+  --ops-topbar-chip-bg: rgba(255, 255, 255, 0.1);
+  --ops-topbar-chip-hover: rgba(255, 255, 255, 0.16);
+  --ops-topbar-divider: rgba(255, 255, 255, 0.14);
+  --ops-surface-bg:
+    radial-gradient(circle at 16% 16%, rgba(255, 255, 255, 0.06), transparent 18%),
+    radial-gradient(circle at 84% 24%, rgba(255, 255, 255, 0.045), transparent 20%),
+    radial-gradient(circle at 82% 92%, rgba(255, 255, 255, 0.035), transparent 16%),
+    linear-gradient(180deg, #484c53 0%, #3e434a 42%, #353940 100%);
+  --ops-panel-bg: rgba(89, 95, 105, 0.24);
+  --ops-panel-muted: rgba(107, 113, 124, 0.2);
+  --ops-panel-border: rgba(255, 255, 255, 0.14);
+  --ops-text: #f2f5f8;
+  --ops-text-muted: #d1d7dd;
+  --ops-text-faint: #b9c2cb;
+  --ops-bubble-in: rgba(236, 240, 244, 0.16);
+  --ops-bubble-out: rgba(244, 247, 250, 0.22);
+  --ops-glass-shadow: 0 18px 48px rgba(0, 0, 0, 0.34);
+  --ops-glass-shadow-strong: 0 24px 72px rgba(0, 0, 0, 0.42);
+  --ops-glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --ops-panel-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+  --ops-hover-glow: rgba(255, 255, 255, 0.08);
+  background: var(--ops-surface-bg);
+}
+
+.app-shell.surface-live-ops .workspace-header,
+.app-shell.surface-live-ops .ghostlive-terminal-bg,
+.app-shell.surface-live-ops .chat-context-strip,
+.app-shell.surface-live-ops .composer-suggestions,
+.app-shell.surface-live-ops .messenger-sidebar-rail,
+.app-shell.surface-live-ops .dp-hub-cta,
+.app-shell.surface-live-ops .details-collapsed-rail,
+.app-shell.surface-live-ops .chat-edge-actions,
+.app-shell.surface-live-ops .inbox-stories,
+.app-shell.surface-live-ops .inbox-filter-row,
+.app-shell.surface-live-ops .inbox-secondary-summary,
+.app-shell.surface-live-ops .chat-header-pills,
+.app-shell.surface-live-ops .live-status-band,
+.app-shell.surface-live-ops .ops-status-bar,
+.app-shell.surface-live-ops .timeline-controls,
+.app-shell.surface-live-ops .chat-header-actions {
+  display: none !important;
+}
+
+.app-shell.surface-live-ops .app-surface {
+  width: var(--ops-shell-width);
+  height: var(--ops-shell-height);
+  margin: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  border: none;
+  border-radius: var(--ops-shell-radius);
+  overflow: hidden;
+  background: var(--ops-surface-bg);
+  box-shadow: none;
+}
+
+.app-shell.surface-live-ops .topbar {
+  height: 58px;
+  min-height: 58px;
+  padding: 0 16px;
+  border: none;
+  border-bottom: 1px solid var(--ops-topbar-border);
+  background: var(--ops-topbar-bg);
+  color: var(--ops-topbar-text);
+  backdrop-filter: var(--ops-glass-blur);
+  -webkit-backdrop-filter: var(--ops-glass-blur);
+  box-shadow: var(--ops-glass-inset), 0 10px 28px rgba(15, 23, 32, 0.08);
+  z-index: 6;
+}
+
+.app-shell.surface-live-ops .topbar-nav-item,
+.app-shell.surface-live-ops .topbar-command-trigger,
+.app-shell.surface-live-ops .topbar-icon-btn,
+.app-shell.surface-live-ops .topbar-metric-tile,
+.app-shell.surface-live-ops .topbar-command-trigger kbd,
+.app-shell.surface-live-ops .topbar-metric-label,
+.app-shell.surface-live-ops .topbar-metric-value,
+.app-shell.surface-live-ops .topbar-actions-divider,
+.app-shell.surface-live-ops .account-trigger,
+.app-shell.surface-live-ops .account-trigger-name,
+.app-shell.surface-live-ops .account-trigger-meta {
+  color: inherit;
+}
+
+.app-shell.surface-live-ops .topbar,
+.app-shell.surface-live-ops .topbar *,
+.app-shell.surface-live-ops .app-footer,
+.app-shell.surface-live-ops .app-footer *,
+.app-shell.surface-live-ops .inbox-panel,
+.app-shell.surface-live-ops .inbox-panel *,
+.app-shell.surface-live-ops .chat-panel,
+.app-shell.surface-live-ops .details-panel {
+  color: var(--ops-text);
+}
+
+.app-shell.surface-live-ops .topbar,
+.app-shell.surface-live-ops .topbar *,
+.app-shell.surface-live-ops .app-footer,
+.app-shell.surface-live-ops .app-footer * {
+  color: var(--ops-topbar-text);
+}
+
+.app-shell.surface-live-ops .topbar-metric-label,
+.app-shell.surface-live-ops .account-trigger-meta,
+.app-shell.surface-live-ops .footer-pill-label,
+.app-shell.surface-live-ops .footer-link {
+  color: var(--ops-text-muted);
+}
+
+.app-shell.surface-live-ops .topbar-command-trigger,
+.app-shell.surface-live-ops .topbar-metric-tile,
+.app-shell.surface-live-ops .topbar-nav-item.active,
+.app-shell.surface-live-ops .topbar-icon-btn:hover,
+.app-shell.surface-live-ops .account-trigger {
+  background: var(--ops-topbar-chip-bg);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.app-shell.surface-live-ops .topbar-nav-item:hover,
+.app-shell.surface-live-ops .topbar-command-trigger:hover {
+  background: var(--ops-topbar-chip-hover);
+  color: var(--ops-topbar-text);
+}
+
+.app-shell.surface-live-ops .topbar-command-trigger kbd {
+  border-color: var(--ops-topbar-divider);
+  background: var(--ops-topbar-chip-bg);
+}
+
+.app-shell.surface-live-ops .topbar-actions-divider {
+  background: var(--ops-topbar-divider);
+}
+
+.app-shell.surface-live-ops .workspace {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
+  background: var(--ops-surface-bg);
+  box-shadow: none;
+}
+
+.app-shell.surface-live-ops .workspace::before,
+.app-shell.surface-live-ops .workspace::after {
+  content: none;
+}
+
+.app-shell.surface-live-ops .workspace-panels {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(320px, var(--ops-sidebar-width)) minmax(0, 1fr) 0;
+  background: var(--ops-surface-bg);
+}
+
+.app-shell.surface-live-ops .workspace:not(.details-collapsed) .workspace-panels {
+  grid-template-columns: minmax(320px, var(--ops-sidebar-width)) minmax(0, 1fr) minmax(280px, var(--ops-details-width));
+}
+
+.app-shell.surface-live-ops .inbox-panel,
+.app-shell.surface-live-ops .chat-panel,
+.app-shell.surface-live-ops .details-panel {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--ops-text);
+  font-family: "Segoe UI", sans-serif;
+}
+
+.app-shell.surface-live-ops .inbox-panel {
+  background: var(--ops-panel-bg);
+  border-inline-end: 1px solid var(--ops-panel-border);
+  backdrop-filter: var(--ops-panel-blur);
+  -webkit-backdrop-filter: var(--ops-panel-blur);
+  box-shadow: var(--ops-glass-inset);
+}
+
+.app-shell.surface-live-ops .chat-panel {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.26) 1px, transparent 0) 0 0/24px 24px,
+    radial-gradient(circle at 18% 24%, rgba(255, 243, 213, 0.34), transparent 16%),
+    radial-gradient(circle at 72% 20%, rgba(202, 226, 255, 0.42), transparent 22%),
+    radial-gradient(circle at 72% 78%, rgba(218, 209, 255, 0.28), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.02)),
+    linear-gradient(180deg, rgba(232, 241, 247, 0.9), rgba(227, 235, 242, 0.84));
+}
+
+html[data-theme='dark'] .app-shell.surface-live-ops .chat-panel {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0) 0 0/20px 20px,
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.06), transparent 18%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
+    linear-gradient(180deg, rgba(65, 70, 78, 0.94), rgba(55, 60, 68, 0.96));
+}
+
+.app-shell.surface-live-ops .details-panel {
+  background: color-mix(in srgb, var(--ops-panel-bg) 94%, var(--ops-surface-bg));
+  border-inline-start: 1px solid var(--ops-panel-border);
+  backdrop-filter: var(--ops-panel-blur);
+  -webkit-backdrop-filter: var(--ops-panel-blur);
+  box-shadow: var(--ops-glass-inset);
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  pointer-events: auto !important;
+  width: auto !important;
+  max-width: none !important;
+  opacity: 1 !important;
+}
+
+.app-shell.surface-live-ops .workspace.details-collapsed .details-panel {
+  display: none !important;
+}
+
+.app-shell.surface-live-ops .workspace:not(.details-collapsed) .details-panel {
+  display: flex !important;
+}
+
+.app-shell.surface-live-ops .messenger-sidebar-header,
+.app-shell.surface-live-ops .chat-header,
+.app-shell.surface-live-ops .messenger-details-header,
+.app-shell.surface-live-ops .composer {
+  background: var(--ops-panel-muted);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+.app-shell.surface-live-ops .messenger-sidebar-header,
+.app-shell.surface-live-ops .chat-header,
+.app-shell.surface-live-ops .messenger-details-header {
+  min-height: 64px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ops-panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: var(--ops-glass-inset);
+}
+
+.app-shell.surface-live-ops .inbox-appbar-profile,
+.app-shell.surface-live-ops .chat-header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.app-shell.surface-live-ops .inbox-appbar-copy {
+  display: grid;
+  gap: 3px;
+}
+
+.app-shell.surface-live-ops .inbox-appbar-copy strong,
+.app-shell.surface-live-ops .title-cluster-text h2,
+.app-shell.surface-live-ops .dp-channel-name,
+.app-shell.surface-live-ops .inbox-messages-title h3,
+.app-shell.surface-live-ops .chat-list-title-stack strong {
+  margin: 0;
+  color: var(--ops-text);
+}
+
+.app-shell.surface-live-ops .inbox-appbar-copy strong,
+.app-shell.surface-live-ops .title-cluster-text h2,
+.app-shell.surface-live-ops .dp-channel-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.app-shell.surface-live-ops .inbox-appbar-copy span,
+.app-shell.surface-live-ops .route,
+.app-shell.surface-live-ops .messenger-profile-subtitle,
+.app-shell.surface-live-ops .chat-list-preview,
+.app-shell.surface-live-ops .chat-list-location,
+.app-shell.surface-live-ops .timestamp,
+.app-shell.surface-live-ops .dp-field dt,
+.app-shell.surface-live-ops .dp-op-meta dt,
+.app-shell.surface-live-ops .dp-op-state-label,
+.app-shell.surface-live-ops .dp-empty-hint,
+.app-shell.surface-live-ops .inbox-messages-title span {
+  color: var(--ops-text-muted);
+}
+
+.app-shell.surface-live-ops .details-panel .dp-channel-name,
+.app-shell.surface-live-ops .details-panel .dp-section-title,
+.app-shell.surface-live-ops .details-panel .dp-field dd,
+.app-shell.surface-live-ops .details-panel .dp-op-meta dd,
+.app-shell.surface-live-ops .details-panel .dp-op-name,
+.app-shell.surface-live-ops .details-panel .dp-tag,
+.app-shell.surface-live-ops .details-panel .dp-section-badge,
+.app-shell.surface-live-ops .details-panel .ghost-button {
+  color: var(--ops-text) !important;
+}
+
+.app-shell.surface-live-ops .details-panel .messenger-profile-subtitle,
+.app-shell.surface-live-ops .details-panel .dp-status-badge,
+.app-shell.surface-live-ops .details-panel .dp-status-badge span,
+.app-shell.surface-live-ops .details-panel .dp-field dt,
+.app-shell.surface-live-ops .details-panel .dp-op-meta dt,
+.app-shell.surface-live-ops .details-panel .dp-op-state-label,
+.app-shell.surface-live-ops .details-panel .dp-empty-hint {
+  color: var(--ops-text-muted) !important;
+}
+
+.app-shell.surface-live-ops .inbox-appbar-avatar,
+.app-shell.surface-live-ops .chat-avatar,
+.app-shell.surface-live-ops .messenger-profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(191, 208, 215, 0.64));
+  color: #22313a;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42), 0 10px 22px rgba(111, 125, 137, 0.18);
+}
+
+.app-shell.surface-live-ops .chat-avatar-image,
+.app-shell.surface-live-ops .messenger-profile-avatar {
+  object-fit: cover;
+}
+
+.app-shell.surface-live-ops .inbox-header-actions,
+.app-shell.surface-live-ops .chat-header-utility {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-shell.surface-live-ops .messenger-circle-button,
+.app-shell.surface-live-ops .messenger-icon-button,
+.app-shell.surface-live-ops .composer-icon-button,
+.app-shell.surface-live-ops .ghost-button,
+.app-shell.surface-live-ops .composer-send-button {
+  border: none;
+  background: transparent;
+  color: var(--ops-text-muted);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.app-shell.surface-live-ops .messenger-circle-button,
+.app-shell.surface-live-ops .messenger-icon-button,
+.app-shell.surface-live-ops .composer-icon-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  font-size: 18px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.app-shell.surface-live-ops .messenger-circle-button:hover,
+.app-shell.surface-live-ops .messenger-icon-button:hover,
+.app-shell.surface-live-ops .composer-icon-button:hover,
+.app-shell.surface-live-ops .ghost-button:hover {
+  background: color-mix(in srgb, var(--ops-panel-muted) 74%, var(--ops-hover-glow));
+  color: var(--ops-text);
+}
+
+.app-shell.surface-live-ops .ghost-button {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 18px;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.app-shell.surface-live-ops button:focus-visible,
+.app-shell.surface-live-ops input:focus-visible,
+.app-shell.surface-live-ops textarea:focus-visible {
+  outline: 2px solid rgba(37, 211, 102, 0.32);
+  outline-offset: 2px;
+}
+
+.app-shell.surface-live-ops .inbox-search-bar {
+  padding: 10px 0;
+  background: transparent;
+}
+
+.app-shell.surface-live-ops .inbox-search-shell {
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+  width: 100%;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(16px) saturate(155%);
+  -webkit-backdrop-filter: blur(16px) saturate(155%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.app-shell.surface-live-ops .inbox-search-input,
+.app-shell.surface-live-ops .composer textarea {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--ops-text);
+  font: inherit;
+}
+
+.app-shell.surface-live-ops .inbox-search-input {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  line-height: 1.25;
+  text-align: inherit;
+}
+
+.app-shell.surface-live-ops .inbox-search-input::placeholder,
+.app-shell.surface-live-ops .composer textarea::placeholder {
+  color: var(--ops-text-faint);
+}
+
+.app-shell.surface-live-ops .inbox-messages-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 10px;
+  background: transparent;
+}
+
+.app-shell.surface-live-ops .chat-list,
+.app-shell.surface-live-ops .message-stream,
+.app-shell.surface-live-ops .details-content {
+  min-height: 0;
+  overflow: auto;
+}
+
+.app-shell.surface-live-ops .chat-list {
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+
+.app-shell.surface-live-ops .chat-list-entry {
+  display: block;
+}
+
+.app-shell.surface-live-ops .chat-list-item {
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-bottom: 1px solid var(--ops-panel-border);
+  background: transparent;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 12px;
+  text-align: start;
+  cursor: pointer;
+}
+
+.app-shell.surface-live-ops .chat-list-item:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.app-shell.surface-live-ops .chat-list-item.selected {
+  background: rgba(255, 255, 255, 0.26);
+  backdrop-filter: blur(14px) saturate(145%);
+  -webkit-backdrop-filter: blur(14px) saturate(145%);
+}
+
+.app-shell.surface-live-ops .chat-list-item.channel-alerting {
+  box-shadow: inset 4px 0 0 #ff6f5f;
+}
+
+.app-shell.surface-live-ops .chat-list-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.app-shell.surface-live-ops .chat-list-row-primary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.app-shell.surface-live-ops .chat-list-title-stack,
+.app-shell.surface-live-ops .chat-list-time-stack {
+  display: grid;
+  gap: 4px;
+}
+
+.app-shell.surface-live-ops .chat-list-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.app-shell.surface-live-ops .chat-list-location.status-label-live {
+  color: #1f9d55;
+}
+
+.app-shell.surface-live-ops .chat-list-location.status-label-offline {
+  color: #d14343;
+}
+
+.app-shell.surface-live-ops .chat-list-preview {
+  margin: 0;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-shell.surface-live-ops .unread-pill {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--ops-accent);
+  color: #ffffff;
+  display: inline-grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.app-shell.surface-live-ops .load-more-button {
+  margin: 14px auto 18px;
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: 18px;
+  border: 1px solid var(--ops-panel-border);
+  background: var(--ops-panel-bg);
+  color: var(--ops-text-muted);
+}
+
+.app-shell.surface-live-ops .title-cluster {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: start;
+}
+
+.app-shell.surface-live-ops .title-cluster-text {
+  min-width: 0;
+}
+
+.app-shell.surface-live-ops .route {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-shell.surface-live-ops .header-meta-separator {
+  color: var(--ops-text-faint);
+}
+
+.app-shell.surface-live-ops .message-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: flex-start;
+  padding: 16px 8px var(--ops-composer-safe-space);
+  scroll-padding-bottom: var(--ops-composer-safe-space);
+}
+
+.app-shell.surface-live-ops .chat-empty-state {
+  margin: auto;
+  max-width: 420px;
+  padding: 24px 28px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  backdrop-filter: blur(26px) saturate(170%);
+  -webkit-backdrop-filter: blur(26px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--ops-glass-shadow);
+  display: grid;
+  gap: 10px;
+}
+
+html[data-theme='dark'] .app-shell.surface-live-ops .chat-empty-state {
+  background: rgba(26, 36, 43, 0.56);
+}
+
+.app-shell.surface-live-ops .chat-empty-state h3,
+.app-shell.surface-live-ops .chat-empty-state p,
+.app-shell.surface-live-ops .chat-empty-kicker {
+  margin: 0;
+  color: var(--ops-text);
+}
+
+.app-shell.surface-live-ops .chat-empty-kicker {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ops-text-faint);
+}
+
+.app-shell.surface-live-ops .message-row,
+.app-shell.surface-live-ops .message-row.system {
+  display: flex;
+  direction: ltr;
+  margin: 2px 0;
+}
+
+.app-shell.surface-live-ops .message-row.user {
+  justify-content: flex-end;
+}
+
+.app-shell.surface-live-ops .message-row.ghost,
+.app-shell.surface-live-ops .message-row.system {
+  justify-content: flex-start;
+}
+
+.app-shell.surface-live-ops .message-body {
+  width: fit-content;
+  max-width: min(84%, 760px);
+  display: grid;
+  gap: 6px;
+  direction: rtl;
+  text-align: right;
+}
+
+.app-shell.surface-live-ops .message-row.user .message-body {
+  margin-left: auto;
+  margin-right: 0;
+  justify-items: end;
+}
+
+.app-shell.surface-live-ops .message-row.ghost .message-body,
+.app-shell.surface-live-ops .message-row.system .message-body {
+  margin-left: 0;
+  margin-right: auto;
+  justify-items: start;
+  text-align: right;
+}
+
+.app-shell.surface-live-ops .message-scan-label {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.24);
+  color: var(--ops-text);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(12px) saturate(145%);
+  -webkit-backdrop-filter: blur(12px) saturate(145%);
+}
+
+.app-shell.surface-live-ops .message-bubble {
+  position: relative;
+  padding: 8px 10px 22px;
+  border-radius: 10px;
+  background: var(--ops-bubble-in);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(18px) saturate(155%);
+  -webkit-backdrop-filter: blur(18px) saturate(155%);
+  box-shadow: 0 6px 18px rgba(17, 27, 33, 0.08);
+}
+
+.app-shell.surface-live-ops .message-row.user .message-bubble {
+  background: rgba(132, 220, 202, 0.26);
+}
+
+.app-shell.surface-live-ops .message-row.system .message-bubble {
+  background: rgba(245, 224, 160, 0.28);
+}
+
+html[data-theme='dark'] .app-shell.surface-live-ops .message-row.system .message-bubble {
+  background: rgba(245, 224, 160, 0.22);
+}
+
+.app-shell.surface-live-ops .message-bubble::before {
+  content: none;
+}
+
+.app-shell.surface-live-ops .message-author-tag {
+  display: inline-block;
+  margin-bottom: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ops-accent);
+}
+
+.app-shell.surface-live-ops .message-bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.45;
+  color: var(--ops-text);
+}
+
+.app-shell.surface-live-ops .timestamp {
+  position: absolute;
+  right: 10px;
+  bottom: 6px;
+  font-size: 11px;
+  color: var(--ops-text-faint);
+}
+
+.app-shell.surface-live-ops .source-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.app-shell.surface-live-ops .source-tags span {
+  min-height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  display: inline-grid;
+  place-items: center;
+  font-size: 11px;
+  color: var(--ops-text-muted);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
+
+.app-shell.surface-live-ops .message-frame-wrap {
+  position: relative;
+  width: fit-content;
+}
+
+.app-shell.surface-live-ops .message-frame-preview {
+  display: block;
+  max-width: min(100%, 340px);
+  border-radius: 12px;
+  box-shadow: 0 10px 26px rgba(17, 27, 33, 0.18);
+}
+
+.app-shell.surface-live-ops .message-frame-dismiss {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(17, 27, 33, 0.72);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.app-shell.surface-live-ops .composer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--ops-panel-border);
+  box-shadow: var(--ops-glass-inset);
+  background: color-mix(in srgb, var(--ops-panel-bg) 94%, transparent);
+}
+
+.app-shell.surface-live-ops .composer-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.app-shell.surface-live-ops .composer-input-shell {
+  min-height: 46px;
+  height: 46px;
+  min-width: 0;
+  padding: 0 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: stretch;
+  backdrop-filter: blur(18px) saturate(165%);
+  -webkit-backdrop-filter: blur(18px) saturate(165%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.app-shell.surface-live-ops .composer-input-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.app-shell.surface-live-ops .composer textarea {
+  min-width: 0;
+  min-height: 0;
+  height: 20px;
+  max-height: 20px;
+  resize: none;
+  margin: 0;
+  padding: 0 !important;
+  line-height: 20px;
+  display: block;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.app-shell.surface-live-ops .composer textarea:focus,
+.app-shell.surface-live-ops .composer textarea:focus-visible {
+  outline: none;
+  box-shadow: none !important;
+}
+
+.app-shell.surface-live-ops .composer-input-shell:focus-within {
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.app-shell.surface-live-ops .composer-send-button {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ops-accent-strong) 78%, white), var(--ops-accent));
+  color: #ffffff;
+  display: inline-grid;
+  place-items: center;
+  font-size: 16px;
+  box-shadow: 0 10px 20px rgba(0, 168, 132, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  align-self: center;
+}
+
+.app-shell.surface-live-ops .composer-send-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: var(--ops-accent-strong);
+}
+
+.app-shell.surface-live-ops .composer-send-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.app-shell.surface-live-ops .messenger-details-header {
+  justify-content: space-between;
+}
+
+.app-shell.surface-live-ops .details-content {
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--ops-panel-bg) 94%, var(--ops-surface-bg));
+}
+
+.app-shell.surface-live-ops .dp-header,
+.app-shell.surface-live-ops .dp-section {
+  background: transparent;
+}
+
+.app-shell.surface-live-ops .dp-header {
+  padding: 28px 24px 18px;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--ops-panel-border);
+}
+
+.app-shell.surface-live-ops .messenger-profile-avatar {
+  width: 104px;
+  height: 104px;
+}
+
+.app-shell.surface-live-ops .dp-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ops-panel-bg) 82%, rgba(255, 255, 255, 0.34));
+  font-size: 12px;
+  color: var(--ops-text-muted);
+  border: 1px solid color-mix(in srgb, var(--ops-panel-border) 72%, rgba(255, 255, 255, 0.14));
+  backdrop-filter: blur(14px) saturate(145%);
+  -webkit-backdrop-filter: blur(14px) saturate(145%);
+}
+
+.app-shell.surface-live-ops .dp-status-badge-live,
+.app-shell.surface-live-ops .dp-status-label-live {
+  color: #22c55e;
+}
+
+.app-shell.surface-live-ops .dp-status-badge-offline,
+.app-shell.surface-live-ops .dp-status-label-offline {
+  color: #ef4444;
+}
+
+.app-shell.surface-live-ops .close-label-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Final pixel-fix overrides for live QA parity */
+.app-shell.surface-live-ops .inbox-search-bar {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.app-shell.surface-live-ops .inbox-search-shell {
+  width: 100% !important;
+  min-height: 50px;
+  margin: 0 !important;
+  padding-inline: 16px !important;
+  border-inline: none !important;
+  border-radius: 0 !important;
+  box-sizing: border-box;
+}
+
+.app-shell.surface-live-ops .message-stream {
+  padding: 16px 4px var(--ops-composer-safe-space) !important;
+  scroll-padding-bottom: var(--ops-composer-safe-space) !important;
+}
+
+.app-shell.surface-live-ops .message-row {
+  width: 100% !important;
+  max-width: none !important;
+  align-self: auto !important;
+  flex: 0 0 auto;
+}
+
+.app-shell.surface-live-ops .message-body {
+  width: fit-content !important;
+  min-width: 0;
+  flex: 0 1 auto !important;
+  max-width: min(88%, 920px) !important;
+}
+
+.app-shell.surface-live-ops .message-row.system {
+  max-width: none !important;
+  align-self: auto !important;
+}
+
+.app-shell.surface-live-ops .message-row.user .message-body {
+  margin-left: auto !important;
+  margin-right: 2px !important;
+  justify-items: end !important;
+}
+
+.app-shell.surface-live-ops .message-row.ghost .message-body,
+.app-shell.surface-live-ops .message-row.system .message-body {
+  margin-left: 2px !important;
+  margin-right: auto !important;
+  justify-items: start !important;
+}
+
+.app-shell.surface-live-ops .message-bubble,
+.app-shell.surface-live-ops .message-row.user .message-bubble,
+.app-shell.surface-live-ops .message-row.system .message-bubble,
+.app-shell.surface-live-ops .message-row.ghost .message-bubble {
+  background-clip: padding-box;
+}
+
+.app-shell.surface-live-ops .message-row.user .message-bubble {
+  background: rgba(117, 208, 189, 0.32) !important;
+  border-color: rgba(183, 247, 235, 0.24) !important;
+}
+
+.app-shell.surface-live-ops .message-row.system .message-bubble,
+.app-shell.surface-live-ops .message-row.ghost .message-bubble {
+  background: rgba(204, 183, 129, 0.26) !important;
+  border-color: rgba(242, 226, 182, 0.18) !important;
+}
+
+html[data-theme='dark'] .app-shell.surface-live-ops .message-row.user .message-bubble {
+  background: rgba(104, 187, 173, 0.3) !important;
+}
+
+html[data-theme='dark'] .app-shell.surface-live-ops .message-row.system .message-bubble,
+html[data-theme='dark'] .app-shell.surface-live-ops .message-row.ghost .message-bubble {
+  background: rgba(167, 145, 102, 0.28) !important;
+}
+
+.app-shell.surface-live-ops .chat-list-location.status-label-live,
+.app-shell.surface-live-ops .dp-status-badge-live,
+.app-shell.surface-live-ops .dp-status-label-live {
+  color: #22c55e !important;
+}
+
+.app-shell.surface-live-ops .chat-list-location.status-label-offline,
+.app-shell.surface-live-ops .dp-status-badge-offline,
+.app-shell.surface-live-ops .dp-status-label-offline {
+  color: #ef4444 !important;
+}
+
+.app-shell.surface-live-ops .dp-section {
+  margin-top: 8px;
+  padding: 18px 20px;
+}
+
+.app-shell.surface-live-ops .dp-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.app-shell.surface-live-ops .dp-section-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.app-shell.surface-live-ops .dp-section-badge {
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ops-panel-bg) 80%, rgba(255, 255, 255, 0.34));
+  display: inline-grid;
+  place-items: center;
+  font-size: 12px;
+  border: 1px solid color-mix(in srgb, var(--ops-panel-border) 72%, rgba(255, 255, 255, 0.14));
+  backdrop-filter: blur(12px) saturate(145%);
+  -webkit-backdrop-filter: blur(12px) saturate(145%);
+}
+
+.app-shell.surface-live-ops .dp-fields,
+.app-shell.surface-live-ops .dp-op-meta {
+  margin: 0;
+}
+
+.app-shell.surface-live-ops .dp-field,
+.app-shell.surface-live-ops .dp-op-meta-row {
+  display: grid;
+  gap: 4px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--ops-panel-border);
+}
+
+.app-shell.surface-live-ops .dp-field:last-child,
+.app-shell.surface-live-ops .dp-op-meta-row:last-child {
+  border-bottom: none;
+}
+
+.app-shell.surface-live-ops .dp-field dd,
+.app-shell.surface-live-ops .dp-op-meta dd {
+  margin: 0;
+  color: var(--ops-text);
+}
+
+.app-shell.surface-live-ops .dp-field-mono {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+}
+
+.app-shell.surface-live-ops .dp-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.app-shell.surface-live-ops .dp-tag {
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--ops-panel-bg) 80%, rgba(255, 255, 255, 0.34));
+  display: inline-grid;
+  place-items: center;
+  font-size: 12px;
+  border: 1px solid color-mix(in srgb, var(--ops-panel-border) 72%, rgba(255, 255, 255, 0.12));
+  backdrop-filter: blur(12px) saturate(145%);
+  -webkit-backdrop-filter: blur(12px) saturate(145%);
+}
+
+.app-shell.surface-live-ops .dp-ops-list {
+  display: grid;
+  gap: 12px;
+}
+
+.app-shell.surface-live-ops .dp-op-card {
+  padding: 14px;
+  border: 1px solid var(--ops-panel-border);
+  border-radius: 12px;
+  background:
+    var(--ops-panel-highlight),
+    color-mix(in srgb, var(--ops-panel-bg) 84%, var(--ops-surface-bg));
+  backdrop-filter: blur(18px) saturate(155%);
+  -webkit-backdrop-filter: blur(18px) saturate(155%);
+  box-shadow: 0 12px 28px rgba(17, 27, 33, 0.1);
+}
+
+.app-shell.surface-live-ops .dp-op-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.app-shell.surface-live-ops .dp-op-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-shell.surface-live-ops .dp-op-name-wrap {
+  display: grid;
+  gap: 2px;
+}
+
+.app-shell.surface-live-ops .dp-op-name {
+  font-size: 14px;
+}
+
+.app-shell.surface-live-ops .dp-op-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.app-shell.surface-live-ops .dp-op-indicator.on {
+  background: var(--ops-accent-strong);
+}
+
+.app-shell.surface-live-ops .dp-op-indicator.off {
+  background: #c7d0d6;
+}
+
+.app-shell.surface-live-ops .operation-toggle {
+  width: 42px;
+  height: 24px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(188, 198, 205, 0.7);
+  padding: 2px;
+  position: relative;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.app-shell.surface-live-ops .operation-toggle.enabled {
+  background: var(--ops-accent);
+}
+
+.app-shell.surface-live-ops .operation-toggle-thumb {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  transition: transform 0.2s ease;
+  box-shadow: 0 4px 10px rgba(17, 27, 33, 0.18);
+}
+
+.app-shell.surface-live-ops .operation-toggle.enabled .operation-toggle-thumb {
+  transform: translateX(18px);
+}
+
+.app-shell.surface-live-ops .details-drawer-backdrop {
+  display: none !important;
+}
+
+.app-shell.surface-live-ops .app-footer,
+.app-shell.surface-live-ops .app-footer.app-footer-show {
+  border: none;
+  border-top: 1px solid var(--ops-topbar-border);
+  background: var(--ops-topbar-bg);
+  backdrop-filter: var(--ops-glass-blur);
+  -webkit-backdrop-filter: var(--ops-glass-blur);
+  box-shadow: var(--ops-glass-inset), 0 -10px 28px rgba(15, 23, 32, 0.08);
+  color: var(--ops-topbar-text);
+}
+
+.app-shell.surface-live-ops .footer-pill,
+.app-shell.surface-live-ops .footer-live-tag {
+  background: var(--ops-topbar-chip-bg);
+  border-color: var(--ops-topbar-border);
+  backdrop-filter: blur(14px) saturate(145%);
+  -webkit-backdrop-filter: blur(14px) saturate(145%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.app-shell.surface-live-ops .footer-pill-label,
+.app-shell.surface-live-ops .footer-link {
+  color: var(--ops-text-muted);
+}
+
+.app-shell.surface-live-ops .footer-pill-value,
+.app-shell.surface-live-ops .footer-live-tag,
+.app-shell.surface-live-ops .footer-clock,
+.app-shell.surface-live-ops .footer-link:hover {
+  color: var(--ops-topbar-text);
+}
+
+html[data-theme='dark'] .app-shell.surface-live-ops .topbar,
+html[data-theme='dark'] .app-shell.surface-live-ops .topbar *,
+html[data-theme='dark'] .app-shell.surface-live-ops .app-footer,
+html[data-theme='dark'] .app-shell.surface-live-ops .app-footer *,
+html[data-theme='dark'] .app-shell.surface-live-ops .inbox-panel,
+html[data-theme='dark'] .app-shell.surface-live-ops .inbox-panel *,
+html[data-theme='dark'] .app-shell.surface-live-ops .chat-panel,
+html[data-theme='dark'] .app-shell.surface-live-ops .details-panel {
+  color: var(--ops-text);
+}
+
+html[data-theme='dark'] .app-shell.surface-live-ops .topbar,
+html[data-theme='dark'] .app-shell.surface-live-ops .topbar *,
+html[data-theme='dark'] .app-shell.surface-live-ops .app-footer,
+html[data-theme='dark'] .app-shell.surface-live-ops .app-footer * {
+  color: var(--ops-topbar-text);
+}
+
+.app-shell.surface-live-ops .bottom-nav {
+  display: none;
+}
+
+@media (max-width: 1360px) {
+  .app-shell.surface-live-ops {
+    --ops-sidebar-width: 344px;
+    --ops-details-width: 300px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .app-shell.surface-live-ops {
+    --ops-shell-width: 100vw;
+  }
+}
+
+@media (max-width: 980px) {
+  .app-shell.surface-live-ops {
+    --ops-shell-width: 100vw;
+    --ops-shell-radius: 0;
+    background: var(--ops-surface-bg);
+  }
+
+  .app-shell.surface-live-ops .app-surface {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .app-shell.surface-live-ops .app-footer,
+  .app-shell.surface-live-ops .app-footer.app-footer-show,
+  .app-shell.surface-live-ops .desktop-only,
+  .app-shell.surface-live-ops .details-drawer-backdrop {
+    display: none !important;
+  }
+
+  .app-shell.surface-live-ops .mobile-only {
+    display: inline-grid !important;
+  }
+
+  .app-shell.surface-live-ops .topbar {
+    height: 56px;
+    min-height: 56px;
+    padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .app-shell.surface-live-ops .workspace {
+    height: 100%;
+  }
+
+  .app-shell.surface-live-ops .workspace-panels,
+  .app-shell.surface-live-ops .workspace:not(.details-collapsed) .workspace-panels {
+    display: block;
+    height: 100%;
+  }
+
+  .app-shell.surface-live-ops .inbox-panel,
+  .app-shell.surface-live-ops .chat-panel,
+  .app-shell.surface-live-ops .details-panel {
+    display: none;
+    width: 100%;
+    height: calc(100vh - 150px);
+    height: calc(100dvh - 150px);
+  }
+
+  .app-shell.surface-live-ops[data-mobile-panel='inbox'] .inbox-panel,
+  .app-shell.surface-live-ops[data-mobile-panel='chat'] .chat-panel,
+  .app-shell.surface-live-ops[data-mobile-panel='details'] .details-panel {
+    display: flex;
+  }
+
+  .app-shell.surface-live-ops .message-stream {
+    padding: 14px;
+  }
+
+  .app-shell.surface-live-ops .message-body {
+    max-width: 88%;
+  }
+
+  .app-shell.surface-live-ops .composer {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .app-shell.surface-live-ops .composer-shell {
+    align-items: center;
+  }
+
+  .app-shell.surface-live-ops .chat-empty-state {
+    max-width: min(100%, 360px);
+  }
+
+  .app-shell.surface-live-ops .bottom-nav {
+    position: fixed;
+    inset: auto 0 0;
+    min-height: 60px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--ops-panel-border);
+    background: var(--ops-topbar-bg);
+    backdrop-filter: var(--ops-glass-blur);
+    -webkit-backdrop-filter: var(--ops-glass-blur);
+    box-shadow: 0 -12px 30px rgba(15, 23, 32, 0.12);
+    z-index: 24;
+  }
+
+  .app-shell.surface-live-ops .bottom-nav button {
+    border: none;
+    background: transparent;
+    color: var(--ops-text-muted);
+    font: inherit;
+  }
+
+.app-shell.surface-live-ops .bottom-nav button.active {
+    color: var(--ops-topbar-text);
+    font-weight: 700;
+  }
+}
+
+@media (min-width: 981px) {
+  .app-shell.surface-live-ops .mobile-only {
+    display: none !important;
+  }
+}
+
+.app-shell.surface-live-ops .inbox-panel,
+.app-shell.surface-live-ops .chat-panel,
+.app-shell.surface-live-ops .details-panel {
+  position: relative;
+}
+
+.app-shell.surface-live-ops .inbox-panel::before,
+.app-shell.surface-live-ops .chat-panel::before,
+.app-shell.surface-live-ops .details-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255, 255, 255, 0.16), transparent 20%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 26%);
+  opacity: 0.9;
+}
+
+.app-shell.surface-live-ops .message-row.system .message-bubble {
+  background: rgba(255, 241, 203, 0.46);
+}
+
+html[data-theme='dark'] .app-shell.surface-live-ops .message-row.system .message-bubble {
+  background: rgba(94, 77, 44, 0.44);
+}
+
+.app-shell.surface-live-ops .composer {
+  background: color-mix(in srgb, var(--ops-panel-bg) 78%, transparent);
+  backdrop-filter: blur(18px) saturate(155%);
+  -webkit-backdrop-filter: blur(18px) saturate(155%);
+}
+
+.app-shell.surface-live-ops .composer-input-shell {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.app-shell.surface-live-ops .details-content {
+  background: color-mix(in srgb, var(--ops-panel-bg) 74%, transparent);
+}
+
+.app-shell.surface-live-ops .dp-op-card {
+  background:
+    var(--ops-panel-highlight),
+    color-mix(in srgb, var(--ops-panel-bg) 68%, transparent);
+}

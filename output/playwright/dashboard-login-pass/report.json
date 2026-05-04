@@ -1,0 +1,29 @@
+{
+  "superAdminDark": {
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\dashboard-login-pass\\super-admin-dark.png"
+  },
+  "commandCenterDark": {
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\dashboard-login-pass\\command-center-dark.png"
+  },
+  "loginDesktop": {
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\dashboard-login-pass\\login-desktop.png",
+    "beforeHover": {
+      "color": "rgb(0, 16, 24)",
+      "background": "rgba(0, 0, 0, 0)",
+      "boxShadow": "rgba(0, 200, 255, 0.3) 0px 4px 20px 0px, rgba(0, 200, 255, 0.15) 0px 0px 20px 0px, rgba(0, 200, 255, 0.08) 0px 0px 40px 0px",
+      "borderColor": "rgba(0, 0, 0, 0)"
+    }
+  },
+  "loginDesktopHover": {
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\dashboard-login-pass\\login-desktop-hover.png",
+    "afterHover": {
+      "color": "rgb(0, 16, 24)",
+      "background": "rgba(0, 0, 0, 0)",
+      "boxShadow": "rgba(0, 220, 255, 0.45) 0px 6px 30px 0px, rgba(0, 220, 255, 0.25) 0px 0px 25px 0px, rgba(0, 220, 255, 0.12) 0px 0px 60px 0px",
+      "borderColor": "rgba(0, 0, 0, 0)"
+    }
+  },
+  "loginMobile": {
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\dashboard-login-pass\\login-mobile.png"
+  }
+}

@@ -58,7 +58,10 @@ export class GhostApiClient {
     channelId: string
     deviceId: string
     deviceName: string
-    cameraName: string
+    cameraId: string
+    cameraLabel: string
+    cameraSourceType: 'usb-dshow' | 'rtsp-ffmpeg' | 'hikvision-sdk'
+    cameraName?: string
   }): Promise<{ channel: AgentChannelSummary }> {
     return this.post('/api/local-agent/bind', input)
   }
@@ -71,7 +74,10 @@ export class GhostApiClient {
     channelId: string
     deviceId: string
     deviceName: string
-    cameraName: string
+    cameraId: string
+    cameraLabel: string
+    cameraSourceType: 'usb-dshow' | 'rtsp-ffmpeg' | 'hikvision-sdk'
+    cameraName?: string
     status: 'online' | 'scanning' | 'degraded' | 'offline'
     message?: string
   }): Promise<void> {
@@ -85,9 +91,16 @@ export class GhostApiClient {
     return response.work ?? null
   }
 
-  async submitCaptureResult(workId: string, deviceId: string, frameDataUrl: string, capturedAtIso: string): Promise<void> {
+  async submitCaptureResult(
+    workId: string,
+    deviceId: string,
+    cameraId: string,
+    frameDataUrl: string,
+    capturedAtIso: string,
+  ): Promise<void> {
     await this.post(`/api/local-agent/work/${encodeURIComponent(workId)}/result`, {
       deviceId,
+      cameraId,
       frameDataUrl,
       capturedAtIso,
     })

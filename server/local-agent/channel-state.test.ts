@@ -20,6 +20,9 @@ function buildChannel(overrides: Partial<FullChannelRecord> = {}): FullChannelRe
     localAgentBinding: {
       deviceId: 'device-1',
       deviceName: 'Device',
+      cameraId: 'camera-1',
+      cameraLabel: 'Camera',
+      cameraSourceType: 'usb-dshow',
       cameraName: 'Camera',
       channelId: 'channel-1',
       boundAtIso: '2026-04-26T18:00:00.000Z',

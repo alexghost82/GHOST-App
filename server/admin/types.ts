@@ -125,7 +125,10 @@ export type LocalAgentConnectionState = 'connected' | 'degraded' | 'offline'
 export interface LocalAgentBindingRecord {
   deviceId: string
   deviceName: string
-  cameraName: string
+  cameraId: string
+  cameraLabel: string
+  cameraSourceType: 'usb-dshow' | 'rtsp-ffmpeg' | 'hikvision-sdk'
+  cameraName?: string
   channelId: string
   boundAtIso: string
 }

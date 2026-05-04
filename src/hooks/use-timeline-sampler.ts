@@ -13,8 +13,10 @@ import type {
 
 interface TimelineSamplerArgs {
   channels: Channel[]
-  captureFrameForChannel?: (channel: Channel) => Promise<string>
-  onCaptureError?: (payload: { channelId: string; error: string }) => void
+  onFrameCaptured?: (payload: {
+    channelId: string
+    frameDataUrl: string
+  }) => void
   onAnalysisComplete: (payload: {
     channelId: string
     analysis: TimelineAnalysis
@@ -35,19 +37,19 @@ function buildIdleSamplerState(): TimelineSamplerState {
 /**
  * מנהל דגימת פריימים מחזורית לכל ערוץ, כולל בניית קולאז' ושליחה לניתוח.
  */
-export function useTimelineSampler({ channels, captureFrameForChannel, onCaptureError, onAnalysisComplete }: TimelineSamplerArgs) {
+export function useTimelineSampler({ channels, onFrameCaptured, onAnalysisComplete }: TimelineSamplerArgs) {
   const [samplerStates, setSamplerStates] = useState<Map<string, TimelineSamplerState>>(new Map())
   const samplerStatesRef = useRef(samplerStates)
   const channelsRef = useRef(channels)
+  const onFrameCapturedRef = useRef(onFrameCaptured)
   const onAnalysisCompleteRef = useRef(onAnalysisComplete)
-  const onCaptureErrorRef = useRef(onCaptureError)
   const timersRef = useRef<Map<string, ReturnType<typeof setInterval>>>(new Map())
   const runningChannelIdsRef = useRef<Set<string>>(new Set())
 
   samplerStatesRef.current = samplerStates
   channelsRef.current = channels
+  onFrameCapturedRef.current = onFrameCaptured
   onAnalysisCompleteRef.current = onAnalysisComplete
-  onCaptureErrorRef.current = onCaptureError
 
   const updateSamplerState = useCallback(
     (channelId: string, updater: (current: TimelineSamplerState) => TimelineSamplerState) => {
@@ -93,9 +95,11 @@ export function useTimelineSampler({ channels, captureFrameForChannel, onCapture
           return
         }
 
-        const capturedFrameDataUrl = captureFrameForChannel
-          ? await captureFrameForChannel(channel)
-          : await captureLatestCameraFrame('scan-standard')
+        const capturedFrameDataUrl = await captureLatestCameraFrame('scan-standard')
+        onFrameCapturedRef.current?.({
+          channelId,
+          frameDataUrl: capturedFrameDataUrl,
+        })
         const isRelevantFrame = await checkFrameRelevance(capturedFrameDataUrl)
         if (!isRelevantFrame) {
           return
@@ -143,9 +147,7 @@ export function useTimelineSampler({ channels, captureFrameForChannel, onCapture
           channelId,
           analysis,
         })
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Timeline sampling failed.'
-        onCaptureErrorRef.current?.({ channelId, error: message })
+      } catch {
         updateSamplerState(channelId, (currentState) => ({
           ...currentState,
           sampledFrames: currentState.sampledFrames.slice(1),

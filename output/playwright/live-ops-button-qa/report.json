@@ -1,0 +1,106 @@
+{
+  "user": "slon",
+  "url": "http://127.0.0.1:4173",
+  "actions": [
+    {
+      "name": "inbox:new-chat",
+      "ok": true,
+      "details": {
+        "activeNav": "Command Center"
+      }
+    },
+    {
+      "name": "inbox:more-options",
+      "ok": true,
+      "details": {
+        "dialogTitle": "Command palette"
+      }
+    },
+    {
+      "name": "inbox:select-second-chat",
+      "ok": true,
+      "details": {
+        "beforeTitle": "Local Agent QA",
+        "afterTitle": "בית",
+        "targetTitle": "בית",
+        "targetIndex": 0
+      }
+    },
+    {
+      "name": "chat:open-details-from-title",
+      "ok": true,
+      "details": {
+        "header": "Contact info"
+      }
+    },
+    {
+      "name": "details:close",
+      "ok": true,
+      "details": {
+        "openCount": 0
+      }
+    },
+    {
+      "name": "chat:search-button",
+      "ok": true,
+      "details": {
+        "focusedPlaceholder": "Search or start new chat"
+      }
+    },
+    {
+      "name": "chat:details-button",
+      "ok": true,
+      "details": {
+        "isOpen": 1
+      }
+    },
+    {
+      "name": "details:manage",
+      "ok": true,
+      "details": {
+        "activeNav": "Command Center"
+      }
+    },
+    {
+      "name": "details:operation-toggle",
+      "ok": true,
+      "details": {
+        "skipped": "no operation toggle rendered in visible chats",
+        "selectedTitle": "Local Agent QA"
+      }
+    },
+    {
+      "name": "composer:emoji",
+      "ok": true,
+      "details": {
+        "value": "🙂"
+      }
+    },
+    {
+      "name": "composer:attach",
+      "ok": true,
+      "details": {
+        "value": "Analyze the latest camera frame and summarize what you see."
+      }
+    },
+    {
+      "name": "composer:send",
+      "ok": true,
+      "details": {
+        "text": "Button QA 1777882143549",
+        "messageExists": 1,
+        "draftValue": ""
+      }
+    }
+  ],
+  "issues": [],
+  "screenshots": {
+    "initial": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-button-qa\\initial.png",
+    "newChat": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-button-qa\\new-chat.png",
+    "moreOptions": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-button-qa\\more-options.png",
+    "selectSecondChat": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-button-qa\\select-second-chat.png",
+    "detailsFromTitle": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-button-qa\\details-from-title.png",
+    "manage": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-button-qa\\details-manage.png",
+    "send": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-button-qa\\composer-send.png"
+  }
+}

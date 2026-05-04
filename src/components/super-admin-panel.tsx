@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { AccountMenuItem } from './account-menu'
 import type {
   AdminOperationRecord,
   AdminOperationRunRecord,
@@ -6,7 +7,6 @@ import type {
   ChannelUsageMonthly,
   OrganizationDetailsResponse,
   OrganizationLimits,
-  OrganizationSummary,
   OrganizationUser,
   SuperAdminIssue,
   SuperAdminOverviewResponse,
@@ -27,17 +27,29 @@ import {
 } from '../services/admin-api'
 import { impersonateUser } from '../services/auth-api'
 import { connectAdminRealtime, type RealtimeEvent, type RealtimeMode } from '../services/realtime-socket'
+import { AppFooter } from './app-footer'
 import { SurfaceDialog } from './surface-dialog'
 import { Topbar } from './topbar'
+import type { TopbarNavItem } from './topbar'
 import './super-admin-panel.css'
 
 interface SuperAdminPanelProps {
   profile: AuthProfile
-  onOpenCommandCenter: () => void
-  onOpenGhostLive: () => void
-  themeMode?: 'dark' | 'light'
-  onToggleTheme?: () => void
   onLogout: () => void
+  onToggleTheme: () => void
+  themeMode: 'light' | 'dark'
+}
+
+type SuperAdminTab = 'overview' | 'ghostLive' | 'users' | 'billing' | 'usage' | 'issues' | 'events' | 'suspendedOrganizations'
+type SuperAdminAccountDialog = 'profile' | 'api' | null
+type SuperAdminNavScreen = 'Ghost Live' | 'Command Center' | 'Super Admin'
+
+interface QuickAction {
+  id: string
+  title: string
+  description: string
+  keywords: string
+  run: () => void
 }
 
 const ORGANIZATION_STATUS_LABELS: Record<'active' | 'suspended', string> = {
@@ -94,28 +106,22 @@ const DEFAULT_LIMITS: OrganizationLimits = {
 /**
  * מסך ניהול־על מרכזי לסופר־אדמין עם מדדים חיים ופעולות תפעוליות.
  */
-type AdminUtilityPanel = 'command' | 'alerts' | 'support' | 'shortcuts' | null
-
-export function SuperAdminPanel({ profile, onOpenCommandCenter, onOpenGhostLive, themeMode = 'dark', onToggleTheme, onLogout }: SuperAdminPanelProps) {
+export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }: SuperAdminPanelProps) {
   const [overview, setOverview] = useState<SuperAdminOverviewResponse | null>(null)
   const [allUsers, setAllUsers] = useState<OrganizationUser[]>([])
   const [issues, setIssues] = useState<SuperAdminIssue[]>([])
   const [organizationDetails, setOrganizationDetails] = useState<OrganizationDetailsResponse | null>(null)
   const [events, setEvents] = useState<RealtimeEvent[]>([])
   const [selectedOrganizationId, setSelectedOrganizationId] = useState('')
-  const [selectedTab, setSelectedTab] = useState<
-    'overview' | 'suspendedOrganizations' | 'users' | 'billing' | 'usage' | 'issues' | 'events'
-  >('overview')
+  const [selectedTab, setSelectedTab] = useState<SuperAdminTab>('overview')
+  const [activeTopbarNav, setActiveTopbarNav] = useState<SuperAdminNavScreen>('Super Admin')
   const [isInitialLoad, setIsInitialLoad] = useState(true)
   const [realtimeMode, setRealtimeMode] = useState<RealtimeMode>('disconnected')
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [isBusy, setIsBusy] = useState(false)
-  const [isCreateOrganizationDialogOpen, setIsCreateOrganizationDialogOpen] = useState(false)
-  const [activeUtilityPanel, setActiveUtilityPanel] = useState<AdminUtilityPanel>(null)
   const [organizationSearch, setOrganizationSearch] = useState('')
   const [organizationName, setOrganizationName] = useState('')
-  const [newOrganizationName, setNewOrganizationName] = useState('')
   const [organizationStatusDraft, setOrganizationStatusDraft] = useState<'active' | 'suspended'>('active')
   const [organizationLimitsDraft, setOrganizationLimitsDraft] = useState<OrganizationLimits>(DEFAULT_LIMITS)
   const [newUserOrgId, setNewUserOrgId] = useState('')
@@ -139,6 +145,11 @@ export function SuperAdminPanel({ profile, onOpenCommandCenter, onOpenGhostLive,
   const [aiKeyOrgId, setAiKeyOrgId] = useState('')
   const [aiApiKey, setAiApiKey] = useState('')
   const [issueFilterOrgId, setIssueFilterOrgId] = useState('')
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false)
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false)
+  const [isSupportOpen, setIsSupportOpen] = useState(false)
+  const [commandQuery, setCommandQuery] = useState('')
+  const [activeAccountDialog, setActiveAccountDialog] = useState<SuperAdminAccountDialog>(null)
 
   async function reloadData() {
     const [nextOverview, nextIssues, nextUsers] = await Promise.all([getSuperAdminOverview(), getIssues(), listUsers()])
@@ -212,24 +223,40 @@ export function SuperAdminPanel({ profile, onOpenCommandCenter, onOpenGhostLive,
     })()
   }, [billingOrgId, managerCode])
 
-  const organizations = useMemo(() => overview?.organizations ?? [], [overview])
-  const filteredOrganizations = useMemo(() => {
-    const normalizedSearch = organizationSearch.trim().toLowerCase()
-    if (!normalizedSearch) {
-      return organizations
+  useEffect(() => {
+    function handleQuickCommandShortcut(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setCommandQuery('')
+        setIsShortcutsOpen(false)
+        setIsSupportOpen(false)
+        setActiveAccountDialog(null)
+        setIsCommandPaletteOpen(true)
+      }
     }
-    return organizations.filter((organization) => {
-      return `${organization.name} ${organization.status}`.toLowerCase().includes(normalizedSearch)
-    })
-  }, [organizationSearch, organizations])
+
+    window.addEventListener('keydown', handleQuickCommandShortcut)
+    return () => window.removeEventListener('keydown', handleQuickCommandShortcut)
+  }, [])
+
+  const organizations = useMemo(() => overview?.organizations ?? [], [overview])
   const activeOrganizations = useMemo(
-    () => filteredOrganizations.filter((organization) => organization.status === 'active'),
-    [filteredOrganizations],
+    () => organizations.filter((organization) => organization.status === 'active'),
+    [organizations],
   )
   const suspendedOrganizations = useMemo(
     () => organizations.filter((organization) => organization.status === 'suspended'),
     [organizations],
   )
+  const filteredOrganizations = useMemo(() => {
+    const normalizedSearch = organizationSearch.trim().toLowerCase()
+    if (!normalizedSearch) {
+      return activeOrganizations
+    }
+    return activeOrganizations.filter((organization) => {
+      return `${organization.name} ${organization.status}`.toLowerCase().includes(normalizedSearch)
+    })
+  }, [activeOrganizations, organizationSearch])
   const selectedOrganization = useMemo(
     () => organizations.find((organization) => organization.id === selectedOrganizationId) ?? null,
     [selectedOrganizationId, organizations],
@@ -244,90 +271,188 @@ export function SuperAdminPanel({ profile, onOpenCommandCenter, onOpenGhostLive,
     }
     return issues.filter((issue) => issue.organizationId === issueFilterOrgId)
   }, [issueFilterOrgId, issues])
-  const superAdminFullName = [profile.firstName, profile.lastName].filter(Boolean).join(' ') || profile.username
-  const openIssuesCount = useMemo(() => issues.filter((issue) => issue.status !== 'resolved').length, [issues])
-  const adminSectionMenuItems = useMemo(
+  const unresolvedIssuesCount = useMemo(() => issues.filter((issue) => issue.status !== 'resolved').length, [issues])
+  const superAdminAccountMenuItems = useMemo<AccountMenuItem[]>(
     () => [
-      { id: 'create_organization', label: 'צור ארגון', icon: '+' },
-      { id: 'tab_overview', label: 'סקירה', icon: '⌂' },
-      { id: 'tab_suspendedOrganizations', label: 'ארגון מושהה', icon: '⏸' },
-      { id: 'tab_users', label: 'משתמשים', icon: '◫' },
-      { id: 'tab_billing', label: 'תשלומים', icon: '₪' },
-      { id: 'tab_usage', label: 'שימוש', icon: '◔' },
-      { id: 'tab_issues', label: 'תקלות', icon: '⚠' },
-      { id: 'tab_events', label: 'אירועים חיים', icon: '✦' },
-      { id: 'notifications', label: 'התראות', icon: '◉' },
-      { id: 'help', label: 'עזרה ותמיכה', icon: '?' },
-      { id: 'logout', label: 'יציאה מהמערכת', icon: '⏻', danger: true },
+      { id: 'profile', label: 'פרופיל אישי', icon: '◈', section: 'main' },
+      { id: 'overview', label: 'סקירה', icon: '◫', section: 'main' },
+      { id: 'suspendedOrganizations', label: 'ארגון מבוטל', icon: '⛶', section: 'main' },
+      { id: 'users', label: 'משתמשים', icon: '⊞', section: 'main' },
+      { id: 'billing', label: 'תשלומים', icon: '⬡', section: 'main' },
+      { id: 'usage', label: 'שימוש', icon: '◌', section: 'main' },
+      { id: 'issues', label: 'תקלות', icon: '◉', section: 'main' },
+      { id: 'events', label: 'אירועים חיים', icon: '⌁', section: 'main' },
+      { id: 'api', label: 'מפתחות API', icon: '⌘', section: 'dev' },
+      { id: 'logout', label: 'יציאה מהמערכת', icon: '⏻', section: 'danger', tone: 'danger' },
     ],
     [],
   )
 
-  function handleTopbarNavChange(nextNav: string) {
-    if (nextNav === 'ghost-live') {
-      onOpenGhostLive()
-      return
-    }
-    onOpenCommandCenter()
+  function closeTopbarOverlays() {
+    setIsCommandPaletteOpen(false)
+    setIsShortcutsOpen(false)
+    setIsSupportOpen(false)
   }
 
-  function handleOpenNotificationsCenter() {
-    setIssueFilterOrgId('')
-    setActiveUtilityPanel('alerts')
+  function navForTab(tab: SuperAdminTab): SuperAdminNavScreen {
+    if (tab === 'overview' || tab === 'suspendedOrganizations') {
+      return 'Super Admin'
+    }
+    if (tab === 'users' || tab === 'billing' || tab === 'usage') {
+      return 'Command Center'
+    }
+    return 'Ghost Live'
   }
 
-  function handleTopbarAccountAction(actionId: string) {
-    if (actionId === 'create_organization') {
-      setErrorMessage('')
-      setSuccessMessage('')
-      setNewOrganizationName('')
-      setIsCreateOrganizationDialogOpen(true)
+  function openAdminTab(tab: SuperAdminTab, nav: SuperAdminNavScreen = navForTab(tab)) {
+    closeTopbarOverlays()
+    setActiveAccountDialog(null)
+    setSelectedTab(tab)
+    setActiveTopbarNav(nav)
+  }
+
+  function handleSuperAdminNavChange(item: TopbarNavItem) {
+    closeTopbarOverlays()
+    setActiveAccountDialog(null)
+    if (item === 'Ghost Live') {
+      setSelectedTab((currentTab) => (currentTab === 'ghostLive' || currentTab === 'issues' || currentTab === 'events' ? currentTab : 'ghostLive'))
+      setActiveTopbarNav('Ghost Live')
       return
     }
-    if (actionId === 'notifications') {
-      handleOpenNotificationsCenter()
+    if (item === 'Command Center') {
+      setSelectedTab((currentTab) => (currentTab === 'users' || currentTab === 'billing' || currentTab === 'usage' ? currentTab : 'users'))
+      setActiveTopbarNav('Command Center')
       return
     }
-    if (actionId === 'help') {
-      setActiveUtilityPanel('support')
+    setSelectedTab('overview')
+    setActiveTopbarNav('Super Admin')
+  }
+
+  function handleAccountAction(itemId: string) {
+    if (itemId === 'logout') {
+      onLogout()
+      return
+    }
+    if (itemId === 'profile') {
+      closeTopbarOverlays()
+      setActiveAccountDialog('profile')
+      return
+    }
+    if (itemId === 'api') {
+      closeTopbarOverlays()
+      setActiveAccountDialog('api')
+      return
+    }
+    if (itemId === 'overview') {
+      openAdminTab('overview', 'Super Admin')
+      return
+    }
+    if (itemId === 'suspendedOrganizations') {
+      openAdminTab('suspendedOrganizations', 'Super Admin')
+      return
+    }
+    if (itemId === 'users') {
+      openAdminTab('users', 'Command Center')
+      return
+    }
+    if (itemId === 'billing') {
+      openAdminTab('billing', 'Command Center')
+      return
+    }
+    if (itemId === 'usage') {
+      openAdminTab('usage', 'Command Center')
+      return
+    }
+    if (itemId === 'issues') {
+      openAdminTab('issues', 'Ghost Live')
+      return
+    }
+    if (itemId === 'events') {
+      openAdminTab('events', 'Ghost Live')
     }
   }
 
-  function handleAdminMenuAction(actionId: string) {
-    if (actionId === 'tab_overview') {
-      setSelectedTab('overview')
-      return
-    }
-    if (actionId === 'tab_suspendedOrganizations') {
-      setSelectedTab('suspendedOrganizations')
-      return
-    }
-    if (actionId === 'tab_users') {
-      setSelectedTab('users')
-      return
-    }
-    if (actionId === 'tab_billing') {
-      setSelectedTab('billing')
-      return
-    }
-    if (actionId === 'tab_usage') {
-      setSelectedTab('usage')
-      return
-    }
-    if (actionId === 'tab_issues') {
-      setSelectedTab('issues')
-      return
-    }
-    if (actionId === 'tab_events') {
-      setSelectedTab('events')
-      return
-    }
+  const superAdminQuickActions = useMemo<QuickAction[]>(
+    () => [
+      {
+        id: 'ghost-live',
+        title: 'Ghost Live',
+        description: 'Open channel management, operations, runs, and live activity.',
+        keywords: 'ghost live channels operations runs live workspace',
+        run: () => openAdminTab('ghostLive', 'Ghost Live'),
+      },
+      {
+        id: 'overview',
+        title: 'Super Admin overview',
+        description: 'Return to the main organization overview tab.',
+        keywords: 'overview dashboard super admin organizations',
+        run: () => openAdminTab('overview', 'Super Admin'),
+      },
+      {
+        id: 'users',
+        title: 'Users',
+        description: 'Open user management for the selected organization.',
+        keywords: 'users team members management',
+        run: () => openAdminTab('users', 'Command Center'),
+      },
+      {
+        id: 'billing',
+        title: 'Billing',
+        description: 'Open payment card and organization billing controls.',
+        keywords: 'billing plan payment card',
+        run: () => openAdminTab('billing', 'Command Center'),
+      },
+      {
+        id: 'usage',
+        title: 'Usage',
+        description: 'Inspect usage ledgers, channels, operations, and runs.',
+        keywords: 'usage costs ledger channels operations',
+        run: () => openAdminTab('usage', 'Command Center'),
+      },
+      {
+        id: 'suspended-organizations',
+        title: 'Cancelled organizations',
+        description: 'Review suspended organizations, history, and reactivation controls.',
+        keywords: 'cancelled organizations suspended deleted archived history',
+        run: () => openAdminTab('suspendedOrganizations', 'Super Admin'),
+      },
+      {
+        id: 'issues',
+        title: 'Issues',
+        description: 'Review open and in-progress issues across organizations.',
+        keywords: 'issues alerts bugs notifications',
+        run: () => openAdminTab('issues', 'Ghost Live'),
+      },
+      {
+        id: 'events',
+        title: 'Live events',
+        description: 'Open the realtime event stream.',
+        keywords: 'events live realtime websocket audit',
+        run: () => openAdminTab('events', 'Ghost Live'),
+      },
+      {
+        id: 'create-org',
+        title: 'Create organization',
+        description: 'Jump to the admin overview and use the create organization form.',
+        keywords: 'create organization onboarding',
+        run: () => openAdminTab('overview', 'Super Admin'),
+      },
+    ],
+    [],
+  )
 
-    handleTopbarAccountAction(actionId)
-  }
+  const filteredSuperAdminQuickActions = useMemo(() => {
+    const normalizedQuery = commandQuery.trim().toLowerCase()
+    if (!normalizedQuery) {
+      return superAdminQuickActions
+    }
+    return superAdminQuickActions.filter((action) =>
+      `${action.title} ${action.description} ${action.keywords}`.toLowerCase().includes(normalizedQuery),
+    )
+  }, [commandQuery, superAdminQuickActions])
 
   async function handleCreateOrganization() {
-    if (!newOrganizationName.trim()) {
+    if (!organizationName.trim()) {
       setErrorMessage('נדרש שם ארגון.')
       return
     }
@@ -335,9 +460,8 @@ export function SuperAdminPanel({ profile, onOpenCommandCenter, onOpenGhostLive,
     setErrorMessage('')
     setSuccessMessage('')
     try {
-      const createdOrganization = await createOrganization(newOrganizationName.trim(), DEFAULT_LIMITS)
-      setNewOrganizationName('')
-      setIsCreateOrganizationDialogOpen(false)
+      const createdOrganization = await createOrganization(organizationName.trim(), DEFAULT_LIMITS)
+      setOrganizationName('')
       setSuccessMessage('הארגון נוצר בהצלחה.')
       await reloadData()
       setSelectedOrganizationId(createdOrganization.id)
@@ -384,12 +508,33 @@ export function SuperAdminPanel({ profile, onOpenCommandCenter, onOpenGhostLive,
     setSuccessMessage('')
     try {
       await updateOrganization(selectedOrganizationId, { status: 'suspended' })
-      setSuccessMessage('הארגון הועבר למחלקת ארגון מושהה.')
+      setSuccessMessage('בוצעה מחיקה לוגית: הארגון הושעה.')
       await reloadData()
       await reloadOrganizationDetails(selectedOrganizationId)
-      setSelectedTab('suspendedOrganizations')
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'מחיקה לוגית לארגון נכשלה.')
+    } finally {
+      setIsBusy(false)
+    }
+  }
+
+  async function handleReactivateOrganization() {
+    if (!selectedOrganizationId) {
+      setErrorMessage('יש לבחור ארגון להפעלה מחדש.')
+      return
+    }
+
+    setIsBusy(true)
+    setErrorMessage('')
+    setSuccessMessage('')
+    try {
+      await updateOrganization(selectedOrganizationId, { status: 'active' })
+      await reloadData()
+      await reloadOrganizationDetails(selectedOrganizationId)
+      setOrganizationStatusDraft('active')
+      setSuccessMessage('הארגון הופעל מחדש בהצלחה.')
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'הפעלת הארגון מחדש נכשלה.')
     } finally {
       setIsBusy(false)
     }
@@ -571,56 +716,106 @@ export function SuperAdminPanel({ profile, onOpenCommandCenter, onOpenGhostLive,
     setSelectedUserActiveDraft(user.isActive)
   }
 
-  function handleOpenSuspendedOrganization(organizationId: string) {
-    setSelectedOrganizationId(organizationId)
-    setSelectedTab('overview')
-  }
-
-  function renderOrganizationListItem(organization: OrganizationSummary, onSelect?: (organizationId: string) => void) {
-    return (
-      <li key={organization.id} className={selectedOrganizationId === organization.id ? 'active' : ''}>
-        <button type="button" onClick={() => (onSelect ?? setSelectedOrganizationId)(organization.id)}>
-          <div className="sa-org-list-title">
-            <strong>{organization.name}</strong>
-            <span className={`sa-org-status ${organization.status}`}>{ORGANIZATION_STATUS_LABELS[organization.status]}</span>
-          </div>
-          <div className="sa-org-list-meta">
-            <span>ערוצים: {isInitialLoad ? '--' : organization.usage.channelsCount}</span>
-            <span>מבצעים: {isInitialLoad ? '--' : (organization.usage.operationsCount ?? 0)}</span>
-            <span>הודעות: {isInitialLoad ? '--' : organization.usage.sentMessages + organization.usage.receivedMessages}</span>
-          </div>
-        </button>
-      </li>
-    )
-  }
-
-  function renderSuspendedOrganizationsTab() {
-    return (
-      <section className="sa-card">
-        <div className="sa-section-heading">
-          <div>
-            <p className="eyebrow">ארכיון ארגונים</p>
-            <h3>ארגון מושהה</h3>
-          </div>
-          <span className="sa-section-count">{suspendedOrganizations.length}</span>
-        </div>
-        {suspendedOrganizations.length === 0 ? (
-          <div className="sa-empty-state">
-            <h3>אין ארגונים מושהים</h3>
-            <p>כל הארגונים הפעילים מופיעים ברשימה הראשית. ארגון שנמחק יעבור לכאן באופן אוטומטי.</p>
-          </div>
-        ) : (
-          <ul className="sa-org-list sa-suspended-org-list">
-            {suspendedOrganizations.map((organization) => renderOrganizationListItem(organization, handleOpenSuspendedOrganization))}
-          </ul>
-        )}
-      </section>
-    )
-  }
-
   function renderTabContent() {
     if (selectedTab === 'suspendedOrganizations') {
-      return renderSuspendedOrganizationsTab()
+      return (
+        <div className="sa-tab-grid">
+          <section className="sa-card">
+            <h3>ארגונים מבוטלים / מושהים ({suspendedOrganizations.length})</h3>
+            {suspendedOrganizations.length === 0 ? (
+              <p className="sa-subtle">אין כרגע ארגונים במצב מושהה.</p>
+            ) : (
+              <ul className="sa-list">
+                {suspendedOrganizations.map((organization) => (
+                  <li key={organization.id} className={selectedOrganizationId === organization.id ? 'active' : ''}>
+                    <button type="button" className="sa-user-select-btn" onClick={() => setSelectedOrganizationId(organization.id)}>
+                      <strong>{organization.name}</strong>
+                      <span>{ORGANIZATION_STATUS_LABELS[organization.status]}</span>
+                      <span>ערוצים: {organization.usage.channelsCount} | מבצעים: {organization.usage.operationsCount ?? 0}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          {selectedOrganization?.status === 'suspended' ? (
+            <>
+              <section className="sa-card">
+                <h3>פרטי ארגון מבוטל</h3>
+                <div className="sa-kpi-grid">
+                  <div><span>שם</span><strong>{selectedOrganization.name}</strong></div>
+                  <div><span>סטטוס</span><strong>{ORGANIZATION_STATUS_LABELS[selectedOrganization.status]}</strong></div>
+                  <div><span>ערוצים</span><strong>{selectedOrganization.usage.channelsCount}</strong></div>
+                  <div><span>מבצעים</span><strong>{selectedOrganization.usage.operationsCount ?? 0}</strong></div>
+                  <div><span>הודעות יוצאות</span><strong>{selectedOrganization.usage.sentMessages}</strong></div>
+                  <div><span>הודעות נכנסות</span><strong>{selectedOrganization.usage.receivedMessages}</strong></div>
+                </div>
+                <div className="sa-inline-actions">
+                  <button
+                    className="primary-button"
+                    type="button"
+                    disabled={isBusy}
+                    onClick={() => void handleReactivateOrganization()}
+                  >
+                    הפעל מחדש ארגון
+                  </button>
+                </div>
+              </section>
+
+              <section className="sa-card">
+                <h3>היסטוריית שימוש ועלויות</h3>
+                {(organizationDetails?.usageLedger ?? []).length === 0 ? (
+                  <p className="sa-subtle">אין נתוני היסטוריה עבור ארגון זה.</p>
+                ) : (
+                  <ul className="sa-list">
+                    {(organizationDetails?.usageLedger ?? []).map((ledger) => (
+                      <li key={ledger.id}>
+                        <div className="sa-ledger-row">
+                          <strong>{ledger.metricType}</strong>
+                          <span>${ledger.amount.toFixed(2)}</span>
+                          <span>{new Date(ledger.createdAtIso).toLocaleString('he-IL')}</span>
+                        </div>
+                        <p>{ledger.details}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              <section className="sa-card">
+                <h3>היסטוריית הרצות אחרונות</h3>
+                {(organizationDetails?.recentRuns ?? []).length === 0 ? (
+                  <p className="sa-subtle">אין הרצות שמורות עבור ארגון זה.</p>
+                ) : (
+                  <div className="sa-table-wrap">
+                    <table className="sa-stats-table">
+                      <thead>
+                        <tr>
+                          <th>מבצע</th>
+                          <th>סטטוס</th>
+                          <th>התחלה</th>
+                          <th>סיום</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(organizationDetails?.recentRuns ?? []).map((run: AdminOperationRunRecord) => (
+                          <tr key={run.id}>
+                            <td><strong>{run.operationId.slice(0, 8)}</strong></td>
+                            <td><span className={`sa-run-status ${run.status}`}>{RUN_STATUS_LABELS[run.status]}</span></td>
+                            <td>{new Date(run.startedAtIso).toLocaleString('he-IL')}</td>
+                            <td>{run.endedAtIso ? new Date(run.endedAtIso).toLocaleString('he-IL') : '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+            </>
+          ) : null}
+        </div>
+      )
     }
 
     if (!selectedOrganization) {
@@ -628,6 +823,150 @@ export function SuperAdminPanel({ profile, onOpenCommandCenter, onOpenGhostLive,
         <div className="sa-empty-state">
           <h3>לא נבחר ארגון</h3>
           <p>בחר ארגון מהרשימה כדי לצפות בפרטים, לערוך ולנהל את כל ההגדרות שלו.</p>
+        </div>
+      )
+    }
+
+    if (selectedTab === 'ghostLive') {
+      return (
+        <div className="sa-tab-grid">
+          <section className="sa-card">
+            <h3>ניהול ערוצים</h3>
+            {(organizationDetails?.channels ?? []).length === 0 ? (
+              <p className="sa-subtle">אין ערוצים בארגון זה.</p>
+            ) : (
+              <div className="sa-table-wrap">
+                <table className="sa-stats-table">
+                  <thead>
+                    <tr>
+                      <th>ערוץ</th>
+                      <th>מצב</th>
+                      <th>יוצאות</th>
+                      <th>נכנסות</th>
+                      <th>מבצעים פעילים</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(organizationDetails?.channels ?? []).map((channel) => {
+                      const stats = (organizationDetails?.channelStats ?? []).find(
+                        (stat: ChannelUsageMonthly) => stat.channelId === channel.id,
+                      )
+                      const totalMessages =
+                        (stats?.outgoingUser ?? 0) +
+                        (stats?.incomingGhost ?? 0) +
+                        (stats?.incomingSystem ?? 0) +
+                        (stats?.incomingOperations ?? 0)
+                      return (
+                        <tr key={channel.id}>
+                          <td><strong>{channel.name}</strong></td>
+                          <td>
+                            <span className={`sa-channel-status ${channel.isBlocked ? 'unavailable' : 'active'}`}>
+                              {channel.isBlocked ? 'לא זמין' : 'פעיל'}
+                            </span>
+                          </td>
+                          <td>{stats?.outgoingUser ?? 0}</td>
+                          <td>{totalMessages}</td>
+                          <td>{stats?.operationsCountActive ?? 0}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
+          <section className="sa-card">
+            <h3>מבצעים בארגון ({(organizationDetails?.operations ?? []).length})</h3>
+            {(organizationDetails?.operations ?? []).length === 0 ? (
+              <p className="sa-subtle">אין מבצעים בארגון זה.</p>
+            ) : (
+              <div className="sa-table-wrap">
+                <table className="sa-stats-table">
+                  <thead>
+                    <tr>
+                      <th>שם</th>
+                      <th>ערוץ</th>
+                      <th>מוד</th>
+                      <th>תזמון</th>
+                      <th>סטטוס</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(organizationDetails?.operations ?? []).map((op: AdminOperationRecord) => {
+                      const channelName = (organizationDetails?.channels ?? []).find((c) => c.id === op.channelId)?.name ?? '—'
+                      return (
+                        <tr key={op.id}>
+                          <td><strong>{op.name}</strong></td>
+                          <td>{channelName}</td>
+                          <td>{OP_MODE_LABELS[op.mode] ?? op.mode}</td>
+                          <td>{op.schedule || '—'}</td>
+                          <td>
+                            <span className={`sa-org-status ${op.enabled ? 'active' : 'suspended'}`}>
+                              {op.enabled ? 'פעיל' : 'מושבת'}
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
+          <section className="sa-card">
+            <h3>הרצות אחרונות</h3>
+            {(organizationDetails?.recentRuns ?? []).length === 0 ? (
+              <p className="sa-subtle">אין הרצות אחרונות להצגה.</p>
+            ) : (
+              <div className="sa-table-wrap">
+                <table className="sa-stats-table">
+                  <thead>
+                    <tr>
+                      <th>מבצע</th>
+                      <th>סטטוס</th>
+                      <th>התחלה</th>
+                      <th>סיום</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(organizationDetails?.recentRuns ?? []).map((run: AdminOperationRunRecord) => {
+                      const opName = (organizationDetails?.operations ?? []).find((o) => o.id === run.operationId)?.name ?? run.operationId.slice(0, 8)
+                      return (
+                        <tr key={run.id}>
+                          <td><strong>{opName}</strong></td>
+                          <td><span className={`sa-run-status ${run.status}`}>{RUN_STATUS_LABELS[run.status]}</span></td>
+                          <td>{new Date(run.startedAtIso).toLocaleString('he-IL')}</td>
+                          <td>{run.endedAtIso ? new Date(run.endedAtIso).toLocaleString('he-IL') : '—'}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
+          <section className="sa-card">
+            <h3>אירועי Ghost Live</h3>
+            {events.length === 0 ? (
+              <p className="sa-subtle">אין כרגע אירועים חיים להצגה.</p>
+            ) : (
+              <ul className="sa-list">
+                {events.slice(0, 10).map((event, index) => (
+                  <li key={`${event.timestampIso}_${index}`}>
+                    <div className="sa-ledger-row">
+                      <strong>{event.eventType}</strong>
+                      <span>{event.severity}</span>
+                      <span>{new Date(event.timestampIso).toLocaleString('he-IL')}</span>
+                    </div>
+                    <p>מזהה ארגון: {event.organizationId}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </div>
       )
     }
@@ -1108,43 +1447,122 @@ export function SuperAdminPanel({ profile, onOpenCommandCenter, onOpenGhostLive,
     )
   }
 
-  return (
-    <div className="sa-root">
-      <Topbar
-        activeNav="ניהול"
-        channelsCount={overview?.totals.channelsCount ?? 0}
-        fullName={superAdminFullName}
-        accountItems={adminSectionMenuItems}
-        onAccountAction={handleAdminMenuAction}
-        themeMode={themeMode}
-        onToggleTheme={onToggleTheme}
-        navItems={[]}
-        onOpenAlerts={handleOpenNotificationsCenter}
-        onOpenCommandPalette={() => setActiveUtilityPanel('command')}
-        onOpenHelp={() => setActiveUtilityPanel('support')}
-        onOpenQuickActions={() => setActiveUtilityPanel('shortcuts')}
-        onLogout={onLogout}
-        onNavChange={handleTopbarNavChange}
-        onOpenNotificationsCenter={handleOpenNotificationsCenter}
-        organizationName="בקרת Ghost"
-        role={profile.role}
-        subtitle="ארגוני מערכת, גישה, חיוב ואירועים חיים"
-        title="חדר בקרה ניהולי"
-        totalLiveFeeds={overview?.totals.channelsCount ?? 0}
-        totalOperations={overview?.totals.operationsCount ?? 0}
-        totalUnreadAlerts={openIssuesCount}
-      />
+  function getSectionMeta(tab: SuperAdminTab): { title: string; description: string } {
+    if (tab === 'overview') {
+      return {
+        title: 'סקירה',
+        description: 'עריכת הארגון, מגבלות ותקרות, ויצירת ארגון חדש.',
+      }
+    }
+    if (tab === 'suspendedOrganizations') {
+      return {
+        title: 'ארגון מבוטל',
+        description: 'ניהול ארגונים מושהים, היסטוריית פעילות, ושחזור ארגון לפעילות מלאה.',
+      }
+    }
+    if (tab === 'ghostLive') {
+      return {
+        title: 'Ghost Live',
+        description: 'ניהול ערוצים, מבצעים, הרצות אחרונות ואירועי live של הארגון הנבחר.',
+      }
+    }
+    if (tab === 'users') {
+      return {
+        title: 'משתמשים',
+        description: 'ניהול משתמשים, הרשאות, יצירה, עדכון והתחזות.',
+      }
+    }
+    if (tab === 'billing') {
+      return {
+        title: 'תשלומים',
+        description: 'אמצעי תשלום, קוד מנהל ומפתחות AI ארגוניים.',
+      }
+    }
+    if (tab === 'usage') {
+      return {
+        title: 'שימוש',
+        description: 'יומני שימוש, ערוצים, מבצעים והרצות אחרונות.',
+      }
+    }
+    if (tab === 'issues') {
+      return {
+        title: 'תקלות',
+        description: 'מעקב אחרי תקלות פתוחות, בטיפול ופתורות.',
+      }
+    }
+    return {
+      title: 'אירועים חיים',
+      description: 'זרם אירועים בזמן אמת מ-WebSocket הניהולי.',
+    }
+  }
 
-      <main className="sa-shell">
-        <aside className="sa-sidebar">
-          <header className="sa-sidebar-header">
-            <p className="eyebrow">סופר אדמין</p>
-            <h2>חדר בקרה ניהולי</h2>
-            <p className="sa-subtle">מחובר כ־{superAdminFullName}</p>
-          </header>
+  return (
+    <div className="app-shell" data-mobile-panel="chat">
+      <div className="app-surface">
+        <Topbar
+          accountMenuItems={superAdminAccountMenuItems}
+          fullName={[profile.firstName, profile.lastName].filter(Boolean).join(' ') || profile.username}
+          organizationName="Ghost HQ"
+          role={profile.role}
+          channelsCount={organizations.length}
+          totalOperations={overview?.organizations.reduce((sum, organization) => sum + (organization.usage.operationsCount ?? 0), 0) ?? 0}
+          totalLiveFeeds={overview?.organizations.reduce((sum, organization) => sum + organization.usage.channelsCount, 0) ?? 0}
+          totalUnreadAlerts={unresolvedIssuesCount}
+          activeNav={activeTopbarNav}
+          canAccessCommandCenter
+          navItems={['Ghost Live', 'Command Center', 'Super Admin']}
+          onAccountAction={handleAccountAction}
+          onBrandClick={() => openAdminTab('overview', 'Super Admin')}
+          onCommandTrigger={() => {
+            setCommandQuery('')
+            setIsShortcutsOpen(false)
+            setIsSupportOpen(false)
+            setActiveAccountDialog(null)
+            setIsCommandPaletteOpen(true)
+          }}
+          onNavChange={handleSuperAdminNavChange}
+          onOpenNotificationsCenter={() => openAdminTab('issues', 'Ghost Live')}
+          onOpenShortcuts={() => {
+            setIsCommandPaletteOpen(false)
+            setIsSupportOpen(false)
+            setActiveAccountDialog(null)
+            setIsShortcutsOpen(true)
+          }}
+          onOpenSupport={() => {
+            setIsCommandPaletteOpen(false)
+            setIsShortcutsOpen(false)
+            setActiveAccountDialog(null)
+            setIsSupportOpen(true)
+          }}
+          onToggleTheme={onToggleTheme}
+          themeMode={themeMode}
+        />
+
+        <main className="sa-shell">
+          <aside className="sa-sidebar">
+        <header className="sa-sidebar-header">
+          <p className="eyebrow">סופר אדמין</p>
+          <h2>חדר בקרה Ghost</h2>
+          <p className="sa-subtle">מחובר כ־{[profile.firstName, profile.lastName].filter(Boolean).join(' ') || profile.username}</p>
+          <div className="sa-sidebar-header-actions">
+            <button className="ghost-button" type="button" onClick={onLogout}>
+              התנתקות
+            </button>
+          </div>
+        </header>
+
+        <section className="sa-sidebar-create">
+          <input
+            value={organizationName}
+            onChange={(event) => setOrganizationName(event.target.value)}
+            placeholder="שם ארגון חדש"
+          />
+          <button className="primary-button" type="button" disabled={isBusy} onClick={() => void handleCreateOrganization()}>
+            צור ארגון
+          </button>
+        </section>
 
         <section className="sa-sidebar-search">
-          <p className="sa-subtle">חפש ברשימת הארגונים לפני מעבר בין לשוניות או עריכת מגבלות, משתמשים, חיוב ואירועים.</p>
           <input
             value={organizationSearch}
             onChange={(event) => setOrganizationSearch(event.target.value)}
@@ -1153,19 +1571,28 @@ export function SuperAdminPanel({ profile, onOpenCommandCenter, onOpenGhostLive,
         </section>
 
         <section className="sa-org-list-wrap">
-          <h3>ארגונים ({activeOrganizations.length})</h3>
-          {activeOrganizations.length === 0 ? (
-            <p className="sa-sidebar-empty">אין ארגונים פעילים להצגה.</p>
-          ) : (
-            <ul className="sa-org-list">
-              {activeOrganizations.map((organization) => renderOrganizationListItem(organization))}
-            </ul>
-          )}
+          <h3>ארגונים פעילים ({filteredOrganizations.length})</h3>
+          <ul className="sa-org-list">
+            {filteredOrganizations.map((organization) => (
+              <li key={organization.id} className={selectedOrganizationId === organization.id ? 'active' : ''}>
+                <button type="button" onClick={() => setSelectedOrganizationId(organization.id)}>
+                  <div className="sa-org-list-title">
+                    <strong>{organization.name}</strong>
+                    <span className={`sa-org-status ${organization.status}`}>{ORGANIZATION_STATUS_LABELS[organization.status]}</span>
+                  </div>
+                  <div className="sa-org-list-meta">
+                    <span>ערוצים: {isInitialLoad ? '--' : organization.usage.channelsCount}</span>
+                    <span>מבצעים: {isInitialLoad ? '--' : (organization.usage.operationsCount ?? 0)}</span>
+                    <span>הודעות: {isInitialLoad ? '--' : organization.usage.sentMessages + organization.usage.receivedMessages}</span>
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section className="sa-sidebar-kpis">
-          <h3>סיכום מערכת</h3>
-          <p className="sa-subtle">השאר את סיכומי המערכת בסרגל הצד כדי שהתוכן הראשי יישאר ממוקד במשימת הניהול שנבחרה.</p>
+          <h3>מדדי מערכת כלליים</h3>
           <div className="sa-kpi-grid">
             <div><span>ארגונים</span><strong>{isInitialLoad ? '--' : (overview?.totals.organizationsCount ?? 0)}</strong></div>
             <div><span>משתמשים</span><strong>{isInitialLoad ? '--' : allUsers.length}</strong></div>
@@ -1177,217 +1604,136 @@ export function SuperAdminPanel({ profile, onOpenCommandCenter, onOpenGhostLive,
             <span>{realtimeMode === 'live' ? 'חי' : realtimeMode === 'polling' ? 'סנכרון אוטומטי' : 'מנותק'}</span>
           </div>
         </section>
-      </aside>
+          </aside>
 
-      <section className="sa-content">
+          <section className="sa-content">
         <header className="sa-content-header">
           <div>
-            <p className="eyebrow">מרחב ניהול</p>
-            <h2>{selectedOrganization?.name ?? 'בחר ארגון'}</h2>
-            <p className="sa-subtle">
-              {selectedOrganization
-                ? 'השתמש בלשוניות שלמטה כדי לנהל את הארגון שנבחר בלי לצאת ממשטח הניהול הזה.'
-                : 'בחר ארגון מסרגל הצד כדי לפתוח את מרחב הניהול.'}
-            </p>
+            <p className="eyebrow">{activeTopbarNav}</p>
+            <h2>{getSectionMeta(selectedTab).title}</h2>
+            <p className="sa-subtle">{getSectionMeta(selectedTab).description}</p>
           </div>
-          <nav className="sa-tabs">
-            <button className={selectedTab === 'overview' ? 'active' : ''} onClick={() => setSelectedTab('overview')} type="button">סקירה</button>
-            <button className={selectedTab === 'suspendedOrganizations' ? 'active' : ''} onClick={() => setSelectedTab('suspendedOrganizations')} type="button">ארגון מושהה</button>
-            <button className={selectedTab === 'users' ? 'active' : ''} onClick={() => setSelectedTab('users')} type="button">משתמשים</button>
-            <button className={selectedTab === 'billing' ? 'active' : ''} onClick={() => setSelectedTab('billing')} type="button">תשלומים</button>
-            <button className={selectedTab === 'usage' ? 'active' : ''} onClick={() => setSelectedTab('usage')} type="button">שימוש</button>
-            <button className={selectedTab === 'issues' ? 'active' : ''} onClick={() => setSelectedTab('issues')} type="button">תקלות</button>
-            <button className={selectedTab === 'events' ? 'active' : ''} onClick={() => setSelectedTab('events')} type="button">אירועים חיים</button>
-          </nav>
         </header>
 
         {errorMessage ? <p className="sa-feedback error">{errorMessage}</p> : null}
         {successMessage ? <p className="sa-feedback success">{successMessage}</p> : null}
 
-        <div className="sa-content-scroll">{renderTabContent()}</div>
-        </section>
-      </main>
+            <div className="sa-content-scroll">{renderTabContent()}</div>
+          </section>
+        </main>
 
-      {activeUtilityPanel === 'alerts' ? (
-        <SurfaceDialog
-          eyebrow="Alerts"
-          title="התראות ניהוליות"
-          description="פתח את מסך התקלות או עבור ישירות לאירועים החיים."
-          onClose={() => setActiveUtilityPanel(null)}
-          width="wide"
-        >
-          <div className="command-grid">
-            <button
-              className="command-card"
-              onClick={() => {
-                setSelectedTab('issues')
-                setActiveUtilityPanel(null)
-              }}
-              type="button"
-            >
-              <strong>פתח תקלות</strong>
-              <span>{openIssuesCount > 0 ? `${openIssuesCount} תקלות פתוחות מחכות לטיפול` : 'אין כרגע תקלות פתוחות.'}</span>
-            </button>
-            <button
-              className="command-card"
-              onClick={() => {
-                setSelectedTab('events')
-                setActiveUtilityPanel(null)
-              }}
-              type="button"
-            >
-              <strong>אירועים חיים</strong>
-              <span>מעבר ישיר ליומן ה-WebSocket והאירועים החיים.</span>
-            </button>
-          </div>
-        </SurfaceDialog>
-      ) : null}
+        {isCommandPaletteOpen ? (
+          <SurfaceDialog
+            eyebrow="Quick command"
+            title="Super Admin command palette"
+            description="Search admin workflows and jump directly into a real management tab."
+            onClose={() => setIsCommandPaletteOpen(false)}
+            width="medium"
+          >
+            <div className="topbar-dialog-stack">
+              <input
+                autoFocus
+                className="topbar-search-input"
+                onChange={(event) => setCommandQuery(event.target.value)}
+                placeholder="Search Ghost Live, cancelled orgs, users, billing, usage..."
+                value={commandQuery}
+              />
+              <div className="topbar-action-list">
+                {filteredSuperAdminQuickActions.map((action) => (
+                  <button key={action.id} className="topbar-action-card" onClick={action.run} type="button">
+                    <strong>{action.title}</strong>
+                    <span>{action.description}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </SurfaceDialog>
+        ) : null}
 
-      {activeUtilityPanel === 'support' ? (
-        <SurfaceDialog
-          eyebrow="Support"
-          title="עזרה ותמיכה"
-          description="בחר פעולה אמיתית: פתיחת תקלות, יצירת ארגון או מעבר למסך הסקירה."
-          onClose={() => setActiveUtilityPanel(null)}
-          width="wide"
-        >
-          <div className="command-grid">
-            <button
-              className="command-card"
-              onClick={() => {
-                setSelectedTab('issues')
-                setActiveUtilityPanel(null)
-              }}
-              type="button"
-            >
-              <strong>פתח תקלות</strong>
-              <span>מעבר לתקלות ובאגים שדווחו על ידי ארגונים.</span>
-            </button>
-            <button
-              className="command-card"
-              onClick={() => {
-                setErrorMessage('')
-                setSuccessMessage('')
-                setNewOrganizationName('')
-                setIsCreateOrganizationDialogOpen(true)
-                setActiveUtilityPanel(null)
-              }}
-              type="button"
-            >
-              <strong>צור ארגון</strong>
-              <span>פתח את חלון יצירת הארגון.</span>
-            </button>
-            <button
-              className="command-card"
-              onClick={() => {
-                setSelectedTab('overview')
-                setActiveUtilityPanel(null)
-              }}
-              type="button"
-            >
-              <strong>סקירה</strong>
-              <span>חזור למבט העל של חדר הבקרה הניהולי.</span>
-            </button>
-          </div>
-        </SurfaceDialog>
-      ) : null}
+        {isShortcutsOpen ? (
+          <SurfaceDialog
+            eyebrow="Shortcuts"
+            title="Super Admin shortcuts"
+            description="Fast access to active organization management workflows."
+            onClose={() => setIsShortcutsOpen(false)}
+            width="medium"
+          >
+            <div className="topbar-shortcuts-grid">
+              {superAdminQuickActions.map((action) => (
+                <button key={action.id} className="topbar-shortcut-tile" onClick={action.run} type="button">
+                  <strong>{action.title}</strong>
+                  <span>{action.description}</span>
+                </button>
+              ))}
+            </div>
+          </SurfaceDialog>
+        ) : null}
 
-      {activeUtilityPanel === 'shortcuts' ? (
-        <SurfaceDialog
-          eyebrow="Quick actions"
-          title="פעולות מהירות"
-          description="הפעולות כאן מחליפות את שורת הלשוניות הישנה."
-          onClose={() => setActiveUtilityPanel(null)}
-          width="wide"
-        >
-          <div className="command-grid">
-            <button className="command-card" onClick={() => { setSelectedTab('overview'); setActiveUtilityPanel(null) }} type="button">
-              <strong>סקירה</strong>
-              <span>מעבר לסיכום הכללי של המערכת.</span>
-            </button>
-            <button className="command-card" onClick={() => { setSelectedTab('users'); setActiveUtilityPanel(null) }} type="button">
-              <strong>משתמשים</strong>
-              <span>ניהול משתמשים והרשאות בארגונים.</span>
-            </button>
-            <button className="command-card" onClick={() => { setSelectedTab('billing'); setActiveUtilityPanel(null) }} type="button">
-              <strong>תשלומים</strong>
-              <span>מסך כרטיסים, חיובים ומפתחות AI.</span>
-            </button>
-            <button className="command-card" onClick={() => { setSelectedTab('events'); setActiveUtilityPanel(null) }} type="button">
-              <strong>אירועים חיים</strong>
-              <span>יומן real-time מלא של הסופר אדמין.</span>
-            </button>
-          </div>
-        </SurfaceDialog>
-      ) : null}
-
-      {activeUtilityPanel === 'command' ? (
-        <SurfaceDialog
-          eyebrow="Quick command"
-          title="Quick command"
-          description="הפקודות כאן פותחות אזורי ניהול אמיתיים או מעבירות למשטח ההפעלה."
-          onClose={() => setActiveUtilityPanel(null)}
-          width="wide"
-        >
-          <div className="command-grid">
-            <button className="command-card" onClick={() => { setSelectedTab('overview'); setActiveUtilityPanel(null) }} type="button">
-              <strong>סקירה</strong>
-              <span>סיכום ארגונים, שימוש ותקלות.</span>
-            </button>
-            <button className="command-card" onClick={() => { setSelectedTab('suspendedOrganizations'); setActiveUtilityPanel(null) }} type="button">
-              <strong>ארגון מושהה</strong>
-              <span>פתח את רשימת הארגונים המושהים.</span>
-            </button>
-            <button className="command-card" onClick={() => { setSelectedTab('users'); setActiveUtilityPanel(null) }} type="button">
-              <strong>משתמשים</strong>
-              <span>ניהול משתמשי מערכת וארגונים.</span>
-            </button>
-            <button className="command-card" onClick={() => { setSelectedTab('issues'); setActiveUtilityPanel(null) }} type="button">
-              <strong>תקלות</strong>
-              <span>מעבר ישיר למסך התקלות.</span>
-            </button>
-            <button className="command-card" onClick={() => { onOpenGhostLive(); setActiveUtilityPanel(null) }} type="button">
-              <strong>Ghost Live</strong>
-              <span>מעבר למשטח הפעילות החיה של המערכת.</span>
-            </button>
-          </div>
-        </SurfaceDialog>
-      ) : null}
-
-      {isCreateOrganizationDialogOpen ? (
-        <SurfaceDialog
-          eyebrow="יצירת ארגון"
-          title="צור ארגון חדש"
-          description="הזן שם ברור לארגון החדש. לאחר היצירה תועבר ישירות למסך הניהול של הארגון."
-          onClose={() => {
-            if (!isBusy) {
-              setIsCreateOrganizationDialogOpen(false)
-            }
-          }}
-          width="narrow"
-          actions={
-            <>
-              <button className="ghost-button" disabled={isBusy} onClick={() => setIsCreateOrganizationDialogOpen(false)} type="button">
-                ביטול
+        {isSupportOpen ? (
+          <SurfaceDialog
+            eyebrow="Support"
+            title="Admin support actions"
+            description="Every destination below is a real management flow."
+            onClose={() => setIsSupportOpen(false)}
+            width="medium"
+          >
+            <div className="topbar-action-list">
+              <button className="topbar-action-card" onClick={() => openAdminTab('ghostLive', 'Ghost Live')} type="button">
+                <strong>Open Ghost Live</strong>
+                <span>Jump into channel management, operations, recent runs, and live activity.</span>
               </button>
-              <button className="primary-button" disabled={isBusy} onClick={() => void handleCreateOrganization()} type="button">
-                צור ארגון
+              <button className="topbar-action-card" onClick={() => openAdminTab('billing', 'Command Center')} type="button">
+                <strong>Open billing</strong>
+                <span>Manage payment cards, manager code access, and AI key sync.</span>
               </button>
-            </>
-          }
-        >
-          <label className="sa-dialog-field">
-            <span>שם הארגון</span>
-            <input
-              autoFocus
-              value={newOrganizationName}
-              onChange={(event) => setNewOrganizationName(event.target.value)}
-              placeholder="לדוגמה: Ghost HQ"
-            />
-          </label>
-        </SurfaceDialog>
-      ) : null}
+              <button className="topbar-action-card" onClick={() => openAdminTab('usage', 'Command Center')} type="button">
+                <strong>Inspect usage</strong>
+                <span>Check ledgers, operations, channels, and recent run history.</span>
+              </button>
+              <button className="topbar-action-card" onClick={() => openAdminTab('overview', 'Super Admin')} type="button">
+                <strong>Create organization</strong>
+                <span>Jump to the overview and use the organization creation form in the sidebar.</span>
+              </button>
+            </div>
+          </SurfaceDialog>
+        ) : null}
+
+        {activeAccountDialog === 'profile' ? (
+          <SurfaceDialog
+            eyebrow="Profile"
+            title={[profile.firstName, profile.lastName].filter(Boolean).join(' ') || profile.username}
+            description="Active authenticated Super Admin session."
+            onClose={() => setActiveAccountDialog(null)}
+            width="narrow"
+          >
+            <div className="topbar-dialog-stack">
+              <div className="topbar-info-row"><span>Role</span><strong>{profile.role}</strong></div>
+              <div className="topbar-info-row"><span>Organizations</span><strong>{overview?.totals.organizationsCount ?? 0}</strong></div>
+              <div className="topbar-info-row"><span>Users</span><strong>{allUsers.length}</strong></div>
+              <div className="topbar-info-row"><span>Open issues</span><strong>{unresolvedIssuesCount}</strong></div>
+            </div>
+          </SurfaceDialog>
+        ) : null}
+
+        {activeAccountDialog === 'api' ? (
+          <SurfaceDialog
+            eyebrow="API"
+            title="Organization AI and integration status"
+            description="Live admin data from the selected organization."
+            onClose={() => setActiveAccountDialog(null)}
+            width="medium"
+          >
+            <div className="topbar-dialog-stack">
+              <div className="topbar-info-row"><span>Selected organization</span><strong>{selectedOrganization?.name ?? 'None selected'}</strong></div>
+              <div className="topbar-info-row"><span>AI key target</span><strong>{aiKeyOrgId || selectedOrganizationId || 'Unavailable'}</strong></div>
+              <div className="topbar-info-row"><span>Last AI sync</span><strong>{selectedOrganization?.openAiLastSyncIso ? new Date(selectedOrganization.openAiLastSyncIso).toLocaleString() : 'Not synced'}</strong></div>
+              <div className="topbar-info-row"><span>Channels</span><strong>{organizationDetails?.channels.length ?? 0}</strong></div>
+            </div>
+          </SurfaceDialog>
+        ) : null}
+
+        <AppFooter />
+      </div>
     </div>
   )
 }
-

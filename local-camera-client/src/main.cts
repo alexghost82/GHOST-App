@@ -149,7 +149,11 @@ async function refreshDashboardSnapshot(saved: SavedAgentConfig): Promise<Dashbo
       accessToken: saved.accessToken,
       refreshToken: saved.refreshToken,
     })
-    const channel = await api.fetchChannel(saved.channelId)
+    const primaryChannelId = saved.channelId ?? saved.bindings[0]?.channelId
+    if (!primaryChannelId) {
+      throw new Error('No saved channel binding found.')
+    }
+    const channel = await api.fetchChannel(primaryChannelId)
     latestDashboardSnapshot = {
       channel,
       fetchedAtIso: new Date().toISOString(),
@@ -532,10 +536,29 @@ ipcMain.handle('get-cameras', async () => {
 })
 
 ipcMain.handle('save-binding', async (_event: IpcMainInvokeEvent, payload: SavedAgentConfig) => {
-  const [{ GhostApiClient }, { DEFAULT_API_BASE_URL, saveLocalConfig }] = await Promise.all([
+  const [{ GhostApiClient }, { DEFAULT_API_BASE_URL, loadLocalConfig, saveLocalConfig }] = await Promise.all([
     loadApiClient(),
     loadStore(),
   ])
+
+  const existing = loadLocalConfig()
+  const nowIso = new Date().toISOString()
+  const cameraName = payload.cameraName?.trim()
+  if (!payload.channelId || !cameraName) {
+    throw new Error('Channel and camera selection are required.')
+  }
+
+  const nextCameraId = `usb-${cameraName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'camera'}`
+  const nextCamera = {
+    cameraId: nextCameraId,
+    label: cameraName,
+    source: {
+      type: 'usb-dshow' as const,
+      name: cameraName,
+    },
+    createdAtIso: existing?.cameras.find((camera) => camera.cameraId === nextCameraId)?.createdAtIso ?? nowIso,
+    updatedAtIso: nowIso,
+  }
 
   const api = new GhostApiClient({
     apiBaseUrl: DEFAULT_API_BASE_URL,
@@ -546,12 +569,26 @@ ipcMain.handle('save-binding', async (_event: IpcMainInvokeEvent, payload: Saved
     channelId: payload.channelId,
     deviceId: payload.deviceId,
     deviceName: payload.deviceName,
-    cameraName: payload.cameraName,
+    cameraId: nextCameraId,
+    cameraLabel: nextCamera.label,
+    cameraSourceType: nextCamera.source.type,
+    cameraName,
   })
 
   const normalizedPayload = {
+    ...(existing ?? {}),
     ...payload,
     apiBaseUrl: DEFAULT_API_BASE_URL,
+    cameras: [
+      ...(existing?.cameras.filter((camera) => camera.cameraId !== nextCameraId) ?? []),
+      nextCamera,
+    ],
+    bindings: [
+      ...(existing?.bindings.filter((binding) => binding.channelId !== payload.channelId) ?? []),
+      { channelId: payload.channelId, cameraId: nextCameraId },
+    ],
+    defaultCameraId: existing?.defaultCameraId ?? nextCameraId,
+    boundAtIso: nowIso,
   }
   saveLocalConfig(normalizedPayload)
   await startWorkerFromSaved(normalizedPayload)
@@ -573,7 +610,9 @@ ipcMain.handle('unbind-agent', async () => {
     accessToken: saved.accessToken,
     refreshToken: saved.refreshToken,
   })
-  await api.unbindChannel(saved.channelId, saved.deviceId)
+  for (const binding of saved.bindings) {
+    await api.unbindChannel(binding.channelId, saved.deviceId)
+  }
   worker?.stop()
   worker = null
   healthServer?.close()

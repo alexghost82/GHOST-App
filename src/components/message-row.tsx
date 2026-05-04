@@ -5,109 +5,58 @@ interface MessageRowProps {
   onDismissFrame?: (messageId: string) => void
 }
 
-const AUTHOR_LABELS: Record<string, string> = {
-  ghost: 'G',
-  system: 'SYS',
-  user: 'ME',
+const ALERT_LABEL_MAP: Record<string, string> = {
+  critical: 'Critical alert',
+  routine: 'Routine scan',
+  report: 'Report',
+  rating: 'Rating',
+  assessment: 'Assessment',
 }
 
-const AUTHOR_TITLES: Record<string, string> = {
-  ghost: 'Ghost',
-  system: 'System',
-  user: 'You',
-}
-
-const ALERT_LEVEL_CLASS: Record<string, string> = {
-  critical: 'alert-critical',
-  routine: 'alert-routine',
-  report: 'alert-report',
-  rating: 'alert-rating',
-  assessment: 'alert-assessment',
-}
-
-const SCAN_LABEL_MAP: Record<string, { className: string; text: string }> = {
-  critical: { className: 'scan-label-critical', text: 'CRITICAL' },
-  routine: { className: 'scan-label-routine', text: 'SCAN OK' },
-  report: { className: 'scan-label-report', text: 'REPORT' },
-  rating: { className: 'scan-label-rating', text: 'RATING' },
-  assessment: { className: 'scan-label-assessment', text: 'ASSESSMENT' },
-}
-
-const AVATAR_MAP: Record<string, string> = {
-  critical: '!',
-  routine: 'OK',
-  report: 'R',
-  rating: '*',
-  assessment: 'A',
-}
-
-/**
- * Renders a chat message row with clear hierarchy for user, Ghost, and system scan states.
- */
 export function MessageRow({ message, onDismissFrame }: MessageRowProps) {
-  const isScan = Boolean(message.alertLevel)
-  const levelClass = message.alertLevel ? (ALERT_LEVEL_CLASS[message.alertLevel] ?? '') : ''
-  const isGhostAvatar = message.author === 'ghost' && !message.alertLevel
-
-  function avatarLabel() {
-    if (message.alertLevel) {
-      return AVATAR_MAP[message.alertLevel] ?? 'SYS'
-    }
-    return AUTHOR_LABELS[message.author] ?? 'U'
-  }
-
-  const scanLabelInfo = message.alertLevel ? SCAN_LABEL_MAP[message.alertLevel] : null
-  const authorTitle = AUTHOR_TITLES[message.author] ?? 'Message'
+  const hasFrame = Boolean(message.frameDataUrl)
+  const levelClass = message.alertLevel ? `alert-${message.alertLevel}` : ''
+  const isOutgoing = message.author === 'user'
+  const isSystem = message.author === 'system'
+  const label = message.alertLevel ? ALERT_LABEL_MAP[message.alertLevel] : null
 
   return (
-    <article className={`message-row ${message.author} ${levelClass}`}>
-      {isGhostAvatar ? (
-        <img className="message-avatar message-avatar-ghost-logo" src="/ghost-logo.png" alt="Ghost logo" />
-      ) : (
-        <div className="message-avatar">{avatarLabel()}</div>
-      )}
+    <article className={`message-row ${message.author} ${levelClass}`.trim()}>
       <div className="message-body">
-        <div className="message-meta">
-          <span className="message-author">{authorTitle}</span>
-          <span className="message-meta-separator">/</span>
-          <span className="message-time-inline">{message.time}</span>
-        </div>
-        {isScan && scanLabelInfo ? (
-          <span className={`message-scan-label ${scanLabelInfo.className}`}>
-            {scanLabelInfo.text}
-            {message.alertLevel === 'rating' && message.score != null ? ` ${message.score}/10` : ''}
-          </span>
-        ) : null}
-        {message.sources && message.sources.length === 1 ? (
-          <div className="message-camera-header">
-            <span className="message-camera-badge">{message.sources[0]}</span>
-          </div>
-        ) : null}
+        {label ? <span className="message-scan-label">{label}</span> : null}
+
         <div className="message-bubble">
+          {isSystem ? <span className="message-author-tag">System</span> : null}
+          {!isOutgoing && !isSystem ? <span className="message-author-tag">Ghost</span> : null}
           <p>{message.text}</p>
-          {message.sources && message.sources.length > 1 ? (
+
+          {message.sources && message.sources.length > 0 ? (
             <div className="source-tags">
               {message.sources.map((source) => (
                 <span key={source}>{source}</span>
               ))}
             </div>
           ) : null}
-          <span className="timestamp">{message.time}</span>
+
+          <span className="timestamp">
+            {message.time}
+            {message.alertLevel === 'rating' && message.score != null ? ` · ${message.score}/10` : ''}
+          </span>
         </div>
-        {message.frameDataUrl ? (
+
+        {hasFrame ? (
           <div className="message-frame-wrap">
-            <img alt="Captured scan frame" className="message-frame-preview" src={message.frameDataUrl} />
+            <img alt="Frame preview" className="message-frame-preview" src={message.frameDataUrl} />
             {onDismissFrame ? (
               <button
                 className="message-frame-dismiss"
                 onClick={() => onDismissFrame(message.id)}
-                title="Hide attached frame"
+                title="Dismiss frame"
                 type="button"
               >
-                x
+                ×
               </button>
             ) : null}
-            <div className="message-frame-caption">Captured frame attached</div>
           </div>
         ) : null}
       </div>

@@ -1,0 +1,80 @@
+{
+  "user": "slon",
+  "dark": {
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-main-chat-qa\\dark-main-chat.png",
+    "theme": "dark",
+    "url": "http://127.0.0.1:4173/",
+    "bodyText": "פקודה מהירה\nCtrl+K\nגוסט לייב\nמרכז פיקוד\nחי\n1\nערוצים\n1\nמבצעים\n0\nבריאות\n100%\nאב\nאלכס בו\nTEST\nגל\nגוסט לייב\nתיבת ניטור מאובטחת\n+\n⋮\nשיחות\n1\nב\nבית\nפעיל\n19:36\n\nאתה: עוד פעם\n\nב\nבית\n\nפעיל כעת·19:36\n\n⋮\nSystem\n\nערוץ חדש נוצר ומוכן לשיחה. אפשר לעדכן RTSP, זיכרון ומבצעים בפאנל הימני.\n\n18:45\n\n?\n\n18:52\n\n?\n\n18:54\n\nבדוק אם יש חסימה בכניסה\n\n18:54\n\nчто ты видишь?\n\n18:57\n\n,\n\n15:31\n\nמה מצב\n\n19:35\n\n??\n\n19:36\n\nעוד פעם\n\n19:36\nהודעה\n➤\nגרסה\nv0.8.3\nבילד\n2026.03\nמיקום\n34.7843°N 32.0853°E\nמערכת\nOK\nשעה\n19:40:31\nחי\nעזרה\nפרטיות\nתנאים",
+    "streamRect": {
+      "x": 0,
+      "y": 148,
+      "width": 1540,
+      "height": 825
+    },
+    "rows": [
+      {
+        "className": "message-row system",
+        "x": 4,
+        "y": 166,
+        "width": 1532,
+        "height": 72
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 246,
+        "width": 1532,
+        "height": 53
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 307,
+        "width": 1532,
+        "height": 53
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 367,
+        "width": 1532,
+        "height": 53
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 428,
+        "width": 1532,
+        "height": 53
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 489,
+        "width": 1532,
+        "height": 53
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 549,
+        "width": 1532,
+        "height": 53
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 610,
+        "width": 1532,
+        "height": 53
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 670,
+        "width": 1532,
+        "height": 53
+      }
+    ]
+  }
+}

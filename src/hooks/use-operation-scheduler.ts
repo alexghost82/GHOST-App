@@ -111,9 +111,6 @@ export function useOperationScheduler({ channels, onOperationFired }: SchedulerA
       }
 
       try {
-        if (channel.captureMode === 'local_agent') {
-          return
-        }
         const hasComplexOperation = operationList.some(
           (operation) => operation.mode !== 'alert' || operation.detailLevel === 'high',
         )
@@ -136,16 +133,9 @@ export function useOperationScheduler({ channels, onOperationFired }: SchedulerA
           })
           lastExecutionTimes.set(`${channel.id}_${operation.id}`, Date.now())
         }
-      } catch (err) {
-        // If the error is because no camera is available (e.g., this is a remote monitor),
-        // we silently skip emitting a failure. The Local Agent is responsible for this channel.
-        const isCameraError = err instanceof Error && (err.message.includes('camera') || err.message.includes('מצלמה') || err.message.includes('media'));
-        if (!isCameraError) {
-          for (const operation of operationList) {
-            emitFailure(channel, operation)
-          }
-        } else {
-          console.debug(`[Scheduler] Skipped local capture for channel ${channel.name} - assuming managed by Local Agent.`);
+      } catch {
+        for (const operation of operationList) {
+          emitFailure(channel, operation)
         }
       } finally {
         runningChannels.delete(channelId)
@@ -158,9 +148,6 @@ export function useOperationScheduler({ channels, onOperationFired }: SchedulerA
 
     function setupIntervalTimers() {
       for (const channel of channelsRef.current) {
-        if (channel.captureMode === 'local_agent') {
-          continue
-        }
         for (const op of channel.operations) {
           if (!op.enabled || !op.parsedSchedule || op.parsedSchedule.type !== 'interval') {
             continue
@@ -192,9 +179,6 @@ export function useOperationScheduler({ channels, onOperationFired }: SchedulerA
       const currentMs = now.getHours() * 3_600_000 + now.getMinutes() * 60_000 + now.getSeconds() * 1_000
 
       for (const channel of channelsRef.current) {
-        if (channel.captureMode === 'local_agent') {
-          continue
-        }
         for (const op of channel.operations) {
           if (!op.enabled || !op.parsedSchedule || op.parsedSchedule.type !== 'time-slots') {
             continue

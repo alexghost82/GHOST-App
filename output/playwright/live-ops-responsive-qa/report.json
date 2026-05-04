@@ -1,0 +1,195 @@
+{
+  "user": "slon",
+  "desktop": {
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-responsive-qa\\desktop-1440x960.png",
+    "metrics": {
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "activeSurface": null,
+      "topbar": {
+        "selector": ".topbar",
+        "display": "flex",
+        "width": 1440,
+        "height": 59,
+        "top": 0,
+        "left": 0,
+        "right": 1440,
+        "bottom": 59
+      },
+      "workspace": {
+        "selector": ".workspace",
+        "display": "flex",
+        "width": 1440,
+        "height": 844,
+        "top": 59,
+        "left": 0,
+        "right": 1440,
+        "bottom": 903
+      },
+      "footer": {
+        "selector": ".app-footer",
+        "display": "grid",
+        "width": 1440,
+        "height": 57,
+        "top": 903,
+        "left": 0,
+        "right": 1440,
+        "bottom": 960
+      },
+      "inbox": {
+        "selector": ".inbox-panel",
+        "display": "flex",
+        "width": 380,
+        "height": 844,
+        "top": 59,
+        "left": 1060,
+        "right": 1440,
+        "bottom": 903
+      },
+      "chat": {
+        "selector": ".chat-panel",
+        "display": "flex",
+        "width": 1060,
+        "height": 844,
+        "top": 59,
+        "left": 0,
+        "right": 1060,
+        "bottom": 903
+      },
+      "details": {
+        "selector": ".details-panel",
+        "display": "none",
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "left": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "bottomNav": {
+        "selector": ".bottom-nav",
+        "display": "none",
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "left": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "shell": {
+        "selector": ".app-surface",
+        "display": "grid",
+        "width": 1440,
+        "height": 960,
+        "top": 0,
+        "left": 0,
+        "right": 1440,
+        "bottom": 960
+      },
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440,
+      "bodyScrollHeight": 960,
+      "bodyClientHeight": 960,
+      "activePanel": "chat",
+      "textSample": "פקודה מהירה\nCtrl+K\nגוסט לייב\nמרכז פיקוד\nחי\n1\nערוצים\n2\nמבצעים\n0\nבריאות\n50%\nאב\nאלכס בו\nTEST\nגל\nגוסט לייב\nתיבת ניטור מאובטחת\n+\n⋮\n⌕\nשיחות\n2\nב\nבית\nפעיל\n15:31\n\nאתה: ,\n\nL\nLocal Agent QA\nלא זמין\n11:09\n\nאתה: Button QA 1777882143549\n\nL\nLocal Agent QA\n\nבמעקב·11:09\n\n⌕\n⋮\n\nButton QA 1777881959107\n\n11:05\n\nButton QA 1777882143549\n\n11:09\nהודעה\n➤\nגרסה\nv0.8.3\nבילד\n2026.03\nמיקום\n34.7843°N 32.0853°E\nמערכת\nOK\nשעה\n13:43:44\nחי\nעזרה\nפרטיות\nתנאים"
+    }
+  },
+  "mobile": {
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-responsive-qa\\mobile-390x844.png",
+    "metrics": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "activeSurface": null,
+      "topbar": {
+        "selector": ".topbar",
+        "display": "flex",
+        "width": 390,
+        "height": 73,
+        "top": 0,
+        "left": 0,
+        "right": 390,
+        "bottom": 73
+      },
+      "workspace": {
+        "selector": ".workspace",
+        "display": "flex",
+        "width": 390,
+        "height": 771,
+        "top": 73,
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      },
+      "footer": {
+        "selector": ".app-footer",
+        "display": "none",
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "left": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "inbox": {
+        "selector": ".inbox-panel",
+        "display": "none",
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "left": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "chat": {
+        "selector": ".chat-panel",
+        "display": "flex",
+        "width": 390,
+        "height": 694,
+        "top": 73,
+        "left": 0,
+        "right": 390,
+        "bottom": 767
+      },
+      "details": {
+        "selector": ".details-panel",
+        "display": "none",
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "left": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "bottomNav": {
+        "selector": ".bottom-nav",
+        "display": "grid",
+        "width": 390,
+        "height": 77,
+        "top": 767,
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      },
+      "shell": {
+        "selector": ".app-surface",
+        "display": "grid",
+        "width": 390,
+        "height": 844,
+        "top": 0,
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      },
+      "bodyScrollWidth": 390,
+      "bodyClientWidth": 390,
+      "bodyScrollHeight": 844,
+      "bodyClientHeight": 844,
+      "activePanel": "chat",
+      "textSample": "אב\nשיחות\nL\nLocal Agent QA\n\nבמעקב·11:09\n\n⌕\n⋮\n\nButton QA 1777881959107\n\n11:05\n\nButton QA 1777882143549\n\n11:09\nהודעה\n➤\nשיחות\nשיחה\nערוץ"
+    }
+  }
+}
