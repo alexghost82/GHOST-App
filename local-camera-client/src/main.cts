@@ -230,10 +230,10 @@ function createWindow(hidden = false): void {
   }
 
   mainWindow = new BrowserWindow({
-    width: 1220,
-    height: 860,
-    minWidth: 1024,
-    minHeight: 740,
+    width: 1360,
+    height: 900,
+    minWidth: 1240,
+    minHeight: 820,
     show: !hidden,
     title: 'GHOST Camera Agent',
     icon: agentIconPath,

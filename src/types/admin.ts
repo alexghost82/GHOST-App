@@ -159,3 +159,5 @@ export interface OrganizationDetailsResponse {
   usageLedger: OrganizationUsageLedger[]
   channelStats: ChannelUsageMonthly[]
 }
+
+export type SuperAdminMobileSection = 'overview' | 'organizations' | 'users' | 'issues' | 'more'

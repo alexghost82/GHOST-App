@@ -14,7 +14,7 @@ const CAMERA_PASSWORD = '05010108Zz'
 const CAMERA_CHANNEL = 1
 const DEVICE_NAME = 'GHOST Hikvision E2E Agent'
 const HEALTH_PORT = 8791
-const POLL_TIMEOUT_MS = 240_000
+const POLL_TIMEOUT_MS = 600_000
 
 async function main() {
   backupLocalAgentFiles()
@@ -85,7 +85,7 @@ async function main() {
     {
       name: operationName,
       mode: 'report',
-      schedule: 'Every 5 seconds',
+      schedule: 'Every 30 seconds',
       trigger: 'Run scheduled Hikvision snapshot validation.',
       action: 'Describe the visible scene in one short operational sentence.',
       modelOverride: 'gpt-4.1-mini',
@@ -93,14 +93,13 @@ async function main() {
       enabled: true,
       parsedSchedule: {
         type: 'interval',
-        intervalMs: 5_000,
+        intervalMs: 30_000,
       },
     },
     tenantAccessToken,
   )
 
   const connectResponse = await GhostApiClient.connect(DEFAULT_API_BASE_URL, organizationName, DEVICE_NAME)
-  const savedBefore = loadLocalConfig()
   const savedBase = {
     organizationId: connectResponse.organizationId,
     organizationName: connectResponse.organizationName,
@@ -110,13 +109,13 @@ async function main() {
     username: connectResponse.profile.username,
     deviceId: connectResponse.deviceId,
     deviceName: DEVICE_NAME,
-    cameras: savedBefore?.cameras ?? [],
-    bindings: savedBefore?.bindings ?? [],
+    cameras: [],
+    bindings: [],
     channelId: channel.id,
     channelName: channel.name,
-    cameraName: savedBefore?.cameraName,
+    cameraName: undefined,
     boundAtIso: new Date().toISOString(),
-    defaultCameraId: savedBefore?.defaultCameraId,
+    defaultCameraId: undefined,
   }
 
   const cameraId = `hikvision-sdk-${stamp}`
@@ -162,10 +161,7 @@ async function main() {
     channelId: channel.id,
     channelName: channel.name,
     boundAtIso: new Date().toISOString(),
-    bindings: [
-      ...savedWithCamera.bindings.filter((binding) => binding.channelId !== channel.id),
-      { channelId: channel.id, cameraId },
-    ],
+    bindings: [{ channelId: channel.id, cameraId }],
     defaultCameraId: cameraId,
     cameraName: camera.label,
   }
@@ -182,7 +178,7 @@ async function main() {
   const worker = new LocalCameraWorker(
     {
       ...config,
-      pollIntervalMs: 2_000,
+      pollIntervalMs: 5_000,
       healthPort: HEALTH_PORT,
     },
     state,

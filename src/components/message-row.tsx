@@ -46,12 +46,12 @@ export function MessageRow({ message, onDismissFrame }: MessageRowProps) {
 
         {hasFrame ? (
           <div className="message-frame-wrap">
-            <img alt="Frame preview" className="message-frame-preview" src={message.frameDataUrl} />
+            <img alt="תצוגת פריים" className="message-frame-preview" src={message.frameDataUrl} />
             {onDismissFrame ? (
               <button
                 className="message-frame-dismiss"
                 onClick={() => onDismissFrame(message.id)}
-                title="Dismiss frame"
+                title="הסר פריים"
                 type="button"
               >
                 ×

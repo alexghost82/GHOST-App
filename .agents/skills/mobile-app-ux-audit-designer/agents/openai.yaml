@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mobile App UX Audit Designer"
+  short_description: "Audit a project's UX/UI, functionality, and logic, then produce 3 mobile realization options and an Android/iOS design blueprint"
+  default_prompt: "Use $mobile-app-ux-audit-designer to inspect the whole project or a selected area, create a Project Understanding Report, collect the desired final result, propose exactly 3 mobile realization options, and then prepare a detailed Android/iOS implementation plan."

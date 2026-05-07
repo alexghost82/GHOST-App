@@ -1,7 +1,6 @@
 import { LIVE_STATE_META } from '../data/constants'
 import type { Channel } from '../types'
 import { resolveChannelAvatarDataUrl } from '../utils/channel-avatar'
-import { StatusDot } from './status-dot'
 
 interface ChannelCardProps {
   channel: Channel
@@ -27,11 +26,54 @@ function buildPreview(channel: Channel): string {
   return message.text
 }
 
+function buildCaptureIndicator(channel: Channel): {
+  shortLabel: string
+  fullLabel: string
+  tone: 'live' | 'degraded' | 'offline' | 'neutral'
+} {
+  if (channel.captureMode === 'local_agent') {
+    const sourceMap: Record<NonNullable<Channel['localAgentBinding']>['cameraSourceType'], string> = {
+      'usb-dshow': 'USB',
+      rtsp: 'RTSP',
+      'hikvision-sdk': 'Hikvision',
+    }
+
+    const stateMap: Record<NonNullable<Channel['localAgentStatus']>['state'], string> = {
+      connected: 'מחובר',
+      degraded: 'חלקי',
+      offline: 'מנותק',
+    }
+
+    const state = channel.localAgentStatus?.state ?? 'offline'
+    const sourceLabel = channel.localAgentBinding?.cameraSourceType ? sourceMap[channel.localAgentBinding.cameraSourceType] : 'LOCAL'
+    return {
+      shortLabel: sourceLabel === 'Hikvision' ? 'HIK' : sourceLabel,
+      fullLabel: `לקוח מקומי · ${sourceLabel} · ${stateMap[state]}`,
+      tone: state === 'connected' ? 'live' : state === 'degraded' ? 'degraded' : 'offline',
+    }
+  }
+
+  if (channel.captureMode === 'browser') {
+    return {
+      shortLabel: 'WEB',
+      fullLabel: 'ישירות מהדפדפן · אין טלמטריית חיבור דפדפן',
+      tone: 'neutral',
+    }
+  }
+
+  return {
+    shortLabel: '--',
+    fullLabel: 'אין הגדרות חיבור למצלמה בערוץ הזה',
+    tone: 'neutral',
+  }
+}
+
 export function ChannelCard({ channel, isAlerting, isSelected, onSelect }: ChannelCardProps) {
   const lastMessageTime = channel.messages.at(-1)?.time ?? '--:--'
   const preview = buildPreview(channel)
   const statusMeta = LIVE_STATE_META[channel.liveState]
   const avatarDataUrl = resolveChannelAvatarDataUrl(channel)
+  const captureIndicator = buildCaptureIndicator(channel)
   const avatarText = channel.type === 'group'
     ? `${Math.min(channel.members.length || 2, 99)}`
     : channel.name.slice(0, 1).toUpperCase()
@@ -53,7 +95,13 @@ export function ChannelCard({ channel, isAlerting, isSelected, onSelect }: Chann
           <div className="chat-list-title-stack">
             <strong>{channel.name}</strong>
             <span className={`chat-list-location status-label-${channel.liveState.toLowerCase()}`}>
-              <StatusDot liveState={channel.liveState} className="channel-status-dot" />
+              <span
+                className={`channel-connection-indicator tone-${captureIndicator.tone}`}
+                title={captureIndicator.fullLabel}
+                aria-label={captureIndicator.fullLabel}
+              >
+                {captureIndicator.shortLabel}
+              </span>
               {statusMeta?.label ?? 'לא זמין'}
             </span>
           </div>

@@ -42,6 +42,9 @@ function navLabel(item: string): string {
   if (item === 'Command Center') {
     return 'מרכז פיקוד'
   }
+  if (item === 'Super Admin') {
+    return 'סופר אדמין'
+  }
   return item
 }
 

@@ -77,7 +77,7 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
       )
       return res.json(enriched)
     } catch (error) {
-      const message = error instanceof Error ? error.message : '×©×’×™××” ×¤× ×™×ž×™×ª.'
+      const message = error instanceof Error ? error.message : 'שגיאה פנימית.'
       return res.status(500).json({ error: message })
     }
   })
@@ -86,12 +86,12 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
     try {
       const { organizationId, userId } = extractTenantContext(req)
       const channel = await store.getFullChannel(organizationId, req.params.id)
-      if (!channel) return res.status(404).json({ error: '×”×¢×¨×•×¥ ×œ× × ×ž×¦×.' })
+      if (!channel) return res.status(404).json({ error: 'הערוץ לא נמצא.' })
       const messages = await store.listMessages(organizationId, userId, channel.id)
       const operations = await store.listChannelOperations(organizationId, channel.id)
       return res.json({ ...normalizeChannelLocalAgentState(channel), messages, operations })
     } catch (error) {
-      const message = error instanceof Error ? error.message : '×©×’×™××” ×¤× ×™×ž×™×ª.'
+      const message = error instanceof Error ? error.message : 'שגיאה פנימית.'
       return res.status(500).json({ error: message })
     }
   })
@@ -100,7 +100,7 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
     try {
       const { organizationId } = extractTenantContext(req)
       const parsed = CreateChannelSchema.safeParse(req.body)
-      if (!parsed.success) return res.status(400).json({ error: '×§×œ×˜ ×œ× ×ª×§×™×Ÿ.', details: parsed.error.flatten() })
+      if (!parsed.success) return res.status(400).json({ error: 'קלט לא תקין.', details: parsed.error.flatten() })
       const channel = await store.createFullChannel(organizationId, {
         ...parsed.data,
         captureMode: parsed.data.captureMode ?? 'browser',
@@ -109,7 +109,7 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
       publishUsageUpdated(realtimeHub, organizationId, { action: 'channel.created', channelId: channel.id })
       return res.status(201).json(normalizeChannelLocalAgentState(channel))
     } catch (error) {
-      const message = error instanceof Error ? error.message : '×©×’×™××” ×¤× ×™×ž×™×ª.'
+      const message = error instanceof Error ? error.message : 'שגיאה פנימית.'
       return res.status(500).json({ error: message })
     }
   })
@@ -118,7 +118,7 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
     try {
       const { organizationId } = extractTenantContext(req)
       const parsed = UpdateChannelSchema.safeParse(req.body)
-      if (!parsed.success) return res.status(400).json({ error: '×§×œ×˜ ×œ× ×ª×§×™×Ÿ.', details: parsed.error.flatten() })
+      if (!parsed.success) return res.status(400).json({ error: 'קלט לא תקין.', details: parsed.error.flatten() })
       const channel = await store.updateChannelData(organizationId, req.params.id, {
         ...parsed.data,
         localAgentBinding:
@@ -128,7 +128,7 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
       })
       return res.json(normalizeChannelLocalAgentState(channel))
     } catch (error) {
-      const message = error instanceof Error ? error.message : '×©×’×™××” ×¤× ×™×ž×™×ª.'
+      const message = error instanceof Error ? error.message : 'שגיאה פנימית.'
       return res.status(500).json({ error: message })
     }
   })
@@ -141,7 +141,7 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
       publishUsageUpdated(realtimeHub, organizationId, { action: 'channel.deleted', channelId: req.params.id })
       return res.status(204).send()
     } catch (error) {
-      const message = error instanceof Error ? error.message : '×©×’×™××” ×¤× ×™×ž×™×ª.'
+      const message = error instanceof Error ? error.message : 'שגיאה פנימית.'
       return res.status(500).json({ error: message })
     }
   })
@@ -150,10 +150,10 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
     try {
       const { organizationId, userId } = extractTenantContext(req)
       const parsed = CreateMessageSchema.safeParse(req.body)
-      if (!parsed.success) return res.status(400).json({ error: '×§×œ×˜ ×œ× ×ª×§×™×Ÿ.', details: parsed.error.flatten() })
+      if (!parsed.success) return res.status(400).json({ error: 'קלט לא תקין.', details: parsed.error.flatten() })
 
       const channel = await store.getFullChannel(organizationId, req.params.id)
-      if (!channel) return res.status(404).json({ error: '×”×¢×¨×•×¥ ×œ× × ×ž×¦×.' })
+      if (!channel) return res.status(404).json({ error: 'הערוץ לא נמצא.' })
 
       const recipientIds = resolveMessageRecipientIds(
         store,
@@ -175,7 +175,7 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
       publishUsageUpdated(realtimeHub, organizationId, { action: 'message.created', channelId: req.params.id })
       return res.status(201).json(record)
     } catch (error) {
-      const message = error instanceof Error ? error.message : '×©×’×™××” ×¤× ×™×ž×™×ª.'
+      const message = error instanceof Error ? error.message : 'שגיאה פנימית.'
       return res.status(500).json({ error: message })
     }
   })
@@ -184,13 +184,13 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
     try {
       const { organizationId } = extractTenantContext(req)
       const parsed = CreateOperationSchema.safeParse(req.body)
-      if (!parsed.success) return res.status(400).json({ error: '×§×œ×˜ ×œ× ×ª×§×™×Ÿ.', details: parsed.error.flatten() })
+      if (!parsed.success) return res.status(400).json({ error: 'קלט לא תקין.', details: parsed.error.flatten() })
       const record = await store.createChannelOperation(organizationId, req.params.id, parsed.data)
       await syncOrganizationUsage(store, organizationId)
       publishUsageUpdated(realtimeHub, organizationId, { action: 'operation.created', channelId: req.params.id })
       return res.status(201).json(record)
     } catch (error) {
-      const message = error instanceof Error ? error.message : '×©×’×™××” ×¤× ×™×ž×™×ª.'
+      const message = error instanceof Error ? error.message : 'שגיאה פנימית.'
       return res.status(500).json({ error: message })
     }
   })
@@ -199,11 +199,11 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
     try {
       const { organizationId } = extractTenantContext(req)
       const parsed = UpdateOperationSchema.safeParse(req.body)
-      if (!parsed.success) return res.status(400).json({ error: '×§×œ×˜ ×œ× ×ª×§×™×Ÿ.', details: parsed.error.flatten() })
+      if (!parsed.success) return res.status(400).json({ error: 'קלט לא תקין.', details: parsed.error.flatten() })
       const record = await store.updateChannelOperation(organizationId, req.params.id, req.params.opId, parsed.data)
       return res.json(record)
     } catch (error) {
-      const message = error instanceof Error ? error.message : '×©×’×™××” ×¤× ×™×ž×™×ª.'
+      const message = error instanceof Error ? error.message : 'שגיאה פנימית.'
       return res.status(500).json({ error: message })
     }
   })
@@ -216,7 +216,7 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
       publishUsageUpdated(realtimeHub, organizationId, { action: 'operation.deleted', channelId: req.params.id })
       return res.status(204).send()
     } catch (error) {
-      const message = error instanceof Error ? error.message : '×©×’×™××” ×¤× ×™×ž×™×ª.'
+      const message = error instanceof Error ? error.message : 'שגיאה פנימית.'
       return res.status(500).json({ error: message })
     }
   })

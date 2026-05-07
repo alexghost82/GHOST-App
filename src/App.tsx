@@ -11,6 +11,7 @@ import { FlashAlertOverlay } from './components/flash-alert-overlay'
 import { GroupNameModal } from './components/group-name-modal'
 import { InboxPanel } from './components/inbox-panel'
 import { ChannelsHub } from './components/channels-hub'
+import { MobileSectionHeader, MobileSurfaceCard, MobileTabBar } from './components/mobile-shell'
 import { SurfaceDialog } from './components/surface-dialog'
 import { Topbar } from './components/topbar'
 import type { TopbarNavItem } from './components/topbar'
@@ -39,6 +40,7 @@ import type {
   Operation,
   OperationDraft,
   OperationMode,
+  OperatorMobileSection,
   TimelineAnalysis,
   TimelineSamplerState,
 } from './types'
@@ -204,7 +206,9 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
   const [channels, setChannels] = useState<Channel[]>([])
   const [selectedChannelId, setSelectedChannelId] = useState<string>('')
   const [isLoadingChannels, setIsLoadingChannels] = useState(true)
+  const [isMobileLayout, setIsMobileLayout] = useState(false)
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>('chat')
+  const [operatorMobileSection, setOperatorMobileSection] = useState<OperatorMobileSection>('live')
   const [isDetailsCollapsed, setIsDetailsCollapsed] = useState(true)
   const [isSending, setIsSending] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -259,6 +263,20 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
       .catch(() => undefined)
       .finally(() => { if (!cancelled) setIsLoadingChannels(false) })
     return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined
+    }
+
+    const mediaQuery = window.matchMedia('(max-width: 980px)')
+    const applyMatch = (matches: boolean) => setIsMobileLayout(matches)
+    applyMatch(mediaQuery.matches)
+
+    const handleChange = (event: MediaQueryListEvent) => applyMatch(event.matches)
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
   }, [])
 
   useEffect(() => {
@@ -1557,16 +1575,40 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
     })
   }
 
-  function handleBottomNavChange(panel: MobilePanel) {
+  function handleLiveOpsPanelChange(panel: MobilePanel) {
+    setOperatorMobileSection('live')
     if (activeTopbarNav !== 'Ghost Live') {
       setActiveTopbarNav('Ghost Live')
     }
     setMobilePanel(panel)
   }
 
+  function handleBottomNavChange(panel: MobilePanel) {
+    handleLiveOpsPanelChange(panel)
+  }
+
+  function handleOperatorMobileSectionChange(section: OperatorMobileSection) {
+    closeTopbarOverlays()
+    setOperatorMobileSection(section)
+
+    if (section === 'live' && activeTopbarNav !== 'Ghost Live') {
+      setActiveTopbarNav('Ghost Live')
+    }
+
+    if (section === 'channels' && canAccessCommandCenter) {
+      setActiveTopbarNav('Command Center')
+    }
+  }
+
   function handleTopbarNavChange(nextNav: TopbarNavItem) {
     if (nextNav === 'Command Center' && !canAccessCommandCenter) {
       return
+    }
+    if (nextNav === 'Ghost Live') {
+      setOperatorMobileSection('live')
+    }
+    if (nextNav === 'Command Center') {
+      setOperatorMobileSection('channels')
     }
     setActiveTopbarNav(nextNav)
   }
@@ -1594,6 +1636,271 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
     }
   }
 
+  const operatorMobileNavItems = [
+    { id: 'live', label: 'גוסט לייב' },
+    { id: 'channels', label: 'ערוצים' },
+    { id: 'alerts', label: 'התראות', badge: totalUnreadAlerts > 0 ? totalUnreadAlerts : undefined },
+    { id: 'account', label: 'חשבון' },
+  ] satisfies Array<{ id: OperatorMobileSection; label: string; badge?: number }>
+
+  const liveOpsMobilePanelItems = [
+    { id: 'inbox', label: 'שיחות' },
+    { id: 'chat', label: 'צ׳אט' },
+    { id: 'details', label: 'ערוץ' },
+  ] satisfies Array<{ id: MobilePanel; label: string }>
+
+  function renderOperatorMobileAlertsScreen() {
+    return (
+      <main className="operator-mobile-screen">
+        <MobileSectionHeader
+          eyebrow="התראות"
+          title="התראות קריטיות"
+          description="סקור, אשר או עבור ישירות לערוץ שנפגע."
+        />
+        <CriticalAlertsCenter
+          alerts={criticalAlerts}
+          embedded
+          onApprove={(alert) => handleApproveCriticalAlert(alert.messageId, alert.channelId)}
+          onClose={() => undefined}
+          onDelete={(alert) => handleDeleteCriticalAlert(alert.messageId, alert.channelId)}
+          onIgnore={(alert) => handleIgnoreCriticalAlert(alert.messageId, alert.channelId)}
+          onSelectChannel={(channelId) => {
+            selectChannel(channelId)
+            setOperatorMobileSection('live')
+            setMobilePanel('chat')
+          }}
+        />
+      </main>
+    )
+  }
+
+  function renderOperatorMobileAccountScreen() {
+    return (
+      <main className="operator-mobile-screen operator-mobile-account">
+        <MobileSectionHeader
+          eyebrow="חשבון"
+          title={fullName}
+          description="פרטי סשן, פעולות מהירות ותמונת מצב של הצוות."
+        />
+
+        <div className="operator-mobile-stack">
+          <MobileSurfaceCard title="סשן" eyebrow="מחובר">
+            <div className="operator-mobile-kpis">
+              <div><span>ארגון</span><strong>{organizationName || 'גוסט'}</strong></div>
+              <div><span>תפקיד</span><strong>{formatRoleLabel(currentUserRole)}</strong></div>
+              <div><span>ערוצים</span><strong>{channels.length}</strong></div>
+              <div><span>פידים חיים</span><strong>{totalLiveFeeds}</strong></div>
+            </div>
+          </MobileSurfaceCard>
+
+          <MobileSurfaceCard title="פעולות מהירות" description="הפעולות החשובות שנשארות נגישות גם בנייד.">
+            <div className="operator-mobile-action-list">
+              {operatorQuickActions.slice(0, 6).map((action) => (
+                <button key={action.id} className="topbar-action-card" onClick={action.run} type="button">
+                  <strong>{action.title}</strong>
+                  <span>{action.description}</span>
+                </button>
+              ))}
+            </div>
+          </MobileSurfaceCard>
+
+          <MobileSurfaceCard title="מפעילים וחברים">
+            <div className="topbar-chip-list">
+              {operatorMembers.length > 0
+                ? operatorMembers.map((member) => <span key={member} className="topbar-chip">{member}</span>)
+                : <p>כרגע אין חברים פעילים להצגה.</p>}
+            </div>
+          </MobileSurfaceCard>
+
+          <MobileSurfaceCard title="פעילות אחרונה">
+            <div className="topbar-audit-list">
+              {operatorRecentActivity.slice(0, 8).map((entry) => (
+                <article key={entry.id} className="topbar-audit-item">
+                  <div className="topbar-audit-head">
+                    <strong>{entry.channelName}</strong>
+                    <span>{entry.time}</span>
+                  </div>
+                  <p>{formatAuthorLabel(entry.author)}: {entry.text}</p>
+                </article>
+              ))}
+            </div>
+          </MobileSurfaceCard>
+        </div>
+      </main>
+    )
+  }
+
+  function renderLiveOpsWorkspace() {
+    return (
+      <main
+        className={`workspace ${isDetailsCollapsed ? 'details-collapsed' : ''}`}
+        onTouchEnd={handleWorkspaceTouchEnd}
+        onTouchStart={handleWorkspaceTouchStart}
+      >
+        <div aria-hidden className="ghostlive-terminal-bg">
+          <span className="ghostlive-terminal-glow" />
+          <span className="ghostlive-terminal-scanlines" />
+          {GHOSTLIVE_INTEL_LINES.map((line) => {
+            const style = {
+              '--line-top': line.top,
+              '--line-left': line.left,
+              '--line-cycle': `${line.cycleSec}s`,
+              '--line-delay': `${line.delaySec}s`,
+              '--line-size': `${line.fontSizePx}px`,
+              '--line-chars': line.text.length,
+              '--line-max': line.maxWidth,
+            } as CSSProperties
+            return (
+              <span key={`${line.text}_${line.top}_${line.left}`} className="ghostlive-code-blip" style={style}>
+                <span className="ghostlive-code-typed">{line.text}</span>
+              </span>
+            )
+          })}
+        </div>
+        <header className="workspace-header">
+          <div>
+            <p className="eyebrow">גוסט לייב</p>
+            <h2>ניטור חי</h2>
+          </div>
+          <div className="workspace-stats">
+            <span>{totalLiveFeeds} LIVE</span>
+            <span>{channels.length} ערוצים</span>
+            <span>{totalOperations} מבצעים</span>
+            <span>{totalUnreadAlerts > 0 ? `${totalUnreadAlerts} התראות` : 'תקין'}</span>
+            <button className="ghost-button" type="button" onClick={() => setIsIssueModalOpen(true)}>
+              דווח תקלה
+            </button>
+          </div>
+        </header>
+
+        {isMobileLayout ? (
+          <MobileTabBar
+            activeId={mobilePanel}
+            ariaLabel="לשוניות מובייל גוסט לייב"
+            className="live-ops-mobile-tabs mobile-only"
+            items={liveOpsMobilePanelItems}
+            onChange={(id) => handleLiveOpsPanelChange(id as MobilePanel)}
+          />
+        ) : null}
+
+        <div className="workspace-panels">
+          <InboxPanel
+            channels={sortedFilteredChannels}
+            focusSearchToken={inboxSearchFocusToken}
+            groupSelectionIds={groupSelectionIds}
+            hasMoreChannels={hasMoreChannels}
+            isGroupingMode={isGroupingMode}
+            onCreateNewChat={handleInboxCreateChat}
+            onCreateGroupFromSelection={createGroupFromSelection}
+            onLoadMoreChannels={() => setVisibleChannelsCount((currentCount) => currentCount + INBOX_PAGE_SIZE)}
+            onOpenInboxMenu={handleInboxMoreOptions}
+            onSearchQueryChange={(value) => { setSearchQuery(value); setVisibleChannelsCount(INBOX_PAGE_SIZE) }}
+            onSelectChannel={selectChannel}
+            onToggleGroupSelection={toggleGroupSelection}
+            onToggleGroupingMode={() => {
+              setIsGroupingMode((currentState) => {
+                const nextState = !currentState
+                if (!nextState) {
+                  setGroupSelectionIds([])
+                }
+                return nextState
+              })
+            }}
+            alertingChannelIds={alertingChannelIds}
+            searchQuery={searchQuery}
+            selectedChannelId={selectedChannel.id}
+            visibleCount={visibleChannelsCount}
+          />
+
+          <ChatPanel
+            activeOpsCount={selectedChannelActiveOps}
+            isSending={isSending}
+            messageDraft={messageDraft}
+            messageStreamRef={messageStreamRef}
+            nextScanInfo={nextScanInfo}
+            onDismissFrame={handleDismissFrame}
+            onMessageDraftChange={setMessageDraft}
+            onMessageStreamScroll={handleMessageStreamScroll}
+            onMessageSubmit={handleMessageSubmit}
+            onShowDetails={openSelectedChannelDetails}
+            onShowInbox={() => setMobilePanel('inbox')}
+            onStartTimelineSampling={handleStartTimelineSampling}
+            onStopTimelineSampling={handleStopTimelineSampling}
+            onSuggestionClick={setMessageDraft}
+            selectedChannel={selectedChannel}
+            timelineSamplerState={selectedTimelineSamplerState}
+          />
+
+          {!isDetailsCollapsed ? (
+            <div
+              aria-hidden
+              className="details-drawer-backdrop desktop-only"
+              onClick={() => setIsDetailsCollapsed(true)}
+            />
+          ) : null}
+
+          <DetailsPanel
+            key={selectedChannel.id}
+            isDetailsCollapsed={isDetailsCollapsed}
+            onCollapseDetails={() => setIsDetailsCollapsed(true)}
+            onExpandDetails={() => setIsDetailsCollapsed(false)}
+            onOpenChannelsHub={() => {
+              if (canAccessCommandCenter) {
+                setOperatorMobileSection('channels')
+                setActiveTopbarNav('Command Center')
+              }
+            }}
+            onSetMobilePanelChat={() => setMobilePanel('chat')}
+            onToggleOperation={toggleOperation}
+            selectedChannel={selectedChannel}
+          />
+        </div>
+      </main>
+    )
+  }
+
+  function renderOperatorSurface() {
+    if (isMobileLayout) {
+      if (operatorMobileSection === 'alerts') {
+        return renderOperatorMobileAlertsScreen()
+      }
+
+      if (operatorMobileSection === 'account') {
+        return renderOperatorMobileAccountScreen()
+      }
+    }
+
+    if (activeTopbarNav === 'Command Center') {
+      return (
+        <ChannelsHub
+          availableChannelsForLink={availableForGrouping}
+          channels={channels}
+          linkedChannelIdSet={linkedChannelIdSet}
+          mobileMode={isMobileLayout}
+          newChannelDraft={newChannelDraft}
+          onDeleteOperation={deleteOperationFromSelectedChannel}
+          onNewChannelDraftChange={updateNewChannelDraftField}
+          onNewChannelSubmit={handleNewChannelSubmit}
+          onOperationDraftChange={updateOperationDraftField}
+          onOperationSubmit={handleOperationSubmit}
+          onRequestDeleteSelectedChannel={requestDeleteSelectedChannel}
+          onSelectChannel={selectChannel}
+          onToggleLinkedChannelId={toggleNewChannelDraftLinkedId}
+          onToggleNewChannelForm={() => setShowNewChannelForm((currentState) => !currentState)}
+          onToggleOperation={toggleOperation}
+          onUpdateOperationField={updateOperationFieldForSelectedChannel}
+          onUpdateSelectedChannel={updateSelectedChannel}
+          operationDraft={operationDraft}
+          selectedChannel={selectedChannel}
+          selectedChannelId={selectedChannel.id}
+          showNewChannelForm={showNewChannelForm}
+        />
+      )
+    }
+
+    return renderLiveOpsWorkspace()
+  }
+
   if (isLoadingChannels) {
     return (
       <div className="app-shell surface-live-ops" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
@@ -1601,10 +1908,165 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
       </div>
     )
   }
+  if (isMobileLayout) {
+    return (
+      <div
+        className={`app-shell operator-mobile-app-shell ${operatorMobileSection === 'live' ? 'surface-live-ops operator-mobile-live-shell' : ''}`}
+        data-mobile-panel={mobilePanel}
+      >
+        <div className="app-surface">
+          <Topbar
+            accountMenuItems={operatorAccountMenuItems}
+            fullName={fullName}
+            organizationName={organizationName}
+            role={currentUserRole}
+            activeNav={activeTopbarNav}
+            canAccessCommandCenter={canAccessCommandCenter}
+            channelsCount={channels.length}
+            onAccountAction={handleAccountAction}
+            onBrandClick={() => {
+              setOperatorMobileSection('live')
+              setActiveTopbarNav('Ghost Live')
+            }}
+            onCommandTrigger={openCommandPalette}
+            onOpenNotificationsCenter={() => handleOperatorMobileSectionChange('alerts')}
+            onOpenShortcuts={() => {
+              setIsCommandPaletteOpen(false)
+              setIsSupportOpen(false)
+              setActiveAccountDialog(null)
+              setIsShortcutsOpen(true)
+            }}
+            onOpenSupport={() => handleOperatorMobileSectionChange('account')}
+            onNavChange={handleTopbarNavChange}
+            onToggleTheme={onToggleTheme}
+            totalLiveFeeds={totalLiveFeeds}
+            totalOperations={totalOperations}
+            totalUnreadAlerts={totalUnreadAlerts}
+            themeMode={themeMode}
+          />
 
+          {renderOperatorSurface()}
+        </div>
+
+        <MobileTabBar
+          activeId={operatorMobileSection}
+          ariaLabel="Operator mobile navigation"
+          className="operator-mobile-primary-nav mobile-only"
+          items={operatorMobileNavItems}
+          onChange={(id) => handleOperatorMobileSectionChange(id as OperatorMobileSection)}
+        />
+
+        {isCommandPaletteOpen ? (
+          <SurfaceDialog
+            eyebrow="פקודה מהירה"
+            title="קיצורי מפעיל"
+            description="מעבר ישיר לזרימת עבודה אמיתית במובייל."
+            onClose={() => setIsCommandPaletteOpen(false)}
+            width="medium"
+          >
+            <div className="topbar-dialog-stack">
+              <input
+                autoFocus
+                className="topbar-search-input"
+                onChange={(event) => setCommandQuery(event.target.value)}
+                placeholder="חפש פעולות, התראות, ערוצים, תמיכה..."
+                value={commandQuery}
+              />
+              <div className="topbar-action-list">
+                {filteredOperatorQuickActions.map((action) => (
+                  <button key={action.id} className="topbar-action-card" onClick={action.run} type="button">
+                    <strong>{action.title}</strong>
+                    <span>{action.description}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </SurfaceDialog>
+        ) : null}
+
+        {isShortcutsOpen ? (
+          <SurfaceDialog
+            eyebrow="קיצורים"
+            title="קיצורי מפעיל"
+            description="כניסות מהירות לפעולות קיימות במערכת."
+            onClose={() => setIsShortcutsOpen(false)}
+            width="medium"
+          >
+            <div className="topbar-shortcuts-grid">
+              {operatorQuickActions.map((action) => (
+                <button key={action.id} className="topbar-shortcut-tile" onClick={action.run} type="button">
+                  <strong>{action.title}</strong>
+                  <span>{action.description}</span>
+                </button>
+              ))}
+            </div>
+          </SurfaceDialog>
+        ) : null}
+
+        {isDeleteModalOpen ? (
+          <div aria-modal className="brand-modal-overlay" role="dialog">
+            <div className="brand-modal">
+              <p className="eyebrow">מחיקה</p>
+              <h3>למחוק את הערוץ הזה לצמיתות?</h3>
+              <p className="brand-modal-copy">
+                הערוץ <strong>{selectedChannel.name}</strong> יימחק יחד עם היסטוריית ההודעות שלו.
+                לא ניתן לשחזר פעולה זו.
+              </p>
+              <div className="brand-modal-actions">
+                <button className="ghost-button" onClick={() => setIsDeleteModalOpen(false)} type="button">
+                  ביטול
+                </button>
+                <button className="danger-button" onClick={confirmDeleteSelectedChannel} type="button">
+                  מחק לצמיתות
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {isIssueModalOpen ? (
+          <div aria-modal className="brand-modal-overlay" role="dialog">
+            <div className="brand-modal">
+              <p className="eyebrow">דיווח תקלה</p>
+              <h3>שלח דיווח תקלה לצוות הניהול</h3>
+              <form onSubmit={handleIssueSubmit} style={{ display: 'grid', gap: 8 }}>
+                <input value={issueTitle} onChange={(event) => setIssueTitle(event.target.value)} placeholder="כותרת התקלה" />
+                <textarea
+                  value={issueDescription}
+                  onChange={(event) => setIssueDescription(event.target.value)}
+                  placeholder="תיאור מפורט"
+                  rows={5}
+                />
+                <select value={issueSeverity} onChange={(event) => setIssueSeverity(event.target.value as 'low' | 'medium' | 'high' | 'critical')}>
+                  <option value="low">נמוכה</option>
+                  <option value="medium">בינונית</option>
+                  <option value="high">גבוהה</option>
+                  <option value="critical">קריטית</option>
+                </select>
+                {issueSubmitError ? <p style={{ color: '#ef4444' }}>{issueSubmitError}</p> : null}
+                {issueSubmitSuccess ? <p style={{ color: '#22c55e' }}>{issueSubmitSuccess}</p> : null}
+                <div className="brand-modal-actions">
+                  <button className="ghost-button" type="button" onClick={() => setIsIssueModalOpen(false)}>
+                    סגור
+                  </button>
+                  <button className="primary-button" type="submit">
+                    שלח דיווח
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        ) : null}
+
+        {flashAlert ? (
+          <FlashAlertOverlay alert={flashAlert} onDismiss={() => setFlashAlert(null)} />
+        ) : null}
+      </div>
+    )
+  }
 
   return (
-    <div className={`app-shell ${activeTopbarNav === 'Ghost Live' ? 'surface-live-ops' : ''}`} data-mobile-panel={mobilePanel}>
+    <div className={`app-shell ${activeTopbarNav === 'Ghost Live' && operatorMobileSection === 'live' ? 'surface-live-ops' : ''}`} data-mobile-panel={mobilePanel}>
       <div className="app-surface">
       <Topbar
         accountMenuItems={operatorAccountMenuItems}
@@ -1615,9 +2077,18 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
         canAccessCommandCenter={canAccessCommandCenter}
         channelsCount={channels.length}
         onAccountAction={handleAccountAction}
-        onBrandClick={() => setActiveTopbarNav('Ghost Live')}
+        onBrandClick={() => {
+          setOperatorMobileSection('live')
+          setActiveTopbarNav('Ghost Live')
+        }}
         onCommandTrigger={openCommandPalette}
-        onOpenNotificationsCenter={() => setIsAlertsCenterOpen(true)}
+        onOpenNotificationsCenter={() => {
+          if (isMobileLayout) {
+            handleOperatorMobileSectionChange('alerts')
+            return
+          }
+          setIsAlertsCenterOpen(true)
+        }}
         onOpenShortcuts={() => {
           setIsCommandPaletteOpen(false)
           setIsSupportOpen(false)
@@ -1625,6 +2096,10 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
           setIsShortcutsOpen(true)
         }}
         onOpenSupport={() => {
+          if (isMobileLayout) {
+            handleOperatorMobileSectionChange('account')
+            return
+          }
           setIsCommandPaletteOpen(false)
           setIsShortcutsOpen(false)
           setActiveAccountDialog(null)
@@ -1899,7 +2374,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
           width="narrow"
         >
           <div className="topbar-dialog-stack">
-            <div className="topbar-info-row"><span>ארגון</span><strong>{organizationName || 'Ghost'}</strong></div>
+            <div className="topbar-info-row"><span>ארגון</span><strong>{organizationName || 'גוסט'}</strong></div>
             <div className="topbar-info-row"><span>תפקיד</span><strong>{formatRoleLabel(currentUserRole)}</strong></div>
             <div className="topbar-info-row"><span>ערוצים</span><strong>{channels.length}</strong></div>
             <div className="topbar-info-row"><span>ערוצים חיים</span><strong>{totalLiveFeeds}</strong></div>

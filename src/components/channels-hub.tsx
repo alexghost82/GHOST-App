@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { LIVE_STATE_META, OPERATION_MODE_META, OPERATION_MODES } from '../data/constants'
 import { parseSchedule, describeSchedule } from '../services/schedule-parser'
 import type { Channel, ChannelType, NewChannelDraft, Operation, OperationDraft, OperationMode } from '../types'
+import { MobileSectionHeader, MobileSurfaceCard, MobileTabBar, StickyPrimaryAction } from './mobile-shell'
 import { StatusDot } from './status-dot'
 
 const SCHEDULE_QUICK_SUGGESTIONS = [
@@ -13,6 +14,8 @@ const SCHEDULE_QUICK_SUGGESTIONS = [
   'כל 10 דקות',
   'כל שעה',
 ] as const
+
+type ChannelsHubMobileView = 'list' | 'create-channel' | 'channel-details' | 'operations' | 'create-operation'
 
 function GroupChatIcon() {
   return (
@@ -42,7 +45,7 @@ function SchedulePreview({ text }: { text: string }) {
   return parsed ? (
     <p className="schedule-preview schedule-preview-ok">{describeSchedule(parsed)}</p>
   ) : (
-    <p className="schedule-preview schedule-preview-warn">לא זוהתה תבנית — נסה: &quot;כל 30 שניות&quot; / &quot;כל יום ב-09:00&quot;</p>
+    <p className="schedule-preview schedule-preview-warn">לא זוהתה תבנית - נסה: "כל 30 שניות" / "כל יום ב-09:00"</p>
   )
 }
 
@@ -55,6 +58,7 @@ interface ChannelsHubProps {
   newChannelDraft: NewChannelDraft
   availableChannelsForLink: Channel[]
   operationDraft: OperationDraft
+  mobileMode?: boolean
   onSelectChannel: (channelId: string) => void
   onToggleNewChannelForm: () => void
   onNewChannelDraftChange: (field: keyof NewChannelDraft, value: string | number | ChannelType) => void
@@ -73,9 +77,6 @@ interface ChannelsHubProps {
   ) => void
 }
 
-/**
- * מסך מרכז ערוצים: יצירת ערוץ, בחירה לעריכה, הגדרות ערוץ ומבצעים — נקודת הניהול הראשית.
- */
 export function ChannelsHub({
   channels,
   linkedChannelIdSet,
@@ -85,6 +86,7 @@ export function ChannelsHub({
   newChannelDraft,
   availableChannelsForLink,
   operationDraft,
+  mobileMode = false,
   onSelectChannel,
   onToggleNewChannelForm,
   onNewChannelDraftChange,
@@ -99,6 +101,20 @@ export function ChannelsHub({
   onUpdateOperationField,
 }: ChannelsHubProps) {
   const [listQuery, setListQuery] = useState('')
+  const [mobileView, setMobileView] = useState<ChannelsHubMobileView>('list')
+
+  useEffect(() => {
+    if (!mobileMode) {
+      setMobileView(showNewChannelForm ? 'create-channel' : 'list')
+      return
+    }
+    if (selectedChannelId && mobileView === 'list' && channels.length > 0) {
+      return
+    }
+    if (!selectedChannelId && channels.length > 0) {
+      onSelectChannel(channels[0].id)
+    }
+  }, [channels, mobileMode, mobileView, onSelectChannel, selectedChannelId, showNewChannelForm])
 
   const sortedChannels = useMemo(() => {
     return [...channels].sort((a, b) => a.name.localeCompare(b.name, 'he'))
@@ -119,11 +135,541 @@ export function ChannelsHub({
   const isOperationDraftValid = operationDraft.action.trim().length > 0
   const enabledOpsCount = selectedChannel.operations.filter((op) => op.enabled).length
 
+  function handleSelectChannel(channelId: string) {
+    onSelectChannel(channelId)
+    if (mobileMode) {
+      setMobileView('channel-details')
+    }
+  }
+
+  function handleOpenCreateChannel() {
+    if (!showNewChannelForm) {
+      onToggleNewChannelForm()
+    }
+    setMobileView('create-channel')
+  }
+
+  function handleCloseCreateChannel() {
+    if (showNewChannelForm) {
+      onToggleNewChannelForm()
+    }
+    setMobileView('list')
+  }
+
+  function handleMobileChannelSubmit(event: FormEvent<HTMLFormElement>) {
+    onNewChannelSubmit(event)
+    setMobileView('list')
+  }
+
+  function handleMobileOperationSubmit(event: FormEvent<HTMLFormElement>) {
+    onOperationSubmit(event)
+    setMobileView('operations')
+  }
+
+  function renderChannelCreateForm() {
+    return (
+      <form className="card stacked-form chub-new-form" onSubmit={mobileMode ? handleMobileChannelSubmit : onNewChannelSubmit}>
+        <div className="section-heading">
+          <h3>יצירת ערוץ</h3>
+          <span>הגדרות בסיס</span>
+        </div>
+
+        <label>
+          שם הערוץ
+          <input
+            required
+            value={newChannelDraft.name}
+            onChange={(event) => onNewChannelDraftChange('name', event.target.value)}
+            placeholder="לובי צפוני / קבוצת שערים"
+          />
+        </label>
+
+        <label>
+          סוג ערוץ
+          <select
+            value={newChannelDraft.type}
+            onChange={(event) => onNewChannelDraftChange('type', event.target.value as ChannelType)}
+          >
+            <option value="personal">ערוץ אישי</option>
+            <option value="group">צ׳אט קבוצתי</option>
+          </select>
+        </label>
+
+        <label>
+          מיקום
+          <input
+            value={newChannelDraft.location}
+            onChange={(event) => onNewChannelDraftChange('location', event.target.value)}
+            placeholder="מפעל ברלב / שער דרומי"
+          />
+        </label>
+
+        <label>
+          היקף ניטור
+          <textarea
+            rows={2}
+            value={newChannelDraft.watchScope}
+            onChange={(event) => onNewChannelDraftChange('watchScope', event.target.value)}
+            placeholder="רכבים, אנשים, כניסה לא מורשית..."
+          />
+        </label>
+
+        <label>
+          תיאור מבצעי
+          <textarea
+            rows={2}
+            value={newChannelDraft.description}
+            onChange={(event) => onNewChannelDraftChange('description', event.target.value)}
+            placeholder="הקשר תפעולי קצר..."
+          />
+        </label>
+
+        <label>
+          כתובת RTSP
+          <input
+            value={newChannelDraft.rtspFeed}
+            onChange={(event) => onNewChannelDraftChange('rtspFeed', event.target.value)}
+            placeholder="rtsp://camera-or-group-feed"
+          />
+        </label>
+
+        {newChannelDraft.type === 'group' ? (
+          <fieldset className="linked-channels-fieldset">
+            <legend className="linked-channels-legend">צירוף צ׳אטים קיימים</legend>
+            <p className="linked-channels-hint">סמן אילו מהשיחות הקיימות ייכללו בקבוצה החדשה.</p>
+            <div className="linked-channels-list" role="group" aria-label="בחירת צ׳אטים לקבוצה">
+              {availableChannelsForLink.length === 0 ? (
+                <p className="linked-channels-empty">אין עדיין צ׳אטים לצירוף.</p>
+              ) : (
+                availableChannelsForLink.map((channel) => {
+                  const checked = newChannelDraft.linkedChannelIds.includes(channel.id)
+                  return (
+                    <label key={channel.id} className="linked-channel-option">
+                      <input
+                        checked={checked}
+                        onChange={() => onToggleLinkedChannelId(channel.id)}
+                        type="checkbox"
+                      />
+                      <span className="linked-channel-option-body">
+                        <span className="linked-channel-name">{channel.name}</span>
+                        <span className="linked-channel-meta">
+                          {channel.type === 'group' ? 'קבוצה' : 'ערוץ'} · {channel.location}
+                        </span>
+                      </span>
+                    </label>
+                  )
+                })
+              )}
+            </div>
+          </fieldset>
+        ) : null}
+
+        <label>
+          אינטרוול זיכרון (שניות)
+          <input
+            type="number"
+            min="5"
+            max="300"
+            step="5"
+            required
+            value={newChannelDraft.memoryInterval}
+            onChange={(event) => onNewChannelDraftChange('memoryInterval', Number(event.target.value))}
+          />
+        </label>
+
+        <button className="primary-button" disabled={!newChannelDraft.name.trim()} type="submit">
+          צור ערוץ
+        </button>
+      </form>
+    )
+  }
+
+  function renderOperationsCreateForm() {
+    return (
+      <article className="card chub-ops-create-card">
+        <div className="section-heading">
+          <h3>מבצע חדש</h3>
+          <span>סוג · תזמון · טריגר · הנחיות</span>
+        </div>
+
+        <form className="stacked-form chub-ops-create-form" onSubmit={mobileMode ? handleMobileOperationSubmit : onOperationSubmit}>
+          <label>
+            שם מבצע
+            <input value={operationDraft.name} onChange={(event) => onOperationDraftChange('name', event.target.value)} />
+          </label>
+
+          <label>
+            סוג תגובה
+            <select
+              value={operationDraft.mode}
+              onChange={(event) => onOperationDraftChange('mode', event.target.value as OperationMode)}
+            >
+              {OPERATION_MODES.map((m) => (
+                <option key={m} value={m}>{OPERATION_MODE_META[m].label}</option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            תזמון סריקה
+            <p className="field-hint">כתוב בשפה חופשית: "כל 10 שניות", "כל יום ב-09:00".</p>
+            <div className="schedule-quick-suggestions" role="group" aria-label="המלצות תזמון מהירות">
+              {SCHEDULE_QUICK_SUGGESTIONS.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  className={`schedule-suggestion-chip ${operationDraft.schedule.trim() === suggestion ? 'active' : ''}`}
+                  onClick={() => onOperationDraftChange('schedule', suggestion)}
+                  type="button"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+            <input
+              value={operationDraft.schedule}
+              onChange={(event) => onOperationDraftChange('schedule', event.target.value)}
+            />
+            <SchedulePreview text={operationDraft.schedule} />
+          </label>
+
+          <label>
+            {OPERATION_MODE_META[operationDraft.mode].triggerLabel}
+            <p className="field-hint">{OPERATION_MODE_META[operationDraft.mode].triggerHint}</p>
+            <input
+              value={operationDraft.trigger}
+              onChange={(event) => onOperationDraftChange('trigger', event.target.value)}
+            />
+          </label>
+
+          <label>
+            מהות / הנחיות
+            <textarea
+              rows={2}
+              value={operationDraft.action}
+              onChange={(event) => onOperationDraftChange('action', event.target.value)}
+            />
+          </label>
+
+          <button className="primary-button" disabled={!isOperationDraftValid} type="submit">
+            שמור מבצע
+          </button>
+        </form>
+      </article>
+    )
+  }
+
+  function renderOperationsList() {
+    return (
+      <div className="chub-ops-list">
+        {selectedChannel.operations.length === 0 ? (
+          <p className="chub-empty-hint">אין מבצעים בערוץ זה.</p>
+        ) : (
+          selectedChannel.operations.map((operation) => (
+            <article className="card operations-hub-item" key={operation.id}>
+              <div className="operations-hub-item-head">
+                <div>
+                  <p className="eyebrow">{operation.enabled ? 'פעיל' : 'מושהה'} · {OPERATION_MODE_META[operation.mode].label}</p>
+                  <h3>{operation.name}</h3>
+                </div>
+                <div className="operations-hub-item-actions">
+                  <button
+                    className={`operation-toggle ${operation.enabled ? 'enabled' : ''}`}
+                    onClick={() => onToggleOperation(operation.id)}
+                    type="button"
+                  >
+                    <span className="operation-toggle-thumb" />
+                  </button>
+                  <button className="danger-button" onClick={() => onDeleteOperation(operation.id)} type="button">
+                    מחק
+                  </button>
+                </div>
+              </div>
+
+              <div className="stacked-form operations-hub-form">
+                <label>
+                  שם מבצע
+                  <input
+                    value={operation.name}
+                    onChange={(event) => onUpdateOperationField(operation.id, 'name', event.target.value)}
+                  />
+                </label>
+                <label>
+                  סוג תגובה
+                  <select
+                    value={operation.mode}
+                    onChange={(event) => onUpdateOperationField(operation.id, 'mode', event.target.value)}
+                  >
+                    {OPERATION_MODES.map((m) => (
+                      <option key={m} value={m}>{OPERATION_MODE_META[m].label}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  תזמון סריקה
+                  <input
+                    value={operation.schedule}
+                    onChange={(event) => onUpdateOperationField(operation.id, 'schedule', event.target.value)}
+                  />
+                  <SchedulePreview text={operation.schedule} />
+                </label>
+                <label>
+                  {OPERATION_MODE_META[operation.mode].triggerLabel}
+                  <input
+                    value={operation.trigger}
+                    onChange={(event) => onUpdateOperationField(operation.id, 'trigger', event.target.value)}
+                  />
+                </label>
+                <label>
+                  מהות / הנחיות
+                  <textarea
+                    rows={2}
+                    value={operation.action}
+                    onChange={(event) => onUpdateOperationField(operation.id, 'action', event.target.value)}
+                  />
+                </label>
+              </div>
+            </article>
+          ))
+        )}
+      </div>
+    )
+  }
+
+  function renderMobile() {
+    if (mobileView === 'list') {
+      return (
+        <main className="channels-hub-mobile">
+          <MobileSectionHeader
+            eyebrow="מרכז פיקוד"
+            title="ערוצים"
+            description="בחר ערוץ כדי לנהל הגדרות ומבצעים, או צור ערוץ חדש."
+            action={
+              <button className="primary-button" onClick={handleOpenCreateChannel} type="button">
+                + ערוץ
+              </button>
+            }
+          />
+
+          <div className="mobile-command-center-stack">
+            <MobileSurfaceCard title="חיפוש ערוצים">
+              <input
+                aria-label="חיפוש ערוצים"
+                className="chub-sidebar-search"
+                onChange={(event) => setListQuery(event.target.value)}
+                placeholder="חיפוש..."
+                type="search"
+                value={listQuery}
+              />
+            </MobileSurfaceCard>
+
+            <MobileSurfaceCard title="מאגר ערוצים" description={`${filteredChannels.length} ערוצים זמינים`}>
+              <div className="chub-channel-list">
+                {filteredChannels.length === 0 ? (
+                  <p className="chub-empty-hint">לא נמצאו ערוצים תואמים.</p>
+                ) : (
+                  filteredChannels.map((channel) => {
+                    const meta = LIVE_STATE_META[channel.liveState]
+                    const isSelected = channel.id === selectedChannelId
+                    const isLinked = linkedChannelIdSet.has(channel.id)
+                    return (
+                      <button
+                        key={channel.id}
+                        className={`chub-row ${isSelected ? 'chub-row-active' : ''}`}
+                        onClick={() => handleSelectChannel(channel.id)}
+                        type="button"
+                      >
+                        <StatusDot liveState={channel.liveState} className="chub-row-dot" />
+                        <span className="chub-row-type-icon" title={channel.type === 'group' ? 'צ׳אט קבוצתי' : 'מצלמה בודדת'}>
+                          {channel.type === 'group' ? <GroupChatIcon /> : <CameraChannelIcon />}
+                        </span>
+                        <span className="chub-row-name">{channel.name}</span>
+                        {isLinked ? <span className="chub-row-badge">מצורף</span> : null}
+                        <span className="chub-row-meta">{meta?.label ?? 'לא זמין'}</span>
+                        <span className="chub-row-location">{channel.location}</span>
+                        {channel.operations.length > 0 ? <span className="chub-row-ops">{channel.operations.length}</span> : null}
+                      </button>
+                    )
+                  })
+                )}
+              </div>
+            </MobileSurfaceCard>
+          </div>
+        </main>
+      )
+    }
+
+    if (mobileView === 'create-channel') {
+      return (
+        <main className="channels-hub-mobile">
+          <MobileSectionHeader
+            backLabel="חזרה"
+            eyebrow="מרכז פיקוד"
+            onBack={handleCloseCreateChannel}
+            title="יצירת ערוץ"
+            description="הגדר קודם את הערוץ החדש, ולאחר מכן הוא יופיע במאגר הנייד."
+          />
+          <div className="mobile-command-center-stack">
+            {renderChannelCreateForm()}
+          </div>
+        </main>
+      )
+    }
+
+    if (mobileView === 'channel-details') {
+      return (
+        <main className="channels-hub-mobile">
+          <MobileSectionHeader
+            backLabel="ערוצים"
+            eyebrow="מרכז פיקוד"
+            onBack={() => setMobileView('list')}
+            title={selectedChannel.name}
+            description={`${statusLabel} · ${selectedChannel.location || 'ערוץ פעיל'}`}
+            action={
+              <button className="ghost-button" onClick={() => setMobileView('operations')} type="button">
+                מבצעים
+              </button>
+            }
+          />
+
+          <div className="mobile-command-center-stack">
+            <MobileSurfaceCard title="הגדרות ערוץ" description="השדות המרכזיים לעריכה עבור הערוץ שנבחר.">
+              <div className="chub-settings-grid">
+                <label>
+                  שם הערוץ
+                  <input
+                    value={selectedChannel.name}
+                    onChange={(event) => onUpdateSelectedChannel('name', event.target.value)}
+                  />
+                </label>
+
+                <label>
+                  מיקום
+                  <input
+                    value={selectedChannel.location}
+                    onChange={(event) => onUpdateSelectedChannel('location', event.target.value)}
+                  />
+                </label>
+
+                <label>
+                  היקף ניטור
+                  <textarea
+                    rows={2}
+                    value={selectedChannel.watchScope}
+                    onChange={(event) => onUpdateSelectedChannel('watchScope', event.target.value)}
+                  />
+                </label>
+
+                <label>
+                  תיאור מבצעי
+                  <textarea
+                    rows={2}
+                    value={selectedChannel.description}
+                    onChange={(event) => onUpdateSelectedChannel('description', event.target.value)}
+                  />
+                </label>
+
+                <label>
+                  אינטרוול זיכרון (שניות)
+                  <input
+                    type="number"
+                    min="5"
+                    max="300"
+                    step="5"
+                    value={selectedChannel.memoryInterval}
+                    onChange={(event) => onUpdateSelectedChannel('memoryInterval', Number(event.target.value))}
+                  />
+                </label>
+
+                <label>
+                  כתובת RTSP
+                  <input
+                    value={selectedChannel.rtspFeed}
+                    onChange={(event) => onUpdateSelectedChannel('rtspFeed', event.target.value)}
+                    placeholder="rtsp://camera-feed"
+                  />
+                </label>
+              </div>
+            </MobileSurfaceCard>
+
+            <MobileSurfaceCard title="חברים ושיוכים">
+              <div className="channel-members chub-settings-members">
+                <span className="metric-label">
+                  {selectedChannel.type === 'group' ? 'צ׳אטים מצורפים' : 'חברי הערוץ'}
+                </span>
+                <div className="source-tags">
+                  {selectedChannel.members.map((member) => (
+                    <span key={member}>{member}</span>
+                  ))}
+                </div>
+              </div>
+            </MobileSurfaceCard>
+          </div>
+
+          <StickyPrimaryAction label="מחק ערוץ" onClick={onRequestDeleteSelectedChannel} />
+        </main>
+      )
+    }
+
+    if (mobileView === 'create-operation') {
+      return (
+        <main className="channels-hub-mobile">
+          <MobileSectionHeader
+            backLabel="מבצעים"
+            eyebrow="מרכז פיקוד"
+            onBack={() => setMobileView('operations')}
+            title={`מבצע חדש · ${selectedChannel.name}`}
+            description="צור זרימת מבצע מותאמת לנייד עבור הערוץ שנבחר."
+          />
+          <div className="mobile-command-center-stack">
+            {renderOperationsCreateForm()}
+          </div>
+        </main>
+      )
+    }
+
+    return (
+      <main className="channels-hub-mobile">
+        <MobileSectionHeader
+          backLabel="פרטים"
+          eyebrow="מרכז פיקוד"
+          onBack={() => setMobileView('channel-details')}
+          title={`מבצעים · ${selectedChannel.name}`}
+          description={`${selectedChannel.operations.length} סה״כ · ${enabledOpsCount} פעילים`}
+          action={
+            <button className="primary-button" onClick={() => setMobileView('create-operation')} type="button">
+              + מבצע
+            </button>
+          }
+        />
+
+        <MobileTabBar
+          ariaLabel="לשוניות פרטי ערוץ בנייד"
+          items={[
+            { id: 'channel-details', label: 'פרטים' },
+            { id: 'operations', label: 'מבצעים', badge: selectedChannel.operations.length },
+          ]}
+          activeId="operations"
+          onChange={(id) => setMobileView(id as ChannelsHubMobileView)}
+        />
+
+        <div className="mobile-command-center-stack">
+          <MobileSurfaceCard title="מאגר מבצעים">
+            {renderOperationsList()}
+          </MobileSurfaceCard>
+        </div>
+      </main>
+    )
+  }
+
+  if (mobileMode) {
+    return renderMobile()
+  }
+
   return (
     <main className="channels-hub-screen">
       <header className="channels-hub-header">
         <div>
-          <p className="eyebrow">Channels Hub</p>
+          <p className="eyebrow">מרכז ערוצים</p>
           <h2>ניהול ערוצים</h2>
         </div>
         <div className="channels-hub-stats">
@@ -149,121 +695,7 @@ export function ChannelsHub({
             />
           </div>
 
-          {showNewChannelForm ? (
-            <form className="card stacked-form chub-new-form" onSubmit={onNewChannelSubmit}>
-              <div className="section-heading">
-                <h3>יצירת ערוץ</h3>
-                <span>הגדרות בסיס</span>
-              </div>
-
-              <label>
-                שם הערוץ
-                <input
-                  required
-                  value={newChannelDraft.name}
-                  onChange={(event) => onNewChannelDraftChange('name', event.target.value)}
-                  placeholder="לובי צפוני / קבוצת שערים"
-                />
-              </label>
-
-              <label>
-                סוג ערוץ
-                <select
-                  value={newChannelDraft.type}
-                  onChange={(event) => onNewChannelDraftChange('type', event.target.value as ChannelType)}
-                >
-                  <option value="personal">ערוץ אישי</option>
-                  <option value="group">צ׳אט קבוצתי</option>
-                </select>
-              </label>
-
-              <label>
-                מיקום
-                <input
-                  value={newChannelDraft.location}
-                  onChange={(event) => onNewChannelDraftChange('location', event.target.value)}
-                  placeholder="מפעל ברלב / שער דרומי"
-                />
-              </label>
-
-              <label>
-                היקף ניטור
-                <textarea
-                  rows={2}
-                  value={newChannelDraft.watchScope}
-                  onChange={(event) => onNewChannelDraftChange('watchScope', event.target.value)}
-                  placeholder="רכבים, אנשים, כניסה לא מורשית..."
-                />
-              </label>
-
-              <label>
-                תיאור מבצעי
-                <textarea
-                  rows={2}
-                  value={newChannelDraft.description}
-                  onChange={(event) => onNewChannelDraftChange('description', event.target.value)}
-                  placeholder="הקשר תפעולי קצר..."
-                />
-              </label>
-
-              <label>
-                RTSP feed
-                <input
-                  value={newChannelDraft.rtspFeed}
-                  onChange={(event) => onNewChannelDraftChange('rtspFeed', event.target.value)}
-                  placeholder="rtsp://camera-or-group-feed"
-                />
-              </label>
-
-              {newChannelDraft.type === 'group' ? (
-                <fieldset className="linked-channels-fieldset">
-                  <legend className="linked-channels-legend">צירוף צ׳אטים קיימים</legend>
-                  <p className="linked-channels-hint">סמן אילו מהשיחות הקיימות ייכללו בקבוצה החדשה.</p>
-                  <div className="linked-channels-list" role="group" aria-label="בחירת צ׳אטים לקבוצה">
-                    {availableChannelsForLink.length === 0 ? (
-                      <p className="linked-channels-empty">אין עדיין צ׳אטים לצירוף.</p>
-                    ) : (
-                      availableChannelsForLink.map((channel) => {
-                        const checked = newChannelDraft.linkedChannelIds.includes(channel.id)
-                        return (
-                          <label key={channel.id} className="linked-channel-option">
-                            <input
-                              checked={checked}
-                              onChange={() => onToggleLinkedChannelId(channel.id)}
-                              type="checkbox"
-                            />
-                            <span className="linked-channel-option-body">
-                              <span className="linked-channel-name">{channel.name}</span>
-                              <span className="linked-channel-meta">
-                                {channel.type === 'group' ? 'קבוצה' : 'ערוץ'} · {channel.location}
-                              </span>
-                            </span>
-                          </label>
-                        )
-                      })
-                    )}
-                  </div>
-                </fieldset>
-              ) : null}
-
-              <label>
-                אינטרוול זיכרון (שניות)
-                <input
-                  type="number"
-                  min="5"
-                  max="300"
-                  step="5"
-                  required
-                  value={newChannelDraft.memoryInterval}
-                  onChange={(event) => onNewChannelDraftChange('memoryInterval', Number(event.target.value))}
-                />
-              </label>
-
-              <button className="primary-button" disabled={!newChannelDraft.name.trim()} type="submit">
-                צור ערוץ
-              </button>
-            </form>
-          ) : null}
+          {showNewChannelForm ? renderChannelCreateForm() : null}
 
           <div className="chub-channel-list">
             {filteredChannels.length === 0 ? (
@@ -277,7 +709,7 @@ export function ChannelsHub({
                   <button
                     key={channel.id}
                     className={`chub-row ${isSelected ? 'chub-row-active' : ''}`}
-                    onClick={() => onSelectChannel(channel.id)}
+                    onClick={() => handleSelectChannel(channel.id)}
                     type="button"
                   >
                     <StatusDot liveState={channel.liveState} className="chub-row-dot" />
@@ -361,7 +793,7 @@ export function ChannelsHub({
               </label>
 
               <label>
-                RTSP feed
+                כתובת RTSP
                 <input
                   value={selectedChannel.rtspFeed}
                   onChange={(event) => onUpdateSelectedChannel('rtspFeed', event.target.value)}
@@ -394,7 +826,7 @@ export function ChannelsHub({
             <header className="chub-zone-header">
               <div>
                 <p className="eyebrow">מבצעים</p>
-                <h3>מבצעי ערוץ — {selectedChannel.name}</h3>
+                <h3>מבצעי ערוץ - {selectedChannel.name}</h3>
                 <p className="chub-zone-hint">{selectedChannel.operations.length} מבצעים · {enabledOpsCount} פעילים</p>
               </div>
             </header>
@@ -402,75 +834,7 @@ export function ChannelsHub({
             <div className="chub-ops-content">
               <section className="chub-ops-create-section" aria-label="הוספת מבצע חדש">
                 <p className="chub-ops-section-kicker">הוספה חדשה</p>
-                <article className="card chub-ops-create-card">
-                  <div className="section-heading">
-                    <h3>מבצע חדש</h3>
-                    <span>סוג · תזמון · טריגר · הנחיות</span>
-                  </div>
-
-                  <form className="stacked-form chub-ops-create-form" onSubmit={onOperationSubmit}>
-                    <label>
-                      שם מבצע
-                      <input value={operationDraft.name} onChange={(event) => onOperationDraftChange('name', event.target.value)} />
-                    </label>
-
-                    <label>
-                      סוג תגובה
-                      <select
-                        value={operationDraft.mode}
-                        onChange={(event) => onOperationDraftChange('mode', event.target.value as OperationMode)}
-                      >
-                        {OPERATION_MODES.map((m) => (
-                          <option key={m} value={m}>{OPERATION_MODE_META[m].label}</option>
-                        ))}
-                      </select>
-                    </label>
-
-                    <label>
-                      תזמון סריקה
-                      <p className="field-hint">כתוב בשפה חופשית: &quot;כל 10 שניות&quot;, &quot;כל יום ב-09:00&quot;.</p>
-                      <div className="schedule-quick-suggestions" role="group" aria-label="המלצות תזמון מהירות">
-                        {SCHEDULE_QUICK_SUGGESTIONS.map((suggestion) => (
-                          <button
-                            key={suggestion}
-                            className={`schedule-suggestion-chip ${operationDraft.schedule.trim() === suggestion ? 'active' : ''}`}
-                            onClick={() => onOperationDraftChange('schedule', suggestion)}
-                            type="button"
-                          >
-                            {suggestion}
-                          </button>
-                        ))}
-                      </div>
-                      <input
-                        value={operationDraft.schedule}
-                        onChange={(event) => onOperationDraftChange('schedule', event.target.value)}
-                      />
-                      <SchedulePreview text={operationDraft.schedule} />
-                    </label>
-
-                    <label>
-                      {OPERATION_MODE_META[operationDraft.mode].triggerLabel}
-                      <p className="field-hint">{OPERATION_MODE_META[operationDraft.mode].triggerHint}</p>
-                      <input
-                        value={operationDraft.trigger}
-                        onChange={(event) => onOperationDraftChange('trigger', event.target.value)}
-                      />
-                    </label>
-
-                    <label>
-                      מהות / הנחיות
-                      <textarea
-                        rows={2}
-                        value={operationDraft.action}
-                        onChange={(event) => onOperationDraftChange('action', event.target.value)}
-                      />
-                    </label>
-
-                    <button className="primary-button" disabled={!isOperationDraftValid} type="submit">
-                      שמור מבצע
-                    </button>
-                  </form>
-                </article>
+                {renderOperationsCreateForm()}
               </section>
 
               <section className="chub-ops-existing-section" aria-label="מבצעים קיימים">
@@ -478,80 +842,7 @@ export function ChannelsHub({
                   <p className="chub-ops-section-kicker">מבצעים קיימים</p>
                   <span>{selectedChannel.operations.length} סה״כ</span>
                 </div>
-
-                <div className="chub-ops-list">
-                  {selectedChannel.operations.length === 0 ? (
-                    <p className="chub-empty-hint">אין מבצעים בערוץ זה.</p>
-                  ) : (
-                    selectedChannel.operations.map((operation) => (
-                      <article className="card operations-hub-item" key={operation.id}>
-                      <div className="operations-hub-item-head">
-                        <div>
-                          <p className="eyebrow">{operation.enabled ? 'פעיל' : 'מושהה'} · {OPERATION_MODE_META[operation.mode].label}</p>
-                          <h3>{operation.name}</h3>
-                        </div>
-                        <div className="operations-hub-item-actions">
-                          <button
-                            className={`operation-toggle ${operation.enabled ? 'enabled' : ''}`}
-                            onClick={() => onToggleOperation(operation.id)}
-                            type="button"
-                          >
-                            <span className="operation-toggle-thumb" />
-                          </button>
-                          <button className="danger-button" onClick={() => onDeleteOperation(operation.id)} type="button">
-                            מחק
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="stacked-form operations-hub-form">
-                        <label>
-                          שם מבצע
-                          <input
-                            value={operation.name}
-                            onChange={(event) => onUpdateOperationField(operation.id, 'name', event.target.value)}
-                          />
-                        </label>
-                        <label>
-                          סוג תגובה
-                          <select
-                            value={operation.mode}
-                            onChange={(event) => onUpdateOperationField(operation.id, 'mode', event.target.value)}
-                          >
-                            {OPERATION_MODES.map((m) => (
-                              <option key={m} value={m}>{OPERATION_MODE_META[m].label}</option>
-                            ))}
-                          </select>
-                        </label>
-                        <label>
-                          תזמון סריקה
-                          <p className="field-hint">כתוב בשפה חופשית.</p>
-                          <input
-                            value={operation.schedule}
-                            onChange={(event) => onUpdateOperationField(operation.id, 'schedule', event.target.value)}
-                          />
-                          <SchedulePreview text={operation.schedule} />
-                        </label>
-                        <label>
-                          {OPERATION_MODE_META[operation.mode].triggerLabel}
-                          <input
-                            value={operation.trigger}
-                            onChange={(event) => onUpdateOperationField(operation.id, 'trigger', event.target.value)}
-                          />
-                        </label>
-                        <label>
-                          מהות / הנחיות
-                          <textarea
-                            rows={2}
-                            value={operation.action}
-                            onChange={(event) => onUpdateOperationField(operation.id, 'action', event.target.value)}
-                          />
-                        </label>
-                      </div>
-                      </article>
-                    ))
-                  )}
-                </div>
+                {renderOperationsList()}
               </section>
             </div>
           </section>

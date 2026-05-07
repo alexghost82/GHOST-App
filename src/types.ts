@@ -3,6 +3,9 @@ export type MessageAuthor = 'user' | 'ghost' | 'system'
 export type ChannelType = 'personal' | 'group'
 
 export type LiveState = 'LIVE' | 'SYNC' | 'DEGRADED' | 'OFFLINE'
+export type ChannelCaptureMode = 'local_agent' | 'browser'
+export type LocalAgentCameraSourceType = 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
+export type LocalAgentConnectionState = 'connected' | 'degraded' | 'offline'
 
 export type OperationMode = 'alert' | 'report' | 'rating' | 'assessment'
 
@@ -95,10 +98,32 @@ export interface Channel {
   /** תמונת הפריים האחרונה שנלכדה מהמצלמה המקומית (Data URL). */
   lastFrameDataUrl?: string
   /** מצב לכידה - סוכן מקומי או דפדפן */
-  captureMode?: 'local_agent' | 'browser'
+  captureMode?: ChannelCaptureMode
+  localAgentBinding?: {
+    deviceId: string
+    deviceName: string
+    cameraId: string
+    cameraLabel: string
+    cameraSourceType: LocalAgentCameraSourceType
+    cameraName?: string
+    channelId: string
+    boundAtIso: string
+  }
   /** סטטוס סוכן מקומי */
   localAgentStatus?: {
-    state: 'connected' | 'degraded' | 'disconnected' | 'waiting'
+    state: LocalAgentConnectionState
+    lastHeartbeatAtIso?: string
+    lastError?: string
+    cameras?: Array<{
+      cameraId: string
+      cameraLabel: string
+      sourceType: LocalAgentCameraSourceType
+      status: 'online' | 'degraded' | 'offline'
+      lastCaptureAtIso?: string
+      lastSuccessfulCaptureAtIso?: string
+      lastError?: string
+      latencyMs?: number
+    }>
   }
   /** האם למצלמה יש הרשאה/גישה עבור הערוץ הנוכחי. */
   cameraEnabled?: boolean
@@ -112,6 +137,7 @@ export interface Channel {
 }
 
 export type MobilePanel = 'inbox' | 'chat' | 'details'
+export type OperatorMobileSection = 'live' | 'channels' | 'alerts' | 'account'
 
 export interface OperationDraft {
   name: string

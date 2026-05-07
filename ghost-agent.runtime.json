@@ -2,52 +2,37 @@
   "organizationId": "da43a574-f2a9-4629-bada-d2ed8ff856c8",
   "organizationName": "test",
   "apiBaseUrl": "https://ghost-test-app-b906c.web.app",
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YzVlMjQ4NC05MjYxLTQwMDEtYTYxNC1mNjllNDNhZDc2YTYiLCJvcmdhbml6YXRpb25JZCI6ImRhNDNhNTc0LWYyYTktNDYyOS1iYWRhLWQyZWQ4ZmY4NTZjOCIsIm9yZ2FuaXphdGlvbk5hbWUiOiJ0ZXN0Iiwicm9sZSI6InJlZ3VsYXJfdXNlciIsInVzZXJuYW1lIjoiYWdlbnRfZ2hvc3QtYWdlbnQtNmVjN2U0MzVfYWY2ZDNiIiwiZmlyc3ROYW1lIjoiTG9jYWwiLCJsYXN0TmFtZSI6IkdIT1NUIEhpa3Zpc2lvbiBFMkUgQWdlbnQiLCJpYXQiOjE3Nzc5MjE4NzQsImV4cCI6MTc3NzkyMjc3NH0.pyQCJeMxzZ3IT7nE0SMMrL9CO7LqfNYFE6Jon7gBN2I",
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbklkIjoiOTdmNmU3OWUtNjllOS00YTZlLTgxODUtNzNjMGRlNjAxMDUyIiwidXNlcklkIjoiOWM1ZTI0ODQtOTI2MS00MDAxLWE2MTQtZjY5ZTQzYWQ3NmE2IiwiaWF0IjoxNzc3OTIxODc0LCJleHAiOjE3Nzg1MjY2NzR9.D1sqBUG7Clk-V3lLUqI5l0wEynujIxIub7XQdFwplXQ",
-  "username": "agent_ghost-agent-6ec7e435_af6d3b",
-  "deviceId": "ghost-agent-6ec7e435",
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlNGFmNDM4MC05MzNjLTRhNjItYWIzZS1kYTk2MWNiZThmMjAiLCJvcmdhbml6YXRpb25JZCI6ImRhNDNhNTc0LWYyYTktNDYyOS1iYWRhLWQyZWQ4ZmY4NTZjOCIsIm9yZ2FuaXphdGlvbk5hbWUiOiJ0ZXN0Iiwicm9sZSI6InJlZ3VsYXJfdXNlciIsInVzZXJuYW1lIjoiYWdlbnRfZ2hvc3QtYWdlbnQtMjQ4MWYyNzNfN2RlZTBiIiwiZmlyc3ROYW1lIjoiTG9jYWwiLCJsYXN0TmFtZSI6IkdIT1NUIEhpa3Zpc2lvbiBFMkUgQWdlbnQiLCJpYXQiOjE3Nzc5MjQzNjIsImV4cCI6MTc3NzkyNTI2Mn0.EZZS5krXOFUr0zz0o9St5bNLzxxrqUSzJ2MxjyDT1OQ",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbklkIjoiYTAzMjJhOTktOWE5Zi00N2Y3LWI1NTMtMGIwZWQ4ZTBjZDA3IiwidXNlcklkIjoiZTRhZjQzODAtOTMzYy00YTYyLWFiM2UtZGE5NjFjYmU4ZjIwIiwiaWF0IjoxNzc3OTI0MzYyLCJleHAiOjE3Nzg1MjkxNjJ9.C0tRsXiU_wJuCSjyVWOs5cQrVSterfqny0yh_69_iGU",
+  "username": "agent_ghost-agent-2481f273_7dee0b",
+  "deviceId": "ghost-agent-2481f273",
   "deviceName": "GHOST Hikvision E2E Agent",
   "cameras": [
     {
-      "cameraId": "legacy-integrated-webcam",
-      "label": "Integrated Webcam",
-      "source": {
-        "type": "usb-dshow",
-        "name": "Integrated Webcam"
-      },
-      "enabled": true,
-      "createdAtIso": "2026-04-27T16:50:09.990Z",
-      "updatedAtIso": "2026-04-27T16:50:09.990Z"
-    },
-    {
-      "cameraId": "hikvision-sdk-20260504-221111",
+      "cameraId": "hikvision-sdk-20260504-225238",
       "label": "Hikvision 10.0.0.10",
       "enabled": true,
-      "createdAtIso": "2026-05-04T19:11:14.098Z",
-      "updatedAtIso": "2026-05-04T19:11:14.098Z",
+      "createdAtIso": "2026-05-04T19:52:41.544Z",
+      "updatedAtIso": "2026-05-04T19:52:41.544Z",
       "source": {
         "type": "hikvision-sdk",
         "host": "10.0.0.10",
         "port": 8000,
         "username": "admin",
         "channel": 1,
-        "passwordRef": "camera-hikvision-sdk-20260504-221111-hikvision-password-fc9cdacf-0b04-414a-9f3d-f5bb90d86729"
+        "passwordRef": "camera-hikvision-sdk-20260504-225238-hikvision-password-0f1620ac-ad90-4223-86b2-10cc12613d56"
       }
     }
   ],
   "bindings": [
     {
-      "channelId": "2e3b2c31-bab4-4c1c-b784-630ecd60d2f7",
-      "cameraId": "legacy-integrated-webcam"
-    },
-    {
-      "channelId": "c88aae69-6993-49bf-bec0-6479acd466d5",
-      "cameraId": "hikvision-sdk-20260504-221111"
+      "channelId": "abec6ef1-5093-45e9-aeee-c0faceac48a8",
+      "cameraId": "hikvision-sdk-20260504-225238"
     }
   ],
-  "channelId": "c88aae69-6993-49bf-bec0-6479acd466d5",
-  "channelName": "Hikvision E2E 20260504-221111",
+  "channelId": "abec6ef1-5093-45e9-aeee-c0faceac48a8",
+  "channelName": "Hikvision E2E 20260504-225238",
   "cameraName": "Hikvision 10.0.0.10",
-  "boundAtIso": "2026-05-04T19:11:14.700Z",
-  "defaultCameraId": "hikvision-sdk-20260504-221111"
+  "boundAtIso": "2026-05-04T19:52:42.080Z",
+  "defaultCameraId": "hikvision-sdk-20260504-225238"
 }

@@ -1,7 +1,7 @@
 import type { LocalCameraConfig } from './config.js'
 import { GhostApiClient } from './api-client.js'
 import type { AgentRuntimeState } from './health-server.js'
-import { buildScanMessage } from './messages.js'
+import { buildScanErrorMessage, buildScanMessage } from './messages.js'
 import { getDueOperations, markOperationsRan } from './scheduler.js'
 import type { CameraRuntimeStatus, Channel, CaptureProfile } from './types.js'
 import { CaptureService } from './cameras/capture-service.js'
@@ -78,14 +78,30 @@ export class LocalCameraWorker {
 
         const cameraId = this.resolveCameraIdForChannel(item.channel)
         const frameDataUrl = await this.captureFrame(cameraId, 'scan-standard')
-        const results = await this.api.scanOperations(item.channel, frameDataUrl, item.operations)
-        const resultByOperationId = new Map(results.map((result) => [result.operationId, result]))
+        try {
+          const results = await this.api.scanOperations(item.channel, frameDataUrl, item.operations)
+          const resultByOperationId = new Map(results.map((result) => [result.operationId, result]))
 
-        for (const operation of item.operations) {
-          const result = resultByOperationId.get(operation.id)
-          if (!result) continue
-          await this.api.saveMessage(item.channel.id, buildScanMessage(operation, result, frameDataUrl, new Date()))
-          this.state.scannedOperations += 1
+          for (const operation of item.operations) {
+            const result = resultByOperationId.get(operation.id)
+            if (!result) continue
+            await this.api.saveMessage(item.channel.id, buildScanMessage(operation, result, frameDataUrl, new Date()))
+            this.state.scannedOperations += 1
+          }
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error)
+          this.state.status = 'degraded'
+          this.state.lastError = message
+
+          for (const operation of item.operations) {
+            await this.api.saveMessage(
+              item.channel.id,
+              buildScanErrorMessage(operation, frameDataUrl, message, new Date()),
+            )
+            this.state.scannedOperations += 1
+          }
+
+          await this.sendHeartbeatSafe(item.channel.id, 'degraded', message)
         }
 
         markOperationsRan(item.operations, now.getTime(), this.lastRunByOperationId)

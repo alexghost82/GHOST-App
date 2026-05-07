@@ -7,35 +7,36 @@
   --ops-composer-safe-space: 120px;
   --ops-shell-radius: 0;
   --ops-shell-border: transparent;
-  --ops-topbar-bg: rgba(247, 249, 251, 0.76);
+  --ops-topbar-bg: rgba(251, 253, 255, 0.9);
   --ops-topbar-text: #182229;
-  --ops-topbar-border: rgba(255, 255, 255, 0.56);
-  --ops-topbar-chip-bg: rgba(255, 255, 255, 0.34);
-  --ops-topbar-chip-hover: rgba(255, 255, 255, 0.52);
+  --ops-topbar-border: rgba(255, 255, 255, 0.86);
+  --ops-topbar-chip-bg: rgba(255, 255, 255, 0.62);
+  --ops-topbar-chip-hover: rgba(255, 255, 255, 0.82);
   --ops-topbar-divider: rgba(24, 34, 41, 0.12);
   --ops-surface-bg:
-    radial-gradient(circle at 18% 22%, rgba(255, 243, 213, 0.64), transparent 20%),
-    radial-gradient(circle at 74% 18%, rgba(207, 231, 255, 0.78), transparent 26%),
-    radial-gradient(circle at 68% 78%, rgba(219, 208, 255, 0.54), transparent 24%),
-    radial-gradient(circle at 22% 86%, rgba(255, 231, 214, 0.48), transparent 18%),
-    linear-gradient(180deg, #eff6fb 0%, #edf3f8 42%, #e9eff4 100%);
-  --ops-panel-bg: rgba(244, 250, 255, 0.34);
-  --ops-panel-muted: rgba(246, 251, 255, 0.26);
-  --ops-panel-border: rgba(255, 255, 255, 0.58);
+    radial-gradient(circle at 18% 22%, rgba(255, 244, 214, 0.52), transparent 20%),
+    radial-gradient(circle at 74% 18%, rgba(219, 236, 255, 0.62), transparent 26%),
+    radial-gradient(circle at 68% 78%, rgba(232, 226, 255, 0.44), transparent 24%),
+    radial-gradient(circle at 22% 86%, rgba(255, 235, 219, 0.38), transparent 18%),
+    linear-gradient(180deg, #f8fbfe 0%, #f4f8fc 42%, #eff5fa 100%);
+  --ops-panel-bg: rgba(253, 254, 255, 0.68);
+  --ops-panel-muted: rgba(251, 253, 255, 0.84);
+  --ops-panel-border: rgba(214, 227, 239, 0.72);
   --ops-text: #182229;
   --ops-text-muted: #6c7b86;
   --ops-text-faint: #8b98a2;
   --ops-accent: #00a884;
   --ops-accent-strong: #25d366;
-  --ops-bubble-in: rgba(255, 255, 255, 0.52);
-  --ops-bubble-out: rgba(227, 255, 214, 0.58);
+  --ops-bubble-in: rgba(255, 255, 255, 0.8);
+  --ops-bubble-out: rgba(220, 248, 239, 0.92);
   --ops-glass-shadow: 0 18px 48px rgba(133, 145, 161, 0.18);
   --ops-glass-shadow-strong: 0 24px 64px rgba(120, 132, 145, 0.24);
-  --ops-glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.42);
+  --ops-glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.72);
   --ops-glass-blur: blur(22px) saturate(160%);
   --ops-panel-blur: blur(24px) saturate(175%);
-  --ops-panel-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.04));
-  --ops-hover-glow: rgba(255, 255, 255, 0.2);
+  --ops-panel-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.12));
+  --ops-hover-glow: rgba(255, 255, 255, 0.42);
+  --ops-mobile-nav-reserve: 0px;
   min-height: 100vh;
   min-height: 100dvh;
   background: var(--ops-surface-bg);
@@ -236,12 +237,12 @@ html[data-theme='dark'] .app-shell.surface-live-ops {
 
 .app-shell.surface-live-ops .chat-panel {
   background:
-    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.26) 1px, transparent 0) 0 0/24px 24px,
-    radial-gradient(circle at 18% 24%, rgba(255, 243, 213, 0.34), transparent 16%),
-    radial-gradient(circle at 72% 20%, rgba(202, 226, 255, 0.42), transparent 22%),
-    radial-gradient(circle at 72% 78%, rgba(218, 209, 255, 0.28), transparent 22%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.02)),
-    linear-gradient(180deg, rgba(232, 241, 247, 0.9), rgba(227, 235, 242, 0.84));
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.34) 1px, transparent 0) 0 0/24px 24px,
+    radial-gradient(circle at 18% 24%, rgba(255, 243, 213, 0.24), transparent 16%),
+    radial-gradient(circle at 72% 20%, rgba(210, 231, 255, 0.3), transparent 22%),
+    radial-gradient(circle at 72% 78%, rgba(226, 220, 255, 0.2), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.14)),
+    linear-gradient(180deg, rgba(247, 251, 255, 0.98), rgba(239, 245, 251, 0.96));
 }
 
 html[data-theme='dark'] .app-shell.surface-live-ops .chat-panel {
@@ -562,6 +563,37 @@ html[data-theme='dark'] .app-shell.surface-live-ops .chat-panel {
   font-size: 12px;
 }
 
+.app-shell.surface-live-ops .channel-connection-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  direction: ltr;
+}
+
+.app-shell.surface-live-ops .channel-connection-indicator.tone-neutral {
+  background: #94a3b8;
+}
+
+.app-shell.surface-live-ops .channel-connection-indicator.tone-live {
+  background: #16a34a;
+}
+
+.app-shell.surface-live-ops .channel-connection-indicator.tone-degraded {
+  background: #d8a21d;
+}
+
+.app-shell.surface-live-ops .channel-connection-indicator.tone-offline {
+  background: #dc2626;
+}
+
 .app-shell.surface-live-ops .chat-list-location.status-label-live {
   color: #1f9d55;
 }
@@ -577,6 +609,7 @@ html[data-theme='dark'] .app-shell.surface-live-ops .chat-panel {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 
 .app-shell.surface-live-ops .unread-pill {
   min-width: 20px;
@@ -1315,18 +1348,30 @@ html[data-theme='dark'] .app-shell.surface-live-ops .app-footer * {
   .app-shell.surface-live-ops {
     --ops-shell-width: 100vw;
     --ops-shell-radius: 0;
+    --ops-composer-safe-space: calc(112px + env(safe-area-inset-bottom));
     background: var(--ops-surface-bg);
+  }
+
+  .app-shell.operator-mobile-live-shell.surface-live-ops {
+    --ops-mobile-nav-reserve: 0px;
   }
 
   .app-shell.surface-live-ops .app-surface {
     width: 100vw;
-    height: 100vh;
-    height: 100dvh;
+    height: calc(100vh - var(--ops-mobile-nav-reserve));
+    height: calc(100dvh - var(--ops-mobile-nav-reserve));
+    min-height: 0;
     margin: 0;
     border: none;
     border-radius: 0;
     box-shadow: none;
     grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .app-shell.operator-mobile-live-shell.surface-live-ops .app-surface {
+    width: 100%;
+    height: auto;
+    min-height: 0;
   }
 
   .app-shell.surface-live-ops .app-footer,
@@ -1351,12 +1396,14 @@ html[data-theme='dark'] .app-shell.surface-live-ops .app-footer * {
 
   .app-shell.surface-live-ops .workspace {
     height: 100%;
+    min-height: 0;
   }
 
   .app-shell.surface-live-ops .workspace-panels,
   .app-shell.surface-live-ops .workspace:not(.details-collapsed) .workspace-panels {
     display: block;
     height: 100%;
+    min-height: 0;
   }
 
   .app-shell.surface-live-ops .inbox-panel,
@@ -1364,8 +1411,8 @@ html[data-theme='dark'] .app-shell.surface-live-ops .app-footer * {
   .app-shell.surface-live-ops .details-panel {
     display: none;
     width: 100%;
-    height: calc(100vh - 150px);
-    height: calc(100dvh - 150px);
+    height: 100%;
+    min-height: 0;
   }
 
   .app-shell.surface-live-ops[data-mobile-panel='inbox'] .inbox-panel,
@@ -1375,23 +1422,77 @@ html[data-theme='dark'] .app-shell.surface-live-ops .app-footer * {
   }
 
   .app-shell.surface-live-ops .message-stream {
-    padding: 14px;
+    padding: 12px 8px var(--ops-composer-safe-space) !important;
   }
 
   .app-shell.surface-live-ops .message-body {
-    max-width: 88%;
+    max-width: min(92%, 520px) !important;
   }
 
   .app-shell.surface-live-ops .composer {
-    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
   }
 
   .app-shell.surface-live-ops .composer-shell {
     align-items: center;
+    gap: 8px;
+  }
+
+  .app-shell.surface-live-ops .composer-input-shell {
+    min-height: 48px;
+    height: 48px;
+    padding: 0 14px;
+    border-radius: 18px;
+  }
+
+  .app-shell.surface-live-ops .messenger-sidebar-header,
+  .app-shell.surface-live-ops .chat-header,
+  .app-shell.surface-live-ops .messenger-details-header {
+    min-height: auto;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .app-shell.surface-live-ops .chat-header-utility,
+  .app-shell.surface-live-ops .inbox-header-actions {
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .app-shell.surface-live-ops .messenger-circle-button,
+  .app-shell.surface-live-ops .messenger-icon-button,
+  .app-shell.surface-live-ops .composer-icon-button {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .app-shell.surface-live-ops .inbox-appbar-avatar,
+  .app-shell.surface-live-ops .chat-avatar,
+  .app-shell.surface-live-ops .messenger-profile-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .app-shell.surface-live-ops .inbox-appbar-copy strong,
+  .app-shell.surface-live-ops .title-cluster-text h2,
+  .app-shell.surface-live-ops .dp-channel-name {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+
+  .app-shell.surface-live-ops .route {
+    font-size: 12px;
+  }
+
+  .app-shell.surface-live-ops .message-bubble {
+    border-radius: 16px;
+    padding: 10px 12px 22px;
   }
 
   .app-shell.surface-live-ops .chat-empty-state {
-    max-width: min(100%, 360px);
+    max-width: min(100%, 320px);
+    padding: 20px 18px;
   }
 
   .app-shell.surface-live-ops .bottom-nav {
@@ -1462,6 +1563,20 @@ html[data-theme='dark'] .app-shell.surface-live-ops .message-row.system .message
 
 .app-shell.surface-live-ops .composer-input-shell {
   background: rgba(255, 255, 255, 0.22);
+}
+
+html:not([data-theme='dark']) .app-shell.surface-live-ops .messenger-sidebar-header,
+html:not([data-theme='dark']) .app-shell.surface-live-ops .chat-header,
+html:not([data-theme='dark']) .app-shell.surface-live-ops .messenger-details-header,
+html:not([data-theme='dark']) .app-shell.surface-live-ops .composer {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(246, 251, 255, 0.8));
+}
+
+html:not([data-theme='dark']) .app-shell.surface-live-ops .composer-input-shell,
+html:not([data-theme='dark']) .app-shell.surface-live-ops .inbox-search-shell {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(213, 228, 241, 0.86);
 }
 
 .app-shell.surface-live-ops .details-content {

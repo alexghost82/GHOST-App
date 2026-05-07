@@ -1,0 +1,524 @@
+{
+  "user": "slon",
+  "clientUrl": "http://127.0.0.1:4174",
+  "desktop": {
+    "light": {
+      "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-theme-matrix-qa\\desktop-1440x960-light.png",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "shell": {
+        "selector": ".app-shell",
+        "color": "rgb(24, 34, 41)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "radial-gradient(circle at 18% 22%, rgba(255, 244, 214, 0.52), rgba(0, 0, 0, 0) 20%), radial-gradient(circle at 74% 18%, rgba(219, 236, 255, 0.62), rgba(0, 0, 0, 0) 26%), radial-gradient(circle at 68% 78%, rgba(232, 226, 255, 0.44), rgba(0, 0, 0, 0) 24%), radial-gradient(circle at 22% 86%, rgba(255, 235, 219, 0.38), rgba(0, 0, 0, 0) 18%), linear-gradient(rgb(248, 251, 254) 0%, rgb(244, 248, 252) 42%, rgb(239, 245, 250) 100%)",
+        "borderColor": "rgb(24, 34, 41)",
+        "boxShadow": "none",
+        "top": 0,
+        "bottom": 960,
+        "height": 960
+      },
+      "topbar": {
+        "selector": ".topbar",
+        "color": "rgb(24, 34, 41)",
+        "backgroundColor": "rgba(251, 253, 255, 0.9)",
+        "backgroundImage": "none",
+        "borderColor": "rgb(24, 34, 41) rgb(24, 34, 41) rgba(255, 255, 255, 0.86)",
+        "boxShadow": "rgba(255, 255, 255, 0.72) 0px 1px 0px 0px inset, rgba(15, 23, 32, 0.08) 0px 10px 28px 0px",
+        "top": 0,
+        "bottom": 59,
+        "height": 59
+      },
+      "liveTabs": null,
+      "liveTabsActive": null,
+      "chatHeader": {
+        "selector": ".chat-header",
+        "color": "rgb(24, 34, 41)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.92), rgba(246, 251, 255, 0.8))",
+        "borderColor": "rgb(24, 34, 41) rgb(24, 34, 41) rgba(214, 227, 239, 0.72)",
+        "boxShadow": "rgba(255, 255, 255, 0.72) 0px 1px 0px 0px inset",
+        "top": 59,
+        "bottom": 148,
+        "height": 89
+      },
+      "chatPanel": {
+        "selector": ".chat-panel",
+        "color": "rgb(24, 34, 41)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.34) 1px, rgba(0, 0, 0, 0) 0px), radial-gradient(circle at 18% 24%, rgba(255, 243, 213, 0.24), rgba(0, 0, 0, 0) 16%), radial-gradient(circle at 72% 20%, rgba(210, 231, 255, 0.3), rgba(0, 0, 0, 0) 22%), radial-gradient(circle at 72% 78%, rgba(226, 220, 255, 0.2), rgba(0, 0, 0, 0) 22%), linear-gradient(rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.14)), linear-gradient(rgba(247, 251, 255, 0.98), rgba(239, 245, 251, 0.96))",
+        "borderColor": "rgb(24, 34, 41)",
+        "boxShadow": "none",
+        "top": 59,
+        "bottom": 903,
+        "height": 844
+      },
+      "composer": {
+        "selector": ".composer",
+        "color": "rgb(24, 34, 41)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.92), rgba(246, 251, 255, 0.8))",
+        "borderColor": "rgba(214, 227, 239, 0.72) rgb(24, 34, 41) rgb(24, 34, 41)",
+        "boxShadow": "rgba(255, 255, 255, 0.72) 0px 1px 0px 0px inset",
+        "top": 828,
+        "bottom": 903,
+        "height": 75
+      },
+      "composerInput": {
+        "selector": ".composer-input-shell",
+        "color": "rgb(24, 34, 41)",
+        "backgroundColor": "rgba(255, 255, 255, 0.78)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(213, 228, 241, 0.86)",
+        "boxShadow": "rgba(255, 255, 255, 0.24) 0px 1px 0px 0px inset",
+        "top": 839,
+        "bottom": 885,
+        "height": 46
+      },
+      "messageBubbleUser": {
+        "selector": ".message-row.user .message-bubble",
+        "color": "rgba(240, 244, 252, 0.98)",
+        "backgroundColor": "rgba(117, 208, 189, 0.32)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(183, 247, 235, 0.24)",
+        "boxShadow": "rgba(17, 27, 33, 0.08) 0px 6px 18px 0px",
+        "top": 183,
+        "bottom": 236,
+        "height": 53
+      },
+      "messageBubbleGhost": {
+        "selector": ".message-row.ghost .message-bubble, .message-row.system .message-bubble",
+        "color": "rgba(240, 244, 252, 0.85)",
+        "backgroundColor": "rgba(204, 183, 129, 0.26)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(242, 226, 182, 0.18)",
+        "boxShadow": "rgba(17, 27, 33, 0.08) 0px 6px 18px 0px",
+        "top": 103,
+        "bottom": 175,
+        "height": 72
+      },
+      "mobilePrimaryNav": null,
+      "mobilePrimaryNavActive": null,
+      "footer": {
+        "selector": ".app-footer",
+        "color": "rgb(24, 34, 41)",
+        "backgroundColor": "rgba(251, 253, 255, 0.9)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(255, 255, 255, 0.86) rgb(24, 34, 41) rgb(24, 34, 41)",
+        "boxShadow": "rgba(255, 255, 255, 0.72) 0px 1px 0px 0px inset, rgba(15, 23, 32, 0.08) 0px -10px 28px 0px",
+        "top": 903,
+        "bottom": 960,
+        "height": 57
+      },
+      "bodyBg": "rgb(215, 217, 221)",
+      "htmlBg": "rgb(255, 255, 255)",
+      "textSample": "פקודה מהירה\nCtrl+K\nגוסט לייב\nמרכז פיקוד\nחי\n1\nערוצים\n1\nמבצעים\n0\nבריאות\n100%\nאב\nאלכס בו\nTEST\nגל\nגוסט לייב\nתיבת ניטור מאובטחת\n+\n⋮\nשיחות\n1\nב\nבית\nWEB\nפעיל\n20:04\n\nאתה: מה מצב?\n\nב\nבית\n\nפעיל כעת·20:04\n\n⋮\nSystem\n\nערוץ חדש נוצר ומוכן לשיחה. אפשר לעדכן RTSP, זיכרון ומבצעים בפאנל הימני.\n\n18:45\n\n?\n\n18:52\n\n?\n\n18:54\n\nבדוק אם יש חסימה בכניסה\n\n18:54\n\nчто ты видишь?\n\n18:57\n\n,\n\n15:31\n\nמה מצב\n\n19:35\n\n??\n\n19:36\n\nעוד פעם\n\n19:36\n\nтм тьс\n\n20:02\n\nמה מצב?\n\n20:04\nהודעה\n➤\nגרסה\nv0.8.3\nבילד\n2026.03\nמיקום\n34.7843°N 32.0853°E\n"
+    },
+    "dark": {
+      "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-theme-matrix-qa\\desktop-1440x960-dark.png",
+      "theme": "dark",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "shell": {
+        "selector": ".app-shell",
+        "color": "rgb(242, 245, 248)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "radial-gradient(circle at 16% 16%, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0) 18%), radial-gradient(circle at 84% 24%, rgba(255, 255, 255, 0.043), rgba(0, 0, 0, 0) 20%), radial-gradient(circle at 82% 92%, rgba(255, 255, 255, 0.035), rgba(0, 0, 0, 0) 16%), linear-gradient(rgb(72, 76, 83) 0%, rgb(62, 67, 74) 42%, rgb(53, 57, 64) 100%)",
+        "borderColor": "rgb(242, 245, 248)",
+        "boxShadow": "none",
+        "top": 0,
+        "bottom": 960,
+        "height": 960
+      },
+      "topbar": {
+        "selector": ".topbar",
+        "color": "rgba(241, 245, 249, 0.92)",
+        "backgroundColor": "rgba(13, 20, 26, 0.72)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(241, 245, 249, 0.92) rgba(241, 245, 249, 0.92) rgba(255, 255, 255, 0.12)",
+        "boxShadow": "rgba(255, 255, 255, 0.1) 0px 1px 0px 0px inset, rgba(15, 23, 32, 0.08) 0px 10px 28px 0px",
+        "top": 0,
+        "bottom": 59,
+        "height": 59
+      },
+      "liveTabs": null,
+      "liveTabsActive": null,
+      "chatHeader": {
+        "selector": ".chat-header",
+        "color": "rgb(242, 245, 248)",
+        "backgroundColor": "rgba(107, 113, 124, 0.2)",
+        "backgroundImage": "none",
+        "borderColor": "rgb(242, 245, 248) rgb(242, 245, 248) rgba(255, 255, 255, 0.14)",
+        "boxShadow": "rgba(255, 255, 255, 0.1) 0px 1px 0px 0px inset",
+        "top": 59,
+        "bottom": 148,
+        "height": 89
+      },
+      "chatPanel": {
+        "selector": ".chat-panel",
+        "color": "rgb(242, 245, 248)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, rgba(0, 0, 0, 0) 0px), radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0) 18%), linear-gradient(rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.016)), linear-gradient(rgba(65, 70, 78, 0.94), rgba(55, 60, 68, 0.96))",
+        "borderColor": "rgb(242, 245, 248)",
+        "boxShadow": "none",
+        "top": 59,
+        "bottom": 903,
+        "height": 844
+      },
+      "composer": {
+        "selector": ".composer",
+        "color": "rgb(242, 245, 248)",
+        "backgroundColor": "color(srgb 0.34902 0.372549 0.411765 / 0.186588)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(255, 255, 255, 0.14) rgb(242, 245, 248) rgb(242, 245, 248)",
+        "boxShadow": "rgba(255, 255, 255, 0.1) 0px 1px 0px 0px inset",
+        "top": 828,
+        "bottom": 903,
+        "height": 75
+      },
+      "composerInput": {
+        "selector": ".composer-input-shell",
+        "color": "rgb(242, 245, 248)",
+        "backgroundColor": "rgba(255, 255, 255, 0.22)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(255, 255, 255, 0.3)",
+        "boxShadow": "rgba(255, 255, 255, 0.24) 0px 1px 0px 0px inset",
+        "top": 839,
+        "bottom": 885,
+        "height": 46
+      },
+      "messageBubbleUser": {
+        "selector": ".message-row.user .message-bubble",
+        "color": "rgba(240, 244, 252, 0.98)",
+        "backgroundColor": "rgba(104, 187, 173, 0.3)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(183, 247, 235, 0.24)",
+        "boxShadow": "rgba(17, 27, 33, 0.08) 0px 6px 18px 0px",
+        "top": 183,
+        "bottom": 236,
+        "height": 53
+      },
+      "messageBubbleGhost": {
+        "selector": ".message-row.ghost .message-bubble, .message-row.system .message-bubble",
+        "color": "rgba(240, 244, 252, 0.85)",
+        "backgroundColor": "rgba(167, 145, 102, 0.28)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(242, 226, 182, 0.18)",
+        "boxShadow": "rgba(17, 27, 33, 0.08) 0px 6px 18px 0px",
+        "top": 103,
+        "bottom": 175,
+        "height": 72
+      },
+      "mobilePrimaryNav": null,
+      "mobilePrimaryNavActive": null,
+      "footer": {
+        "selector": ".app-footer",
+        "color": "rgba(241, 245, 249, 0.92)",
+        "backgroundColor": "rgba(13, 20, 26, 0.72)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(255, 255, 255, 0.12) rgba(241, 245, 249, 0.92) rgba(241, 245, 249, 0.92)",
+        "boxShadow": "rgba(255, 255, 255, 0.1) 0px 1px 0px 0px inset, rgba(15, 23, 32, 0.08) 0px -10px 28px 0px",
+        "top": 903,
+        "bottom": 960,
+        "height": 57
+      },
+      "bodyBg": "rgb(7, 9, 13)",
+      "htmlBg": "rgb(10, 13, 17)",
+      "textSample": "פקודה מהירה\nCtrl+K\nגוסט לייב\nמרכז פיקוד\nחי\n1\nערוצים\n1\nמבצעים\n0\nבריאות\n100%\nאב\nאלכס בו\nTEST\nגל\nגוסט לייב\nתיבת ניטור מאובטחת\n+\n⋮\nשיחות\n1\nב\nבית\nWEB\nפעיל\n20:04\n\nאתה: מה מצב?\n\nב\nבית\n\nפעיל כעת·20:04\n\n⋮\nSystem\n\nערוץ חדש נוצר ומוכן לשיחה. אפשר לעדכן RTSP, זיכרון ומבצעים בפאנל הימני.\n\n18:45\n\n?\n\n18:52\n\n?\n\n18:54\n\nבדוק אם יש חסימה בכניסה\n\n18:54\n\nчто ты видишь?\n\n18:57\n\n,\n\n15:31\n\nמה מצב\n\n19:35\n\n??\n\n19:36\n\nעוד פעם\n\n19:36\n\nтм тьс\n\n20:02\n\nמה מצב?\n\n20:04\nהודעה\n➤\nגרסה\nv0.8.3\nבילד\n2026.03\nמיקום\n34.7843°N 32.0853°E\n"
+    }
+  },
+  "mobile": {
+    "light": {
+      "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-theme-matrix-qa\\mobile-390x844-light.png",
+      "theme": "light",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "shell": {
+        "selector": ".app-shell",
+        "color": "rgb(24, 34, 41)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "radial-gradient(circle at 18% 22%, rgba(255, 244, 214, 0.52), rgba(0, 0, 0, 0) 20%), radial-gradient(circle at 74% 18%, rgba(219, 236, 255, 0.62), rgba(0, 0, 0, 0) 26%), radial-gradient(circle at 68% 78%, rgba(232, 226, 255, 0.44), rgba(0, 0, 0, 0) 24%), radial-gradient(circle at 22% 86%, rgba(255, 235, 219, 0.38), rgba(0, 0, 0, 0) 18%), linear-gradient(rgb(248, 251, 254) 0%, rgb(244, 248, 252) 42%, rgb(239, 245, 250) 100%)",
+        "borderColor": "rgb(24, 34, 41)",
+        "boxShadow": "none",
+        "top": 0,
+        "bottom": 844,
+        "height": 844
+      },
+      "topbar": {
+        "selector": ".topbar",
+        "color": "rgb(24, 34, 41)",
+        "backgroundColor": "rgba(251, 253, 255, 0.9)",
+        "backgroundImage": "none",
+        "borderColor": "rgb(24, 34, 41) rgb(24, 34, 41) rgba(255, 255, 255, 0.86)",
+        "boxShadow": "rgba(255, 255, 255, 0.72) 0px 1px 0px 0px inset, rgba(15, 23, 32, 0.08) 0px 10px 28px 0px",
+        "top": 0,
+        "bottom": 73,
+        "height": 73
+      },
+      "liveTabs": {
+        "selector": ".live-ops-mobile-tabs",
+        "color": "rgb(24, 34, 41)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "linear-gradient(color(srgb 0.984314 0.992157 1 / 0.73851), rgba(255, 255, 255, 0))",
+        "borderColor": "rgb(24, 34, 41)",
+        "boxShadow": "none",
+        "top": 73,
+        "bottom": 141,
+        "height": 68
+      },
+      "liveTabsActive": {
+        "selector": ".live-ops-mobile-tabs .mobile-tab-bar-button.active",
+        "color": "rgb(35, 50, 59)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.94), rgba(241, 248, 254, 0.98))",
+        "borderColor": "rgba(219, 229, 239, 0.96)",
+        "boxShadow": "rgba(255, 255, 255, 0.92) 0px 1px 0px 0px inset, rgba(166, 185, 204, 0.18) 0px 10px 20px 0px",
+        "top": 83,
+        "bottom": 129,
+        "height": 46
+      },
+      "chatHeader": {
+        "selector": ".chat-header",
+        "color": "rgb(24, 34, 41)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.92), rgba(246, 251, 255, 0.8))",
+        "borderColor": "rgb(24, 34, 41) rgb(24, 34, 41) rgba(214, 227, 239, 0.72)",
+        "boxShadow": "rgba(255, 255, 255, 0.72) 0px 1px 0px 0px inset",
+        "top": 141,
+        "bottom": 198,
+        "height": 57
+      },
+      "chatPanel": {
+        "selector": ".chat-panel",
+        "color": "rgb(24, 34, 41)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.34) 1px, rgba(0, 0, 0, 0) 0px), radial-gradient(circle at 18% 24%, rgba(255, 243, 213, 0.24), rgba(0, 0, 0, 0) 16%), radial-gradient(circle at 72% 20%, rgba(210, 231, 255, 0.3), rgba(0, 0, 0, 0) 22%), radial-gradient(circle at 72% 78%, rgba(226, 220, 255, 0.2), rgba(0, 0, 0, 0) 22%), linear-gradient(rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.14)), linear-gradient(rgba(247, 251, 255, 0.98), rgba(239, 245, 251, 0.96))",
+        "borderColor": "rgb(24, 34, 41)",
+        "boxShadow": "none",
+        "top": 141,
+        "bottom": 763,
+        "height": 622
+      },
+      "composer": {
+        "selector": ".composer",
+        "color": "rgb(24, 34, 41)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.92), rgba(246, 251, 255, 0.8))",
+        "borderColor": "rgba(214, 227, 239, 0.72) rgb(24, 34, 41) rgb(24, 34, 41)",
+        "boxShadow": "rgba(255, 255, 255, 0.72) 0px 1px 0px 0px inset",
+        "top": 686,
+        "bottom": 763,
+        "height": 77
+      },
+      "composerInput": {
+        "selector": ".composer-input-shell",
+        "color": "rgb(24, 34, 41)",
+        "backgroundColor": "rgba(255, 255, 255, 0.78)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(213, 228, 241, 0.86)",
+        "boxShadow": "rgba(255, 255, 255, 0.24) 0px 1px 0px 0px inset",
+        "top": 697,
+        "bottom": 745,
+        "height": 48
+      },
+      "messageBubbleUser": {
+        "selector": ".message-row.user .message-bubble",
+        "color": "rgba(240, 244, 252, 0.98)",
+        "backgroundColor": "rgba(117, 208, 189, 0.32)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(183, 247, 235, 0.24)",
+        "boxShadow": "rgba(17, 27, 33, 0.08) 0px 6px 18px 0px",
+        "top": 31,
+        "bottom": 86,
+        "height": 55
+      },
+      "messageBubbleGhost": {
+        "selector": ".message-row.ghost .message-bubble, .message-row.system .message-bubble",
+        "color": "rgba(240, 244, 252, 0.85)",
+        "backgroundColor": "rgba(204, 183, 129, 0.26)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(242, 226, 182, 0.18)",
+        "boxShadow": "rgba(17, 27, 33, 0.08) 0px 6px 18px 0px",
+        "top": -70,
+        "bottom": 23,
+        "height": 93
+      },
+      "mobilePrimaryNav": {
+        "selector": ".operator-mobile-primary-nav",
+        "color": "rgb(24, 34, 41)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0), rgba(249, 252, 255, 0.98) 32%), radial-gradient(circle at 50% 100%, rgba(15, 118, 110, 0.1), rgba(0, 0, 0, 0) 64%)",
+        "borderColor": "rgba(220, 230, 240, 0.92) rgb(24, 34, 41) rgb(24, 34, 41)",
+        "boxShadow": "rgba(15, 23, 42, 0.12) 0px -18px 40px 0px",
+        "top": 763,
+        "bottom": 844,
+        "height": 81
+      },
+      "mobilePrimaryNavActive": {
+        "selector": ".operator-mobile-primary-nav .mobile-tab-bar-button.active",
+        "color": "rgb(35, 50, 59)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "linear-gradient(rgba(235, 249, 246, 0.96), rgba(224, 238, 244, 0.94))",
+        "borderColor": "rgba(138, 186, 191, 0.92)",
+        "boxShadow": "rgba(255, 255, 255, 0.28) 0px 1px 0px 0px inset",
+        "top": 775,
+        "bottom": 831,
+        "height": 56
+      },
+      "footer": null,
+      "bodyBg": "rgb(215, 217, 221)",
+      "htmlBg": "rgb(255, 255, 255)",
+      "textSample": "אב\nInbox\nChat\nChannel\nשיחות\nב\nבית\n\nפעיל כעת·20:04\n\n⋮\nSystem\n\nערוץ חדש נוצר ומוכן לשיחה. אפשר לעדכן RTSP, זיכרון ומבצעים בפאנל הימני.\n\n18:45\n\n?\n\n18:52\n\n?\n\n18:54\n\nבדוק אם יש חסימה בכניסה\n\n18:54\n\nчто ты видишь?\n\n18:57\n\n,\n\n15:31\n\nמה מצב\n\n19:35\n\n??\n\n19:36\n\nעוד פעם\n\n19:36\n\nтм тьс\n\n20:02\n\nמה מצב?\n\n20:04\nהודעה\n➤\nLive Ops\nChannels\nAlerts\nAccount"
+    },
+    "dark": {
+      "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-theme-matrix-qa\\mobile-390x844-dark.png",
+      "theme": "dark",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "shell": {
+        "selector": ".app-shell",
+        "color": "rgb(242, 245, 248)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "radial-gradient(circle at 16% 16%, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0) 18%), radial-gradient(circle at 84% 24%, rgba(255, 255, 255, 0.043), rgba(0, 0, 0, 0) 20%), radial-gradient(circle at 82% 92%, rgba(255, 255, 255, 0.035), rgba(0, 0, 0, 0) 16%), linear-gradient(rgb(72, 76, 83) 0%, rgb(62, 67, 74) 42%, rgb(53, 57, 64) 100%)",
+        "borderColor": "rgb(242, 245, 248)",
+        "boxShadow": "none",
+        "top": 0,
+        "bottom": 844,
+        "height": 844
+      },
+      "topbar": {
+        "selector": ".topbar",
+        "color": "rgba(241, 245, 249, 0.92)",
+        "backgroundColor": "rgba(13, 20, 26, 0.72)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(241, 245, 249, 0.92) rgba(241, 245, 249, 0.92) rgba(255, 255, 255, 0.12)",
+        "boxShadow": "rgba(255, 255, 255, 0.1) 0px 1px 0px 0px inset, rgba(15, 23, 32, 0.08) 0px 10px 28px 0px",
+        "top": 0,
+        "bottom": 73,
+        "height": 73
+      },
+      "liveTabs": {
+        "selector": ".live-ops-mobile-tabs",
+        "color": "rgb(242, 245, 248)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "linear-gradient(color(srgb 0.419608 0.443137 0.486275 / 0.176), rgba(255, 255, 255, 0))",
+        "borderColor": "rgb(242, 245, 248)",
+        "boxShadow": "none",
+        "top": 73,
+        "bottom": 141,
+        "height": 68
+      },
+      "liveTabsActive": {
+        "selector": ".live-ops-mobile-tabs .mobile-tab-bar-button.active",
+        "color": "rgb(247, 250, 252)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.34), color(srgb 0.34902 0.372549 0.411765 / 0.229647))",
+        "borderColor": "color(srgb 1 1 1 / 0.115765)",
+        "boxShadow": "rgba(255, 255, 255, 0.08) 0px 1px 0px 0px inset",
+        "top": 83,
+        "bottom": 129,
+        "height": 46
+      },
+      "chatHeader": {
+        "selector": ".chat-header",
+        "color": "rgb(242, 245, 248)",
+        "backgroundColor": "rgba(107, 113, 124, 0.2)",
+        "backgroundImage": "none",
+        "borderColor": "rgb(242, 245, 248) rgb(242, 245, 248) rgba(255, 255, 255, 0.14)",
+        "boxShadow": "rgba(255, 255, 255, 0.1) 0px 1px 0px 0px inset",
+        "top": 141,
+        "bottom": 198,
+        "height": 57
+      },
+      "chatPanel": {
+        "selector": ".chat-panel",
+        "color": "rgb(242, 245, 248)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, rgba(0, 0, 0, 0) 0px), radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0) 18%), linear-gradient(rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.016)), linear-gradient(rgba(65, 70, 78, 0.94), rgba(55, 60, 68, 0.96))",
+        "borderColor": "rgb(242, 245, 248)",
+        "boxShadow": "none",
+        "top": 141,
+        "bottom": 763,
+        "height": 622
+      },
+      "composer": {
+        "selector": ".composer",
+        "color": "rgb(242, 245, 248)",
+        "backgroundColor": "color(srgb 0.34902 0.372549 0.411765 / 0.186588)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(255, 255, 255, 0.14) rgb(242, 245, 248) rgb(242, 245, 248)",
+        "boxShadow": "rgba(255, 255, 255, 0.1) 0px 1px 0px 0px inset",
+        "top": 686,
+        "bottom": 763,
+        "height": 77
+      },
+      "composerInput": {
+        "selector": ".composer-input-shell",
+        "color": "rgb(242, 245, 248)",
+        "backgroundColor": "rgba(255, 255, 255, 0.22)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(255, 255, 255, 0.3)",
+        "boxShadow": "rgba(255, 255, 255, 0.24) 0px 1px 0px 0px inset",
+        "top": 697,
+        "bottom": 745,
+        "height": 48
+      },
+      "messageBubbleUser": {
+        "selector": ".message-row.user .message-bubble",
+        "color": "rgba(240, 244, 252, 0.98)",
+        "backgroundColor": "rgba(104, 187, 173, 0.3)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(183, 247, 235, 0.24)",
+        "boxShadow": "rgba(17, 27, 33, 0.08) 0px 6px 18px 0px",
+        "top": 31,
+        "bottom": 86,
+        "height": 55
+      },
+      "messageBubbleGhost": {
+        "selector": ".message-row.ghost .message-bubble, .message-row.system .message-bubble",
+        "color": "rgba(240, 244, 252, 0.85)",
+        "backgroundColor": "rgba(167, 145, 102, 0.28)",
+        "backgroundImage": "none",
+        "borderColor": "rgba(242, 226, 182, 0.18)",
+        "boxShadow": "rgba(17, 27, 33, 0.08) 0px 6px 18px 0px",
+        "top": -70,
+        "bottom": 23,
+        "height": 93
+      },
+      "mobilePrimaryNav": {
+        "selector": ".operator-mobile-primary-nav",
+        "color": "rgb(242, 245, 248)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0), color(srgb 0.0627451 0.0823529 0.105882 / 0.96) 34%), radial-gradient(circle at 50% 100%, color(srgb 0.0588235 0.462745 0.431373 / 0.12), rgba(0, 0, 0, 0) 64%)",
+        "borderColor": "color(srgb 0.152941 0.192157 0.235294 / 0.84) rgb(242, 245, 248) rgb(242, 245, 248)",
+        "boxShadow": "rgba(0, 0, 0, 0.34) 0px -20px 44px 0px",
+        "top": 763,
+        "bottom": 844,
+        "height": 81
+      },
+      "mobilePrimaryNavActive": {
+        "selector": ".operator-mobile-primary-nav .mobile-tab-bar-button.active",
+        "color": "rgb(247, 250, 252)",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "backgroundImage": "linear-gradient(color(srgb 0.830588 0.903294 0.897647), color(srgb 0.12549 0.156863 0.2 / 0.92))",
+        "borderColor": "color(srgb 0.122824 0.278745 0.298039)",
+        "boxShadow": "rgba(255, 255, 255, 0.08) 0px 1px 0px 0px inset",
+        "top": 775,
+        "bottom": 831,
+        "height": 56
+      },
+      "footer": null,
+      "bodyBg": "rgb(7, 9, 13)",
+      "htmlBg": "rgb(10, 13, 17)",
+      "textSample": "אב\nInbox\nChat\nChannel\nשיחות\nב\nבית\n\nפעיל כעת·20:04\n\n⋮\nSystem\n\nערוץ חדש נוצר ומוכן לשיחה. אפשר לעדכן RTSP, זיכרון ומבצעים בפאנל הימני.\n\n18:45\n\n?\n\n18:52\n\n?\n\n18:54\n\nבדוק אם יש חסימה בכניסה\n\n18:54\n\nчто ты видишь?\n\n18:57\n\n,\n\n15:31\n\nמה מצב\n\n19:35\n\n??\n\n19:36\n\nעוד פעם\n\n19:36\n\nтм тьс\n\n20:02\n\nמה מצב?\n\n20:04\nהודעה\n➤\nLive Ops\nChannels\nAlerts\nAccount"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import '../App.css'
+import '../styles/mobile-shell.css'
 import App from '../App'
 import { LoginPage } from './login-page'
 import { SuperAdminPanel } from './super-admin-panel'
