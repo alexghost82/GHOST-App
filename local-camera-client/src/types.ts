@@ -190,6 +190,17 @@ export interface LocalAgentConnectResponse {
   priorBinding?: LocalAgentBinding
 }
 
+export interface LocalAgentProvisioningSession {
+  token: string
+  consumedAtIso: string
+  expiresAtIso: string
+}
+
+export interface LocalAgentProvisioningConsumeResponse extends LocalAgentConnectResponse {
+  targetChannel: AgentChannelSummary
+  provisioning: LocalAgentProvisioningSession
+}
+
 export interface CaptureWorkItem {
   id: string
   organizationId: string

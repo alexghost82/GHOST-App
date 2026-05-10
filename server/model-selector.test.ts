@@ -2,12 +2,12 @@ import { describe, expect, it } from 'vitest'
 import { isComplexTrigger, selectVisionDetailLevel, selectVisionModel } from './model-selector'
 
 describe('model-selector', () => {
-  it('מזהה טריגר מורכב לפי מילות מפתח', () => {
-    expect(isComplexTrigger('זהה אנשים ורכבים חשודים בכניסה')).toBe(true)
-    expect(isComplexTrigger('בדוק אם השער פתוח')).toBe(false)
+  it('detects complex triggers by keywords', () => {
+    expect(isComplexTrigger('detect objects and count vehicles near the gate')).toBe(true)
+    expect(isComplexTrigger('check whether the gate is open')).toBe(false)
   })
 
-  it('בוחר מודל חזק למשימת scan מורכבת', () => {
+  it('selects the stronger model for complex scan tasks', () => {
     const model = selectVisionModel({
       task: 'scan',
       triggerText: 'detect objects and count vehicles',
@@ -15,17 +15,17 @@ describe('model-selector', () => {
     expect(model).toBe('gpt-4.1')
   })
 
-  it('מכבד modelOverride גם אם הטריגר פשוט', () => {
+  it('honors modelOverride even for simple triggers', () => {
     const model = selectVisionModel({
       task: 'scan',
-      triggerText: 'בדיקה פשוטה',
+      triggerText: 'simple check',
       modelOverride: 'gpt-4.1-mini',
     })
     expect(model).toBe('gpt-4.1-mini')
   })
 
-  it('בוחר רמת detail חסכונית לסריקה פשוטה', () => {
-    expect(selectVisionDetailLevel({ task: 'scan', triggerText: 'בדוק סטטוס שער' })).toBe('low')
-    expect(selectVisionDetailLevel({ task: 'chat' })).toBe('high')
+  it('uses lighter detail defaults for simple scan and chat flows', () => {
+    expect(selectVisionDetailLevel({ task: 'scan', triggerText: 'check gate status' })).toBe('low')
+    expect(selectVisionDetailLevel({ task: 'chat' })).toBe('auto')
   })
 })

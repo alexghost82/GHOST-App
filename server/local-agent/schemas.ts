@@ -9,6 +9,16 @@ export const LocalAgentConnectSchema = z.object({
   deviceId: z.string().min(1).max(120).optional(),
 })
 
+export const LocalAgentProvisioningCreateSchema = z.object({
+  channelId: z.string().min(1),
+})
+
+export const LocalAgentProvisioningConsumeSchema = z.object({
+  token: z.string().min(16).max(240),
+  deviceName: z.string().min(1).max(160),
+  deviceId: z.string().min(1).max(120).optional(),
+})
+
 export const LocalAgentBindSchema = z.object({
   channelId: z.string().min(1),
   deviceId: z.string().min(1).max(120),
@@ -69,6 +79,8 @@ export const LocalAgentWorkResultSchema = z.object({
 })
 
 export type LocalAgentConnectRequest = z.infer<typeof LocalAgentConnectSchema>
+export type LocalAgentProvisioningCreateRequest = z.infer<typeof LocalAgentProvisioningCreateSchema>
+export type LocalAgentProvisioningConsumeRequest = z.infer<typeof LocalAgentProvisioningConsumeSchema>
 export type LocalAgentBindRequest = z.infer<typeof LocalAgentBindSchema>
 export type LocalAgentUnbindRequest = z.infer<typeof LocalAgentUnbindSchema>
 export type LocalAgentHeartbeat = z.infer<typeof LocalAgentHeartbeatSchema>

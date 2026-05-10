@@ -1,4 +1,7 @@
 $env:PATH = 'C:\Program Files\nodejs;' + $env:PATH
+$env:PORT = '7722'
+$env:QUEUE_MODE = 'direct'
+$env:REDIS_URL = ''
 $stdout = 'c:\Users\User\Documents\GitHub\GHOST-App\output\playwright\server-stdout.log'
 $stderr = 'c:\Users\User\Documents\GitHub\GHOST-App\output\playwright\server-stderr.log'
 New-Item -ItemType Directory -Force -Path 'c:\Users\User\Documents\GitHub\GHOST-App\output\playwright' | Out-Null

@@ -1588,3 +1588,88 @@ html:not([data-theme='dark']) .app-shell.surface-live-ops .inbox-search-shell {
     var(--ops-panel-highlight),
     color-mix(in srgb, var(--ops-panel-bg) 68%, transparent);
 }
+
+.app-shell.surface-live-ops .topbar-brand-button {
+  border-radius: 16px;
+}
+
+.app-shell.surface-live-ops .topbar-actions {
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+.app-shell.surface-live-ops .topbar-icon-btn,
+.app-shell.surface-live-ops .account-trigger,
+.app-shell.surface-live-ops .topbar-command-trigger,
+.app-shell.surface-live-ops .topbar-metric-tile,
+.app-shell.surface-live-ops .topbar-nav-item {
+  border: 1px solid transparent;
+}
+
+html[data-theme='dark'] .app-shell.surface-live-ops .topbar,
+html[data-theme='dark'] .app-shell.surface-live-ops .app-footer {
+  background:
+    linear-gradient(180deg, rgba(88, 95, 105, 0.28), rgba(47, 52, 60, 0.22)),
+    rgba(40, 45, 53, 0.78);
+}
+
+html[data-theme='dark'] .app-shell.surface-live-ops .topbar-command-trigger,
+html[data-theme='dark'] .app-shell.surface-live-ops .topbar-metric-tile,
+html[data-theme='dark'] .app-shell.surface-live-ops .topbar-nav-item,
+html[data-theme='dark'] .app-shell.surface-live-ops .topbar-icon-btn,
+html[data-theme='dark'] .app-shell.surface-live-ops .account-trigger,
+html[data-theme='dark'] .app-shell.surface-live-ops .footer-pill,
+html[data-theme='dark'] .app-shell.surface-live-ops .footer-live-tag {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
+    rgba(82, 88, 98, 0.34);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 980px) {
+  .app-shell.surface-live-ops,
+  .app-shell.surface-live-ops .app-surface,
+  .app-shell.surface-live-ops .workspace,
+  .app-shell.surface-live-ops .workspace-panels {
+    overflow-x: clip;
+  }
+
+  .app-shell.surface-live-ops .topbar {
+    padding-inline: max(16px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right));
+  }
+
+  .app-shell.surface-live-ops .topbar-actions {
+    gap: 4px;
+  }
+
+  .app-shell.surface-live-ops .topbar-brand,
+  .app-shell.surface-live-ops .topbar-brand-button {
+    margin-inline-start: 2px;
+  }
+}
+
+html:not([data-theme='dark']) .app-shell.surface-live-ops .message-bubble {
+  color: var(--ops-text);
+}
+
+html:not([data-theme='dark']) .app-shell.surface-live-ops .message-bubble p {
+  padding-inline-end: 72px;
+}
+
+html:not([data-theme='dark']) .app-shell.surface-live-ops .timestamp,
+html:not([data-theme='dark']) .app-shell.surface-live-ops .message-row.user .message-bubble > .timestamp,
+html:not([data-theme='dark']) .app-shell.surface-live-ops .message-row.system .message-bubble > .timestamp,
+html:not([data-theme='dark']) .app-shell.surface-live-ops .message-row.ghost .message-bubble > .timestamp {
+  color: rgba(71, 85, 105, 0.9) !important;
+}
+
+.app-shell.surface-live-ops .message-bubble > .timestamp {
+  inset-inline-end: 12px;
+  inset-block-end: 7px;
+  line-height: 1.1;
+}
+
+.app-shell.surface-live-ops .app-footer,
+.app-shell.surface-live-ops .app-footer.app-footer-show {
+  box-shadow: var(--ops-glass-inset) !important;
+}

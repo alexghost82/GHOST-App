@@ -14,6 +14,9 @@ export interface Message {
   author: MessageAuthor
   text: string
   time: string
+  createdAtIso?: string
+  syncStatus?: 'pending' | 'confirmed' | 'failed'
+  replyToMessageId?: string
   sources?: string[]
   /** סוג תגובת הסריקה: התראה בינארית, דו"ח, דירוג או הערכת מצב */
   alertLevel?: 'critical' | 'routine' | 'report' | 'rating' | 'assessment'

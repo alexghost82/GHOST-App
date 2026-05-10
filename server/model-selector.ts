@@ -77,7 +77,7 @@ export function selectVisionDetailLevel(args: DetailSelectionArgs): VisionDetail
     return args.detailOverride
   }
   if (args.task === 'chat') {
-    return 'high'
+    return 'auto'
   }
   return isComplexTrigger(args.triggerText) ? 'auto' : 'low'
 }

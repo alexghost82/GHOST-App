@@ -1,6 +1,7 @@
 import { LIVE_STATE_META } from '../data/constants'
 import type { Channel } from '../types'
 import { resolveChannelAvatarDataUrl } from '../utils/channel-avatar'
+import { getLastVisibleChannelMessage } from '../utils/chat-messages'
 
 interface ChannelCardProps {
   channel: Channel
@@ -10,20 +11,12 @@ interface ChannelCardProps {
 }
 
 function buildPreview(channel: Channel): string {
-  const message = channel.messages.at(-1)
+  const message = getLastVisibleChannelMessage(channel)
   if (!message) {
     return channel.watchScope || channel.location || 'אין עדיין הודעות'
   }
 
-  if (message.author === 'user') {
-    return `אתה: ${message.text}`
-  }
-
-  if (message.author === 'system') {
-    return `מערכת: ${message.text}`
-  }
-
-  return message.text
+  return message.text.trim() || channel.watchScope || channel.location || 'אין עדיין הודעות'
 }
 
 function buildCaptureIndicator(channel: Channel): {
@@ -69,7 +62,7 @@ function buildCaptureIndicator(channel: Channel): {
 }
 
 export function ChannelCard({ channel, isAlerting, isSelected, onSelect }: ChannelCardProps) {
-  const lastMessageTime = channel.messages.at(-1)?.time ?? '--:--'
+  const lastMessageTime = getLastVisibleChannelMessage(channel)?.time ?? '--:--'
   const preview = buildPreview(channel)
   const statusMeta = LIVE_STATE_META[channel.liveState]
   const avatarDataUrl = resolveChannelAvatarDataUrl(channel)

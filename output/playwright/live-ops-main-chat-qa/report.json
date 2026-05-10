@@ -4,7 +4,7 @@
     "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-main-chat-qa\\dark-main-chat.png",
     "theme": "dark",
     "url": "http://127.0.0.1:4173/",
-    "bodyText": "פקודה מהירה\nCtrl+K\nגוסט לייב\nמרכז פיקוד\nחי\n1\nערוצים\n1\nמבצעים\n0\nבריאות\n100%\nאב\nאלכס בו\nTEST\nגל\nגוסט לייב\nתיבת ניטור מאובטחת\n+\n⋮\nשיחות\n1\nב\nבית\nפעיל\n19:36\n\nאתה: עוד פעם\n\nב\nבית\n\nפעיל כעת·19:36\n\n⋮\nSystem\n\nערוץ חדש נוצר ומוכן לשיחה. אפשר לעדכן RTSP, זיכרון ומבצעים בפאנל הימני.\n\n18:45\n\n?\n\n18:52\n\n?\n\n18:54\n\nבדוק אם יש חסימה בכניסה\n\n18:54\n\nчто ты видишь?\n\n18:57\n\n,\n\n15:31\n\nמה מצב\n\n19:35\n\n??\n\n19:36\n\nעוד פעם\n\n19:36\nהודעה\n➤\nגרסה\nv0.8.3\nבילד\n2026.03\nמיקום\n34.7843°N 32.0853°E\nמערכת\nOK\nשעה\n19:40:31\nחי\nעזרה\nפרטיות\nתנאים",
+    "bodyText": "פקודה מהירה\nCtrl+K\nגוסט לייב\nמרכז פיקוד\nחי\n1\nערוצים\n1\nמבצעים\n0\nבריאות\n100%\nאב\nאלכס בו\nTEST\nגל\nגוסט לייב\nתיבת ניטור מאובטחת\n+\n⋮\nשיחות\n1\nב\nבית\nWEB\nפעיל\n20:04\n\nאתה: מה מצב?\n\nב\nבית\n\nפעיל כעת·20:04\n\n⋮\n\nמה מצב?\n\n14:50\n\n???\n\n15:00\n\n???\n\n15:05\n\n????\n\n15:06\n\njkhj;h;kh;\n\n15:08\n\n???\n\n15:08\n\n,\n\n15:31\n\n?\n\n18:52\n\nבדוק אם יש חסימה בכניסה\n\n18:54\n\n?\n\n18:54\n\nчто ты видишь?\n\n18:57\n\nמה מצב\n\n19:35\n\n??\n\n19:36\n\nעוד פעם\n\n19:36\n\nтм тьс\n\n20:02\n\nמה מצב?\n\n20:04\nהודעה\n➤\nגרסה\nv0.8.3\nבילד\n2026.03\nמיקום\n34.7843°N 32.0853°E\nמערכת\nOK\nשעה\n15:14:20\nחי\nעזרה\nפרטיות\nתנאים",
     "streamRect": {
       "x": 0,
       "y": 148,
@@ -13,65 +13,114 @@
     },
     "rows": [
       {
-        "className": "message-row system",
-        "x": 4,
-        "y": 166,
-        "width": 1532,
-        "height": 72
-      },
-      {
         "className": "message-row user",
         "x": 4,
-        "y": 246,
+        "y": -111,
         "width": 1532,
         "height": 53
       },
       {
         "className": "message-row user",
         "x": 4,
-        "y": 307,
+        "y": -50,
         "width": 1532,
         "height": 53
       },
       {
         "className": "message-row user",
         "x": 4,
-        "y": 367,
+        "y": 10,
         "width": 1532,
         "height": 53
       },
       {
         "className": "message-row user",
         "x": 4,
-        "y": 428,
+        "y": 71,
         "width": 1532,
         "height": 53
       },
       {
         "className": "message-row user",
         "x": 4,
-        "y": 489,
+        "y": 131,
         "width": 1532,
         "height": 53
       },
       {
         "className": "message-row user",
         "x": 4,
-        "y": 549,
+        "y": 192,
         "width": 1532,
         "height": 53
       },
       {
         "className": "message-row user",
         "x": 4,
-        "y": 610,
+        "y": 253,
         "width": 1532,
         "height": 53
       },
       {
         "className": "message-row user",
         "x": 4,
-        "y": 670,
+        "y": 313,
+        "width": 1532,
+        "height": 53
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 374,
+        "width": 1532,
+        "height": 53
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 434,
+        "width": 1532,
+        "height": 53
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 495,
+        "width": 1532,
+        "height": 53
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 556,
+        "width": 1532,
+        "height": 53
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 616,
+        "width": 1532,
+        "height": 53
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 677,
+        "width": 1532,
+        "height": 53
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 737,
+        "width": 1532,
+        "height": 53
+      },
+      {
+        "className": "message-row user",
+        "x": 4,
+        "y": 798,
         "width": 1532,
         "height": 53
       }

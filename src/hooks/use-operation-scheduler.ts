@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Channel, Operation, OperationMode } from '../types'
-import { captureLatestCameraFrame } from '../services/camera-frame'
+import { captureChannelFrame } from '../services/channel-capture'
 import { requestOperationScan } from '../services/operation-scan'
 import type { OperationScanResult } from '../services/operation-scan'
 import { getNextRunMs } from '../services/schedule-parser'
@@ -114,7 +114,10 @@ export function useOperationScheduler({ channels, onOperationFired }: SchedulerA
         const hasComplexOperation = operationList.some(
           (operation) => operation.mode !== 'alert' || operation.detailLevel === 'high',
         )
-        const frameDataUrl = await captureLatestCameraFrame(hasComplexOperation ? 'scan-standard' : 'scan-low')
+        const frameDataUrl = await captureChannelFrame(channel, {
+          profile: hasComplexOperation ? 'scan-standard' : 'scan-low',
+          purpose: 'preview',
+        })
         const results: OperationScanResult[] = await requestOperationScan(channel, frameDataUrl, operationList)
         const resultByOperationId = new Map(results.map((result) => [result.operationId, result]))
 

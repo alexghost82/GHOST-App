@@ -21,6 +21,7 @@ import {
   INBOX_PAGE_SIZE,
   LIVE_STATE_META,
   MAX_TIMELINE_HISTORY_ITEMS,
+  NEAR_BOTTOM_THRESHOLD_PX,
 } from './data/constants'
 import {
   fetchChannels as fetchChannelsFromServer,
@@ -48,6 +49,7 @@ import { useOperationScheduler } from './hooks/use-operation-scheduler'
 import type { OperationFiredPayload } from './hooks/use-operation-scheduler'
 import { useTimelineSampler } from './hooks/use-timeline-sampler'
 import { captureLatestCameraFrame, releaseCameraResources } from './services/camera-frame'
+import { captureChannelFrame } from './services/channel-capture'
 import { requestOperationScan } from './services/operation-scan'
 import { parseSchedule } from './services/schedule-parser'
 import { requestVisionReply } from './services/vision-chat'
@@ -59,6 +61,8 @@ import { buildCriticalAlerts, hasPendingCriticalAlertsInChannel } from './utils/
 import { consumeChannelAlertPopupSlot } from './utils/alert-popup-rate-limit'
 import { memberNamesFromLinkedChannelIds } from './utils/group-channel'
 import { getCurrentTime, getMinutesSinceTimeLabel } from './utils/time'
+import { createLocalAgentProvisioningSession } from './services/local-agent-provisioning'
+import { getLastVisibleChannelMessage, getVisibleChannelMessages } from './utils/chat-messages'
 
 function buildDefaultTimelineState(): TimelineSamplerState {
   return {
@@ -79,7 +83,6 @@ function formatTimelineHistoryContext(analysisHistory: TimelineAnalysis[]): stri
     .join('\n')
 }
 
-const OPERATOR_DISPLAY_NAME = 'עומר'
 const CHANNEL_ALERT_POPUP_COOLDOWN_MS = 20_000
 
 interface GhostLiveIntelLine {
@@ -195,14 +198,192 @@ function formatAuthorLabel(author: Message['author']): string {
     return 'אתה'
   }
   if (author === 'system') {
-    return 'מערכת'
+    return 'GHOST'
   }
-  return 'Ghost'
+  return 'GHOST'
 }
+
+function resolveOperatorDisplayName(fullName: string): string {
+  const profile = readAuthProfile()
+  const profileName = [profile?.firstName, profile?.lastName].filter(Boolean).join(' ').trim()
+  const normalizedFullName = fullName.trim()
+  return profileName || profile?.username?.trim() || normalizedFullName || 'Operator'
+}
+
+const PENDING_MESSAGES_STORAGE_KEY = 'ghost_pending_channel_messages'
+
+function readPendingMessagesByChannel(): Record<string, Message[]> {
+  if (typeof window === 'undefined') {
+    return {}
+  }
+  try {
+    const raw = window.localStorage.getItem(PENDING_MESSAGES_STORAGE_KEY)
+    if (!raw) {
+      return {}
+    }
+    return JSON.parse(raw) as Record<string, Message[]>
+  } catch {
+    return {}
+  }
+}
+
+function writePendingMessagesByChannel(messagesByChannel: Record<string, Message[]>): void {
+  if (typeof window === 'undefined') {
+    return
+  }
+  try {
+    window.localStorage.setItem(PENDING_MESSAGES_STORAGE_KEY, JSON.stringify(messagesByChannel))
+  } catch {
+    return
+  }
+}
+
+function queuePendingMessage(channelId: string, message: Message): void {
+  const current = readPendingMessagesByChannel()
+  const existing = current[channelId] ?? []
+  if (existing.some((entry) => entry.id === message.id)) {
+    return
+  }
+  writePendingMessagesByChannel({
+    ...current,
+    [channelId]: [...existing, message],
+  })
+}
+
+function updatePendingMessage(channelId: string, messageId: string, updater: (message: Message) => Message): void {
+  const current = readPendingMessagesByChannel()
+  const existing = current[channelId] ?? []
+  let changed = false
+  const nextMessages = existing.map((entry) => {
+    if (entry.id !== messageId) {
+      return entry
+    }
+    changed = true
+    return updater(entry)
+  })
+  if (!changed) {
+    return
+  }
+  writePendingMessagesByChannel({
+    ...current,
+    [channelId]: nextMessages,
+  })
+}
+
+function clearPendingMessage(channelId: string, messageId: string): void {
+  const current = readPendingMessagesByChannel()
+  const existing = current[channelId] ?? []
+  const nextMessages = existing.filter((entry) => entry.id !== messageId)
+  if (nextMessages.length === existing.length) {
+    return
+  }
+  if (nextMessages.length === 0) {
+    const { [channelId]: _removed, ...rest } = current
+    writePendingMessagesByChannel(rest)
+    return
+  }
+  writePendingMessagesByChannel({
+    ...current,
+    [channelId]: nextMessages,
+  })
+}
+
+function reconcilePendingMessagesByServer(serverChannels: Channel[]): void {
+  const pendingMessagesByChannel = readPendingMessagesByChannel()
+  const nextPendingByChannel: Record<string, Message[]> = {}
+
+  for (const channel of serverChannels) {
+    const pendingMessages = pendingMessagesByChannel[channel.id] ?? []
+    if (pendingMessages.length === 0) {
+      continue
+    }
+    const serverIds = new Set(channel.messages.map((message) => message.id))
+    const remainingMessages = pendingMessages.filter((message) => !serverIds.has(message.id))
+    if (remainingMessages.length > 0) {
+      nextPendingByChannel[channel.id] = remainingMessages
+    }
+  }
+
+  writePendingMessagesByChannel(nextPendingByChannel)
+}
+
+function mergeServerMessagesWithPending(serverMessages: Message[], pendingMessages: Message[]): Message[] {
+  const mergedById = new Map<string, Message>()
+
+  for (const serverMessage of serverMessages) {
+    mergedById.set(serverMessage.id, {
+      ...serverMessage,
+      syncStatus: 'confirmed',
+    })
+  }
+
+  for (const pendingMessage of pendingMessages) {
+    if (!mergedById.has(pendingMessage.id)) {
+      mergedById.set(pendingMessage.id, pendingMessage)
+    }
+  }
+
+  return sortMessagesChronologically([...mergedById.values()])
+}
+
+function mergeServerChannelsWithLocalState(serverChannels: Channel[], currentChannels: Channel[]): Channel[] {
+  const currentById = new Map(currentChannels.map((channel) => [channel.id, channel]))
+  const pendingMessagesByChannel = readPendingMessagesByChannel()
+
+  return serverChannels.map((serverChannel) => {
+    const currentChannel = currentById.get(serverChannel.id)
+    const pendingMessages = pendingMessagesByChannel[serverChannel.id] ?? []
+    if (!currentChannel) {
+      return {
+        ...serverChannel,
+        messages: mergeServerMessagesWithPending(serverChannel.messages, pendingMessages),
+        timelineState: buildDefaultTimelineState(),
+      }
+    }
+
+    return {
+      ...serverChannel,
+      unread: currentChannel.unread,
+      messages: mergeServerMessagesWithPending(serverChannel.messages, pendingMessages),
+      timelineState: currentChannel.timelineState ?? buildDefaultTimelineState(),
+      lastFrameDataUrl: currentChannel.lastFrameDataUrl ?? serverChannel.lastFrameDataUrl,
+    }
+  })
+}
+
+function sortMessagesChronologically(messages: Message[]): Message[] {
+  return [...messages].sort((left, right) => {
+    if (left.createdAtIso && right.createdAtIso && left.createdAtIso !== right.createdAtIso) {
+      return left.createdAtIso.localeCompare(right.createdAtIso)
+    }
+    if (left.time === right.time) {
+      return left.id.localeCompare(right.id)
+    }
+    return left.time.localeCompare(right.time)
+  })
+}
+
+function buildGhostRecoveryReply(operatorName: string, error: unknown): string {
+  const rawMessage = error instanceof Error ? error.message : String(error)
+  const normalized = rawMessage.toLowerCase()
+
+  if (normalized.includes('quota') || normalized.includes('billing') || normalized.includes('429')) {
+    return `${operatorName}, איני יכול כרגע להשלים ניתוח חזותי כי קצבת ה-AI של המפתח שהוגדר למערכת נגמרה. ההודעה שלך נשמרה, וכדי להחזיר תשובות מלאות צריך לחדש quota או לעדכן מפתח פעיל.`
+  }
+
+  if (normalized.includes('time') || normalized.includes('timeout') || normalized.includes('המתנה')) {
+    return `${operatorName}, ההודעה שלך נשמרה אבל ניתוח התמונה התעכב מעבר לזמן ההמתנה. נסה שוב בעוד זמן קצר.`
+  }
+
+  return `${operatorName}, ההודעה שלך נשמרה אבל כרגע איני יכול להשלים את ניתוח התמונה בערוץ הזה. נסה שוב בעוד זמן קצר.`
+}
+
+void buildGhostRecoveryReply
 
 function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationName, themeMode }: AppProps) {
   const canAccessCommandCenter =
     currentUserRole === 'system_manager' || currentUserRole === 'regular_user'
+  const operatorDisplayName = resolveOperatorDisplayName(fullName)
   const [channels, setChannels] = useState<Channel[]>([])
   const [selectedChannelId, setSelectedChannelId] = useState<string>('')
   const [isLoadingChannels, setIsLoadingChannels] = useState(true)
@@ -214,6 +395,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
   const [searchQuery, setSearchQuery] = useState('')
   const [inboxSearchFocusToken, setInboxSearchFocusToken] = useState(0)
   const [visibleChannelsCount, setVisibleChannelsCount] = useState(INBOX_PAGE_SIZE)
+  const [isNearBottom, setIsNearBottom] = useState(true)
   const [messageDraft, setMessageDraft] = useState('')
   const [operationDraft, setOperationDraft] = useState(DEFAULT_OPERATION_DRAFT)
   const [newChannelDraft, setNewChannelDraft] = useState(DEFAULT_NEW_CHANNEL_DRAFT)
@@ -248,21 +430,51 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
 
   useEffect(() => {
     let cancelled = false
-    setIsLoadingChannels(true)
-    fetchChannelsFromServer()
-      .then((serverChannels) => {
-        if (cancelled) return
-        setChannels(serverChannels)
-        if (serverChannels.length > 0) {
-          setSelectedChannelId(serverChannels[0].id)
-        } else {
+    let isFirstLoad = true
+
+    async function refreshChannels(showLoading = false) {
+      if (showLoading) {
+        setIsLoadingChannels(true)
+      }
+
+      try {
+        const serverChannels = await fetchChannelsFromServer()
+        if (cancelled) {
+          return
+        }
+
+        reconcilePendingMessagesByServer(serverChannels)
+        setChannels((currentChannels) => mergeServerChannelsWithLocalState(serverChannels, currentChannels))
+        setSelectedChannelId((currentChannelId) => {
+          if (serverChannels.some((channel) => channel.id === currentChannelId)) {
+            return currentChannelId
+          }
+          return serverChannels[0]?.id ?? ''
+        })
+
+        if (isFirstLoad && serverChannels.length === 0) {
           setActiveTopbarNav('Command Center')
           setShowNewChannelForm(true)
         }
-      })
-      .catch(() => undefined)
-      .finally(() => { if (!cancelled) setIsLoadingChannels(false) })
-    return () => { cancelled = true }
+      } catch {
+        return
+      } finally {
+        isFirstLoad = false
+        if (!cancelled && showLoading) {
+          setIsLoadingChannels(false)
+        }
+      }
+    }
+
+    void refreshChannels(true)
+    const pollTimer = window.setInterval(() => {
+      void refreshChannels(false)
+    }, 15_000)
+
+    return () => {
+      cancelled = true
+      window.clearInterval(pollTimer)
+    }
   }, [])
 
   useEffect(() => {
@@ -329,7 +541,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
     const ids = new Set<string>()
     channels.forEach((ch) => ch.linkedChannelIds?.forEach((id) => ids.add(id)))
     return ids
-  }, [channels])
+  }, [channels, operatorDisplayName])
 
   const sortedFilteredChannels = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
@@ -357,8 +569,8 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
         if (aPriority !== bPriority) {
           return aPriority - bPriority
         }
-        const aLast = getMinutesSinceTimeLabel(a.messages.at(-1)?.time ?? '00:00')
-        const bLast = getMinutesSinceTimeLabel(b.messages.at(-1)?.time ?? '00:00')
+        const aLast = getMinutesSinceTimeLabel(getLastVisibleChannelMessage(a)?.time ?? '00:00')
+        const bLast = getMinutesSinceTimeLabel(getLastVisibleChannelMessage(b)?.time ?? '00:00')
         return aLast - bLast
       })
   }, [channels, searchQuery, linkedChannelIdSet])
@@ -386,10 +598,10 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
 
   useEffect(() => {
     const stream = messageStreamRef.current
-    if (stream) {
+    if (stream && isNearBottom) {
       stream.scrollTo({ top: stream.scrollHeight, behavior: 'smooth' })
     }
-  }, [selectedChannel.messages.length, selectedChannelId])
+  }, [selectedChannel.messages.length, selectedChannelId, isNearBottom])
 
   const totalOperations = useMemo(
     () => channels.reduce((count, channel) => count + channel.operations.filter((operation) => operation.enabled).length, 0),
@@ -420,7 +632,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
   const operatorRecentActivity = useMemo(() => {
     return [...channels]
       .flatMap((channel) =>
-        channel.messages.slice(-3).map((message) => ({
+        getVisibleChannelMessages(channel).slice(-3).map((message) => ({
           id: `${channel.id}_${message.id}`,
           channelName: channel.name,
           author: message.author,
@@ -487,6 +699,9 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
         keywords: 'ghost live workspace chat monitor',
         run: () => {
           closeTopbarOverlays()
+          if (isMobileLayout) {
+            setOperatorMobileSection('live')
+          }
           setActiveTopbarNav('Ghost Live')
         },
       },
@@ -497,6 +712,9 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
         keywords: 'command center channels operations settings',
         run: () => {
           closeTopbarOverlays()
+          if (isMobileLayout) {
+            setOperatorMobileSection('live')
+          }
           setActiveTopbarNav('Command Center')
         },
       },
@@ -507,6 +725,10 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
         keywords: 'alerts notifications critical',
         run: () => {
           closeTopbarOverlays()
+          if (isMobileLayout) {
+            setOperatorMobileSection('alerts')
+            return
+          }
           setIsAlertsCenterOpen(true)
         },
       },
@@ -526,12 +748,15 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
         keywords: 'details selected channel sidebar settings',
         run: () => {
           closeTopbarOverlays()
+          if (isMobileLayout) {
+            setOperatorMobileSection('live')
+          }
           setIsDetailsCollapsed(false)
           setMobilePanel('details')
         },
       },
     ],
-    [selectedChannel.name],
+    [isMobileLayout, selectedChannel.name],
   )
 
   const filteredOperatorQuickActions = useMemo(() => {
@@ -559,6 +784,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
   function selectChannel(channelId: string) {
     setSelectedChannelId(channelId)
     setMobilePanel('chat')
+    setIsNearBottom(true)
     setAlertingChannelIds((prev) => {
       if (!prev.has(channelId)) {
         return prev
@@ -623,6 +849,61 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
     )
   }
 
+  function appendLocalMessage(channelId: string, message: Message): void {
+    updateChannelById(channelId, (channel) => {
+      const withoutDuplicate = channel.messages.filter((entry) => entry.id !== message.id)
+      const withoutSupersededReply =
+        channel.type === 'personal' && message.author === 'ghost' && message.replyToMessageId
+          ? withoutDuplicate.filter(
+              (entry) =>
+                !(
+                  entry.author === 'ghost' &&
+                  entry.replyToMessageId === message.replyToMessageId &&
+                  entry.id !== message.id
+                ),
+            )
+          : withoutDuplicate
+
+      return {
+        ...channel,
+        unread: 0,
+        messages: sortMessagesChronologically([...withoutSupersededReply, message]),
+      }
+    })
+  }
+
+  function markLocalMessageStatus(
+    channelId: string,
+    messageId: string,
+    syncStatus: NonNullable<Message['syncStatus']>,
+  ): void {
+    updateChannelById(channelId, (channel) => ({
+      ...channel,
+      messages: channel.messages.map((message) =>
+        message.id === messageId ? { ...message, syncStatus } : message,
+      ),
+    }))
+  }
+
+  function persistChannelMessage(channelId: string, message: Message): void {
+    queuePendingMessage(channelId, message)
+    saveMessage(channelId, message)
+      .then((savedMessage) => {
+        clearPendingMessage(channelId, message.id)
+        appendLocalMessage(channelId, {
+          ...savedMessage,
+          syncStatus: 'confirmed',
+        })
+      })
+      .catch(() => {
+        updatePendingMessage(channelId, message.id, (entry) => ({
+          ...entry,
+          syncStatus: 'failed',
+        }))
+        markLocalMessageStatus(channelId, message.id, 'failed')
+      })
+  }
+
   function buildScanMessage(
     mode: OperationMode,
     operationName: string,
@@ -634,7 +915,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
     channelLocation?: string,
   ): Message {
     const time = getCurrentTime()
-    const base = { id: crypto.randomUUID(), author: 'system' as const, time }
+    const base = { id: crypto.randomUUID(), author: 'system' as const, time, createdAtIso: new Date().toISOString() }
     const shouldAttachFrameToMessage = mode === 'alert' && Boolean(critical) && Boolean(frameDataUrl)
 
     switch (mode) {
@@ -642,8 +923,8 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
         return {
           ...base,
           text: critical
-            ? buildPersonalCriticalAlertText(OPERATOR_DISPLAY_NAME, operationName, summary, time, channelName, channelLocation)
-            : `${OPERATOR_DISPLAY_NAME}, עדכון שגרתי בזמן אמת. מבצע «${operationName}»: ${summary || 'הסריקה הושלמה ללא חריגה.'} פרטי סביבה: הסריקה בוצעה בפריים העדכני של הערוץ ולא זוהתה אינדיקציה חריגה בסביבה הנצפית.`,
+            ? buildPersonalCriticalAlertText(operatorDisplayName, operationName, summary, time, channelName, channelLocation)
+            : `${operatorDisplayName}, עדכון שגרתי בזמן אמת. מבצע «${operationName}»: ${summary || 'הסריקה הושלמה ללא חריגה.'} פרטי סביבה: הסריקה בוצעה בפריים העדכני של הערוץ ולא זוהתה אינדיקציה חריגה בסביבה הנצפית.`,
           frameDataUrl: shouldAttachFrameToMessage ? frameDataUrl : undefined,
           alertLevel: critical ? 'critical' : 'routine',
         }
@@ -744,6 +1025,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
               author: 'system',
               text: `ניתוח ציר-זמן הושלם (${analysis.frameCount} פריימים): ${analysis.summary}`,
               time: getCurrentTime(),
+              createdAtIso: new Date().toISOString(),
               alertLevel: 'routine',
             },
           ],
@@ -786,6 +1068,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
    */
   async function handleGroupMessageReplies(
     groupChannel: Channel,
+    userMessageId: string,
     userPrompt: string,
     frameDataUrl: string,
     analysisContext?: string,
@@ -796,19 +1079,19 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
       .filter((ch): ch is Channel => ch !== undefined)
 
     if (linkedChannels.length === 0) {
-      const reply = await requestVisionReply(groupChannel, userPrompt, frameDataUrl, analysisContext)
+      const reply = await requestVisionReply(groupChannel, userPrompt, frameDataUrl, analysisContext, operatorDisplayName)
       const ghostMessage: Message = {
         id: crypto.randomUUID(),
-        author: 'ghost',
+        author: 'system',
         text: reply.text,
         time: getCurrentTime(),
+        createdAtIso: new Date().toISOString(),
+        replyToMessageId: userMessageId,
         sources: reply.sources,
+        syncStatus: 'pending',
       }
-      updateChannelById(groupChannel.id, (channel) => ({
-        ...channel,
-        messages: [...channel.messages, ghostMessage],
-      }))
-      saveMessage(groupChannel.id, ghostMessage).catch(() => undefined)
+      appendLocalMessage(groupChannel.id, ghostMessage)
+      persistChannelMessage(groupChannel.id, ghostMessage)
       trackMessage(groupChannel.id, 'incoming', 'ghost')
       return
     }
@@ -820,38 +1103,37 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
           userPrompt,
           frameDataUrl,
           analysisContext,
+          operatorDisplayName,
         )
         return {
           channelName: linkedChannel.name,
           text: reply.text,
-          success: true,
+          sources: reply.sources,
         }
       } catch (error) {
-        return {
-          channelName: linkedChannel.name,
-          text: `שגיאה בקבלת תשובה: ${error instanceof Error ? error.message : 'שגיאה לא ידועה'}`,
-          success: false,
-        }
+        console.error(`Failed to generate group reply for ${linkedChannel.name}`, error)
+        return null
       }
     })
 
-    const replies = await Promise.all(replyPromises)
+    const replies: Array<{ channelName: string; text: string; sources?: string[] }> = (
+      await Promise.all(replyPromises)
+    ).flatMap((reply) => (reply ? [reply] : []))
 
     const ghostMessages: Message[] = replies.map((reply) => ({
       id: crypto.randomUUID(),
       author: 'ghost' as const,
       text: reply.text,
       time: getCurrentTime(),
-      sources: [reply.channelName],
-    }))
-
-    updateChannelById(groupChannel.id, (channel) => ({
-      ...channel,
-      messages: [...channel.messages, ...ghostMessages],
+      createdAtIso: new Date().toISOString(),
+      replyToMessageId: userMessageId,
+      sources: reply.sources?.length ? reply.sources : [reply.channelName],
+      syncStatus: 'pending',
     }))
 
     for (const msg of ghostMessages) {
-      saveMessage(groupChannel.id, msg).catch(() => undefined)
+      appendLocalMessage(groupChannel.id, msg)
+      persistChannelMessage(groupChannel.id, msg)
       trackMessage(groupChannel.id, 'incoming', 'ghost')
     }
   }
@@ -878,20 +1160,30 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
       author: 'user',
       text: trimmedMessage,
       time: timestamp,
+      createdAtIso: new Date().toISOString(),
+      syncStatus: 'pending',
     }
 
     setMessageDraft('')
     setMobilePanel('chat')
-    updateChannelById(selectedChannel.id, (channel) => ({
-      ...channel,
-      unread: 0,
-      messages: [...channel.messages, userMessage],
-    }))
-    saveMessage(selectedChannel.id, userMessage).catch(() => undefined)
+    setIsNearBottom(true)
+    appendLocalMessage(selectedChannel.id, userMessage)
+    persistChannelMessage(selectedChannel.id, userMessage)
     trackMessage(selectedChannel.id, 'outgoing', 'user')
 
     try {
-      const latestFrameDataUrl = await captureLatestCameraFrame('chat-high')
+      let latestFrameDataUrl = selectedChannel.lastFrameDataUrl
+      try {
+        latestFrameDataUrl = await captureChannelFrame(selectedChannel, {
+          profile: 'chat-high',
+          purpose: 'chat',
+        })
+      } catch (captureError) {
+        if (!latestFrameDataUrl) {
+          throw captureError
+        }
+        console.warn('Chat capture fell back to cached frame', captureError)
+      }
       updateChannelById(selectedChannel.id, (channel) => ({
         ...channel,
         cameraEnabled: true,
@@ -907,23 +1199,22 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
         selectedChannel.linkedChannelIds.length > 0
 
       if (isGroup) {
-        await handleGroupMessageReplies(selectedChannel, trimmedMessage, latestFrameDataUrl, analysisContext)
+        await handleGroupMessageReplies(selectedChannel, userMessage.id, trimmedMessage, latestFrameDataUrl, analysisContext)
       } else {
-        const reply = await requestVisionReply(selectedChannel, trimmedMessage, latestFrameDataUrl, analysisContext)
+        const reply = await requestVisionReply(selectedChannel, trimmedMessage, latestFrameDataUrl, analysisContext, operatorDisplayName)
         const ghostMessage: Message = {
           id: crypto.randomUUID(),
           author: 'ghost',
           text: reply.text,
           time: getCurrentTime(),
+          createdAtIso: new Date().toISOString(),
+          replyToMessageId: userMessage.id,
           sources: reply.sources,
+          syncStatus: 'pending',
         }
 
-        updateChannelById(selectedChannel.id, (channel) => ({
-          ...channel,
-          unread: 0,
-          messages: [...channel.messages, ghostMessage],
-        }))
-        saveMessage(selectedChannel.id, ghostMessage).catch(() => undefined)
+        appendLocalMessage(selectedChannel.id, ghostMessage)
+        persistChannelMessage(selectedChannel.id, ghostMessage)
         trackMessage(selectedChannel.id, 'incoming', 'ghost')
       }
 
@@ -954,28 +1245,28 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
           if (scanMessages.length > 0) {
             updateChannelById(selectedChannel.id, (channel) => ({
               ...channel,
-              messages: [...channel.messages, ...scanMessages],
+              messages: sortMessagesChronologically([...channel.messages, ...scanMessages]),
             }))
             for (const msg of scanMessages) {
-              saveMessage(selectedChannel.id, msg).catch(() => undefined)
+              persistChannelMessage(selectedChannel.id, {
+                ...msg,
+                syncStatus: 'pending',
+              })
             }
             trackMessage(selectedChannel.id, 'incoming', 'operation', scanMessages.length)
           }
         } catch (scanError) {
           const scanErrText =
             scanError instanceof Error ? scanError.message : 'שגיאה לא צפויה בסריקת מבצעים.'
-          updateChannelById(selectedChannel.id, (channel) => ({
-            ...channel,
-            messages: [
-              ...channel.messages,
-              {
-                id: crypto.randomUUID(),
-                author: 'system',
-                text: `לא הושלמה סריקת המבצעים המופעלים: ${scanErrText}`,
-                time: getCurrentTime(),
-              },
-            ],
-          }))
+          const scanFailureMessage: Message = {
+            id: crypto.randomUUID(),
+            author: 'system',
+            text: `לא הושלמה סריקת המבצעים המופעלים: ${scanErrText}`,
+            time: getCurrentTime(),
+            createdAtIso: new Date().toISOString(),
+          }
+          appendLocalMessage(selectedChannel.id, scanFailureMessage)
+          trackMessage(selectedChannel.id, 'incoming', 'system')
         }
       }
     } catch (error) {
@@ -988,14 +1279,16 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
         author: 'system',
         text: `שגיאה בניתוח תמונה: ${errorText}`,
         time: getCurrentTime(),
+        createdAtIso: new Date().toISOString(),
       }
+      appendLocalMessage(selectedChannel.id, systemMessage)
+      trackMessage(selectedChannel.id, 'incoming', 'system')
 
       updateChannelById(selectedChannel.id, (channel) => ({
         ...channel,
         cameraEnabled: false,
-        messages: [...channel.messages, systemMessage],
       }))
-      trackMessage(selectedChannel.id, 'incoming', 'system')
+      console.error('Vision reply flow failed', error)
     } finally {
       setIsSending(false)
     }
@@ -1105,6 +1398,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
           author: 'system',
           text: systemIntro,
           time: getCurrentTime(),
+          createdAtIso: new Date().toISOString(),
         },
       ],
       operations: [],
@@ -1392,6 +1686,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
           author: 'system',
           text: `נוצרה קבוצה «${groupName.trim()}» עם ${members.length} ערוצים: ${members.join(' · ')}.`,
           time: getCurrentTime(),
+          createdAtIso: new Date().toISOString(),
         },
       ],
       operations: [],
@@ -1457,7 +1752,13 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
   }
 
   function handleMessageStreamScroll() {
-    return undefined
+    const stream = messageStreamRef.current
+    if (!stream) {
+      return
+    }
+
+    const distanceFromBottom = stream.scrollHeight - stream.scrollTop - stream.clientHeight
+    setIsNearBottom(distanceFromBottom <= NEAR_BOTTOM_THRESHOLD_PX)
   }
 
   function isMobileViewport(): boolean {
@@ -1636,6 +1937,11 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
     }
   }
 
+  async function handleLaunchLocalAgentSetup(channelId: string) {
+    const session = await createLocalAgentProvisioningSession(channelId)
+    window.location.href = session.launchUrl
+  }
+
   const operatorMobileNavItems = [
     { id: 'live', label: 'גוסט לייב' },
     { id: 'channels', label: 'ערוצים' },
@@ -1695,7 +2001,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
 
           <MobileSurfaceCard title="פעולות מהירות" description="הפעולות החשובות שנשארות נגישות גם בנייד.">
             <div className="operator-mobile-action-list">
-              {operatorQuickActions.slice(0, 6).map((action) => (
+              {operatorQuickActions.map((action) => (
                 <button key={action.id} className="topbar-action-card" onClick={action.run} type="button">
                   <strong>{action.title}</strong>
                   <span>{action.description}</span>
@@ -1877,6 +2183,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
           channels={channels}
           linkedChannelIdSet={linkedChannelIdSet}
           mobileMode={isMobileLayout}
+          onLaunchLocalAgentSetup={handleLaunchLocalAgentSetup}
           newChannelDraft={newChannelDraft}
           onDeleteOperation={deleteOperationFromSelectedChannel}
           onNewChannelDraftChange={updateNewChannelDraftField}
@@ -2119,6 +2426,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
           channels={channels}
           linkedChannelIdSet={linkedChannelIdSet}
           newChannelDraft={newChannelDraft}
+          onLaunchLocalAgentSetup={handleLaunchLocalAgentSetup}
           onDeleteOperation={deleteOperationFromSelectedChannel}
           onNewChannelDraftChange={updateNewChannelDraftField}
           onNewChannelSubmit={handleNewChannelSubmit}

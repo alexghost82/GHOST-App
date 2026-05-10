@@ -28,10 +28,16 @@ let sharedStream: MediaStream | null = null
 let captureVideoElement: HTMLVideoElement | null = null
 let captureCanvasElement: HTMLCanvasElement | null = null
 
-/**
- * מחזיר stream משותף מהמצלמה המקומית.
- * נועד למנוע פתיחות חוזרות של ההתקן בכל פעולה.
- */
+function ensureCanvas(width: number, height: number): HTMLCanvasElement {
+  if (!captureCanvasElement) {
+    captureCanvasElement = document.createElement('canvas')
+  }
+
+  captureCanvasElement.width = width
+  captureCanvasElement.height = height
+  return captureCanvasElement
+}
+
 async function getOrCreateStream(): Promise<MediaStream> {
   if (sharedStream) {
     return sharedStream
@@ -49,9 +55,6 @@ async function getOrCreateStream(): Promise<MediaStream> {
   return sharedStream
 }
 
-/**
- * מבטיח שאלמנט הווידאו מוכן להצגת פריים מה-stream.
- */
 async function getReadyVideoElement(stream: MediaStream): Promise<HTMLVideoElement> {
   if (!captureVideoElement) {
     captureVideoElement = document.createElement('video')
@@ -72,7 +75,7 @@ async function getReadyVideoElement(stream: MediaStream): Promise<HTMLVideoEleme
       }
       const onError = () => {
         cleanup()
-        reject(new Error('כשל בטעינת stream המצלמה.'))
+        reject(new Error('Failed to load camera stream.'))
       }
       const cleanup = () => {
         captureVideoElement?.removeEventListener('loadeddata', onLoaded)
@@ -91,9 +94,6 @@ async function getReadyVideoElement(stream: MediaStream): Promise<HTMLVideoEleme
   return captureVideoElement
 }
 
-/**
- * לוכד פריים עדכני מהמצלמה בפורמט WebP Data URL.
- */
 export async function captureLatestCameraFrame(profile: CaptureProfile = 'scan-standard'): Promise<string> {
   const selectedProfile = CAPTURE_PROFILE_CONFIG[profile]
   const stream = await getOrCreateStream()
@@ -105,24 +105,42 @@ export async function captureLatestCameraFrame(profile: CaptureProfile = 'scan-s
   const width = Math.max(1, Math.round(sourceWidth * ratio))
   const height = Math.max(1, Math.round(sourceHeight * ratio))
 
-  if (!captureCanvasElement) {
-    captureCanvasElement = document.createElement('canvas')
-  }
-
-  captureCanvasElement.width = width
-  captureCanvasElement.height = height
-  const context = captureCanvasElement.getContext('2d')
+  const canvas = ensureCanvas(width, height)
+  const context = canvas.getContext('2d')
   if (!context) {
-    throw new Error('לא ניתן לאתחל canvas ללכידת פריים.')
+    throw new Error('Failed to initialize capture canvas.')
   }
 
   context.drawImage(video, 0, 0, width, height)
-  return captureCanvasElement.toDataURL('image/webp', selectedProfile.quality)
+  return canvas.toDataURL('image/webp', selectedProfile.quality)
 }
 
-/**
- * משחרר את כל משאבי המצלמה כדי למנוע זליגת זיכרון.
- */
+export function createFallbackCameraFrame(profile: CaptureProfile = 'scan-standard'): string {
+  const selectedProfile = CAPTURE_PROFILE_CONFIG[profile]
+  const canvas = ensureCanvas(selectedProfile.width, selectedProfile.height)
+  const context = canvas.getContext('2d')
+  if (!context) {
+    throw new Error('Failed to initialize fallback capture canvas.')
+  }
+
+  const gradient = context.createLinearGradient(0, 0, selectedProfile.width, selectedProfile.height)
+  gradient.addColorStop(0, '#08111f')
+  gradient.addColorStop(1, '#1f3f67')
+  context.fillStyle = gradient
+  context.fillRect(0, 0, selectedProfile.width, selectedProfile.height)
+
+  context.fillStyle = 'rgba(255, 255, 255, 0.92)'
+  context.font = 'bold 28px Segoe UI'
+  context.fillText('GHOST CAMERA UNAVAILABLE', 28, 54)
+  context.font = '20px Segoe UI'
+  context.fillText('Using fallback frame for chat continuity', 28, 92)
+  context.strokeStyle = 'rgba(255, 255, 255, 0.22)'
+  context.lineWidth = 2
+  context.strokeRect(18, 18, selectedProfile.width - 36, selectedProfile.height - 36)
+
+  return canvas.toDataURL('image/jpeg', 0.82)
+}
+
 export function releaseCameraResources() {
   if (sharedStream) {
     sharedStream.getTracks().forEach((track) => track.stop())
@@ -133,7 +151,7 @@ export function releaseCameraResources() {
     try {
       captureVideoElement.pause()
     } catch {
-      /* JSDOM לא מממש pause, ובדפדפן אמיתי הפעולה נתמכת */
+      // JSDOM does not implement pause(); browsers do.
     }
     captureVideoElement.srcObject = null
   }

@@ -4,6 +4,7 @@ import type {
   CaptureWorkItem,
   Channel,
   LocalAgentConnectResponse,
+  LocalAgentProvisioningConsumeResponse,
   MessagePayload,
   Operation,
   OperationScanResult,
@@ -38,6 +39,24 @@ export class GhostApiClient {
     const payload = await response.json() as LocalAgentConnectResponse & { error?: string }
     if (!response.ok) {
       throw new Error(payload.error || `Connect failed with HTTP ${response.status}`)
+    }
+    return payload
+  }
+
+  static async consumeProvisioningSession(
+    apiBaseUrl: string,
+    token: string,
+    deviceName: string,
+    deviceId?: string,
+  ): Promise<LocalAgentProvisioningConsumeResponse> {
+    const response = await fetch(`${apiBaseUrl.replace(/\/+$/, '')}/api/local-agent/provisioning-sessions/consume`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, deviceName, deviceId }),
+    })
+    const payload = await response.json() as LocalAgentProvisioningConsumeResponse & { error?: string }
+    if (!response.ok) {
+      throw new Error(payload.error || `Provisioning failed with HTTP ${response.status}`)
     }
     return payload
   }

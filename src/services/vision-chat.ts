@@ -1,7 +1,7 @@
 import type { Channel } from '../types'
 import { httpRequest } from './http-client'
 
-const API_TIMEOUT_MS = 20000
+const API_TIMEOUT_MS = 45000
 
 interface VisionReply {
   text: string
@@ -33,6 +33,7 @@ export async function requestVisionReply(
   userPrompt: string,
   frameDataUrl: string,
   analysisContext?: string,
+  viewerName?: string,
 ): Promise<VisionReply> {
   const controller = new AbortController()
   const timeoutId = window.setTimeout(() => controller.abort(), API_TIMEOUT_MS)
@@ -53,6 +54,7 @@ export async function requestVisionReply(
         prompt: userPrompt,
         frameDataUrl,
         analysisContext,
+        viewerName,
       }),
     })
 

@@ -18,7 +18,7 @@ async function buildSamplePngDataUrl(): Promise<string> {
 }
 
 describe('image-optimizer', () => {
-  it('ממיר תמונה ל-jpeg דחוס עם detail נמוך לסריקת low', async () => {
+  it('converts scan-low input to compressed jpeg output', async () => {
     const sourceImage = await buildSamplePngDataUrl()
     const result = await optimizeImageDataUrl(sourceImage, 'scan-low')
     expect(result.dataUrl.startsWith('data:image/jpeg;base64,')).toBe(true)
@@ -26,8 +26,8 @@ describe('image-optimizer', () => {
     expect(result.byteSize).toBeGreaterThan(0)
   })
 
-  it('בוחר פרופיל נכון לפי סוג משימה', () => {
-    expect(getImageProfileByTask('chat', false)).toBe('chat-high')
+  it('selects the expected image profile for each task shape', () => {
+    expect(getImageProfileByTask('chat', false)).toBe('scan-standard')
     expect(getImageProfileByTask('scan', false)).toBe('scan-low')
     expect(getImageProfileByTask('scan', true)).toBe('scan-standard')
   })

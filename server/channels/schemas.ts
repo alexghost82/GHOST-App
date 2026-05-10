@@ -56,9 +56,11 @@ export const UpdateChannelSchema = z.object({
 })
 
 export const CreateMessageSchema = z.object({
+  id: z.string().min(1).optional(),
   author: z.enum(['user', 'ghost', 'system']),
   text: z.string().min(1),
   time: z.string().min(1),
+  replyToMessageId: z.string().min(1).optional(),
   alertLevel: z.enum(['critical', 'routine', 'report', 'rating', 'assessment']).optional(),
   score: z.number().optional(),
   frameDataUrl: z.string().optional(),

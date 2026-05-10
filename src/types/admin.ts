@@ -160,4 +160,14 @@ export interface OrganizationDetailsResponse {
   channelStats: ChannelUsageMonthly[]
 }
 
-export type SuperAdminMobileSection = 'overview' | 'organizations' | 'users' | 'issues' | 'more'
+export type SuperAdminMobileSection =
+  | 'overview'
+  | 'organizations'
+  | 'suspendedOrganizations'
+  | 'ghostLive'
+  | 'users'
+  | 'billing'
+  | 'usage'
+  | 'issues'
+  | 'events'
+  | 'more'

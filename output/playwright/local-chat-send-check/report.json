@@ -1,0 +1,124 @@
+{
+  "user": "slon",
+  "baseUrl": "http://127.0.0.1:4173",
+  "draft": "local-send-check-1778391630568",
+  "afterSend": {
+    "hasInBody": true,
+    "matchingRows": [
+      "local-send-check-177839163056808:40"
+    ],
+    "ghostRows": [
+      "GHOSTאלכס בו, איני יכול כרגע להשלים ניתוח חזותי כי קצבת ה-AI של המפתח שהוגדר למערכת נגמרה. ההודעה שלך נשמרה, וכדי להחזיר תשובות מלאות צריך לחדש quota או לעדכן מפתח פעיל.08:40"
+    ],
+    "rowCount": 34
+  },
+  "afterReload": {
+    "hasInBody": true,
+    "matchingRows": [
+      "local-send-check-177839163056808:40"
+    ],
+    "ghostRows": [
+      "GHOSTאלכס בו, איני יכול כרגע להשלים ניתוח חזותי כי קצבת ה-AI של המפתח שהוגדר למערכת נגמרה. ההודעה שלך נשמרה, וכדי להחזיר תשובות מלאות צריך לחדש quota או לעדכן מפתח פעיל.08:40"
+    ],
+    "rowCount": 34
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "Failed to load resource: the server responded with a status of 429 (Too Many Requests)",
+    "Vision reply flow failed Error: ניתוח התמונה נכשל: visual analysis is unavailable because the AI quota for the configured key is exhausted. Update billing or use a key with available quota and try again.\n    at requestVisionReply (http://127.0.0.1:4173/src/services/vision-chat.ts:43:11)\n    at async handleMessageSubmit (http://127.0.0.1:4173/src/App.tsx:1058:19)",
+    "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ],
+  "networkEvents": [
+    {
+      "type": "response",
+      "url": "http://127.0.0.1:7722/api/channels",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "type": "response",
+      "url": "http://127.0.0.1:7722/api/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "type": "response",
+      "url": "http://127.0.0.1:7722/api/channels",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "type": "response",
+      "url": "http://127.0.0.1:7722/api/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "type": "response",
+      "url": "http://127.0.0.1:7722/api/channels/30e3b4fb-a412-4454-b207-7260fb1fec52/messages",
+      "status": 201,
+      "method": "POST"
+    },
+    {
+      "type": "response",
+      "url": "http://127.0.0.1:7722/api/admin/usage/channel-message",
+      "status": 403,
+      "method": "POST"
+    },
+    {
+      "type": "response",
+      "url": "http://127.0.0.1:7722/api/channels",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "type": "response",
+      "url": "http://127.0.0.1:7722/api/chat-vision",
+      "status": 429,
+      "method": "POST"
+    },
+    {
+      "type": "response",
+      "url": "http://127.0.0.1:7722/api/channels/30e3b4fb-a412-4454-b207-7260fb1fec52/messages",
+      "status": 201,
+      "method": "POST"
+    },
+    {
+      "type": "response",
+      "url": "http://127.0.0.1:7722/api/admin/usage/channel-message",
+      "status": 403,
+      "method": "POST"
+    },
+    {
+      "type": "response",
+      "url": "http://127.0.0.1:7722/api/channels",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "type": "response",
+      "url": "http://127.0.0.1:7722/api/channels",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "type": "response",
+      "url": "http://127.0.0.1:7722/api/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "type": "response",
+      "url": "http://127.0.0.1:7722/api/channels",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "type": "response",
+      "url": "http://127.0.0.1:7722/api/auth/me",
+      "status": 200,
+      "method": "GET"
+    }
+  ],
+  "screenshotPath": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\local-chat-send-check\\after-reload.png"
+}

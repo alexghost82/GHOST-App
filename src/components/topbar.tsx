@@ -198,17 +198,19 @@ export function Topbar({
   onAccountAction,
 }: TopbarProps) {
   const healthPercent = channelsCount > 0 ? Math.round((totalLiveFeeds / channelsCount) * 100) : 0
+  const brandSrc = themeMode === 'dark' ? '/whiteicon.png' : '/ghost-icon-128.png'
+  const fallbackBrandSrc = themeMode === 'dark' ? '/favicon.svg' : '/favicon-64.png'
 
   return (
     <header className="topbar">
       <button aria-label="חזרה למרחב הראשי" className="topbar-brand topbar-brand-button" onClick={onBrandClick} type="button">
         <img
-          className="brand-mark"
-          src="/ghost-icon-128.png"
+          className={`brand-mark brand-mark-${themeMode}`}
+          src={brandSrc}
           alt="Ghost"
           onError={(event) => {
             event.currentTarget.onerror = null
-            event.currentTarget.src = '/favicon-64.png'
+            event.currentTarget.src = fallbackBrandSrc
           }}
         />
       </button>
@@ -231,7 +233,7 @@ export function Topbar({
               onClick={() => onNavChange(item)}
               type="button"
             >
-              {navLabel(item)}
+              {(navLabel(item), item)}
             </button>
           ))}
         </nav>
@@ -277,7 +279,7 @@ export function Topbar({
         {showNotifications ? (
           <button
             aria-label={`התראות שלא נקראו: ${totalUnreadAlerts}`}
-            className="topbar-icon-btn"
+            className="topbar-icon-btn topbar-theme-btn"
             onClick={onOpenNotificationsCenter}
             type="button"
           >

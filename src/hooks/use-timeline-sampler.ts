@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { MAX_COLLAGE_FRAMES, MAX_TIMELINE_HISTORY_ITEMS } from '../data/constants'
-import { captureLatestCameraFrame } from '../services/camera-frame'
+import { captureChannelFrame } from '../services/channel-capture'
 import { buildCollageFromFrames } from '../services/collage-builder'
 import { checkFrameRelevance } from '../services/frame-relevance'
 import { requestTimelineAnalysis } from '../services/timeline-analysis'
@@ -95,7 +95,10 @@ export function useTimelineSampler({ channels, onFrameCaptured, onAnalysisComple
           return
         }
 
-        const capturedFrameDataUrl = await captureLatestCameraFrame('scan-standard')
+        const capturedFrameDataUrl = await captureChannelFrame(channel, {
+          profile: 'scan-standard',
+          purpose: 'timeline',
+        })
         onFrameCapturedRef.current?.({
           channelId,
           frameDataUrl: capturedFrameDataUrl,

@@ -46,6 +46,9 @@ function mapServerMessageToClient(raw: Message | Record<string, unknown>): Messa
     author: raw.author as Message['author'],
     text: raw.text as string,
     time: raw.time as string,
+    createdAtIso: (raw as Record<string, unknown>).createdAtIso as string | undefined,
+    syncStatus: ((raw as Record<string, unknown>).syncStatus as Message['syncStatus']) ?? 'confirmed',
+    replyToMessageId: (raw as Record<string, unknown>).replyToMessageId as string | undefined,
     alertLevel: (raw as Record<string, unknown>).alertLevel as Message['alertLevel'],
     score: (raw as Record<string, unknown>).score as number | undefined,
     frameDataUrl: (raw as Record<string, unknown>).frameDataUrl as string | undefined,
@@ -126,12 +129,16 @@ export async function deleteChannelApi(channelId: string): Promise<void> {
 
 export async function saveMessage(
   channelId: string,
-  message: Omit<Message, 'id'>,
-): Promise<void> {
-  await httpRequest(`${BASE}/${channelId}/messages`, {
+  message: Message,
+): Promise<Message> {
+  const res = await httpRequest(`${BASE}/${channelId}/messages`, {
     method: 'POST',
     body: JSON.stringify(message),
   })
+  if (!res.ok) {
+    throw new Error('שמירת ההודעה נכשלה.')
+  }
+  return mapServerMessageToClient((await res.json()) as Record<string, unknown>)
 }
 
 export async function createOperationApi(

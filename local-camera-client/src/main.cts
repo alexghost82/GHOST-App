@@ -50,6 +50,7 @@ let latestDashboardSnapshot: DashboardSnapshot = {
 let trayIconCache: Partial<Record<TrayVisualState, NativeImage>> = {}
 let isQuitting = false
 let pendingTrayAction: TrayAction | null = null
+let pendingProvisioningToken: string | null = null
 
 const rawLaunchArgs = process.argv.slice(1)
 const launchFlags = new Set(rawLaunchArgs.filter((value) => value.startsWith('--')))
@@ -76,9 +77,64 @@ async function loadApiClient() {
   return import('./api-client.js')
 }
 
+async function loadCameraProvisioning() {
+  return import('./cameras/camera-provisioning.js')
+}
+
 async function loadWindowsAutostart() {
   const dynamicImport = new Function('specifier', 'return import(specifier)')
   return dynamicImport('./windows-autostart.js') as Promise<typeof import('./windows-autostart.js')>
+}
+
+function defaultDeviceName(): string {
+  return process.env.COMPUTERNAME?.trim() || 'Office Gateway'
+}
+
+function resolveAgentDataDir(): string {
+  const configured = process.env.GHOST_AGENT_DATA_DIR?.trim()
+  if (configured) {
+    return resolve(configured)
+  }
+  return app.getPath('userData')
+}
+
+function extractProvisioningTokenFromArgs(args: string[]): string | null {
+  for (const arg of args) {
+    if (!arg || !arg.startsWith('ghost-agent://')) {
+      continue
+    }
+    try {
+      const parsed = new URL(arg)
+      const token = parsed.searchParams.get('token')?.trim()
+      if (token) {
+        return token
+      }
+    } catch {
+      continue
+    }
+  }
+  return null
+}
+
+function deliverPendingProvisioningToken(): void {
+  if (!pendingProvisioningToken || !mainWindow?.webContents || mainWindow.webContents.isLoadingMainFrame()) {
+    return
+  }
+  mainWindow.webContents.send('provisioning-token', pendingProvisioningToken)
+}
+
+function queueProvisioningToken(token: string): void {
+  pendingProvisioningToken = token
+  openDashboard()
+  deliverPendingProvisioningToken()
+}
+
+function registerCustomProtocol(): void {
+  if (process.defaultApp) {
+    app.setAsDefaultProtocolClient('ghost-agent', process.execPath, [resolve(process.argv[1] ?? app.getAppPath())])
+    return
+  }
+  app.setAsDefaultProtocolClient('ghost-agent')
 }
 
 function clearSessionTelemetry(): void {
@@ -153,11 +209,11 @@ async function refreshDashboardSnapshot(saved: SavedAgentConfig): Promise<Dashbo
       accessToken: saved.accessToken,
       refreshToken: saved.refreshToken,
     })
-    const primaryChannelId = saved.channelId ?? saved.bindings[0]?.channelId
-    if (!primaryChannelId) {
+    const channelId = saved.channelId ?? saved.bindings[0]?.channelId
+    if (!channelId) {
       throw new Error('No saved channel binding found.')
     }
-    const channel = await api.fetchChannel(primaryChannelId)
+    const channel = await api.fetchChannel(channelId)
     latestDashboardSnapshot = {
       channel,
       fetchedAtIso: new Date().toISOString(),
@@ -248,6 +304,19 @@ function createWindow(hidden = false): void {
   })
 
   mainWindow.removeMenu()
+  mainWindow.once('ready-to-show', () => {
+    if (hidden || !mainWindow) {
+      return
+    }
+    mainWindow.center()
+    mainWindow.show()
+    mainWindow.restore()
+    mainWindow.focus()
+    mainWindow.setAlwaysOnTop(true, 'screen-saver')
+    setTimeout(() => {
+      mainWindow?.setAlwaysOnTop(false)
+    }, 1_200)
+  })
   mainWindow.on('close', (event) => {
     if (!isQuitting) {
       event.preventDefault()
@@ -259,9 +328,25 @@ function createWindow(hidden = false): void {
   })
   mainWindow.webContents.on('did-finish-load', () => {
     flushPendingTrayAction()
+    deliverPendingProvisioningToken()
+    if (!hidden) {
+      showWindow()
+    }
+  })
+  mainWindow.webContents.on('did-fail-load', (_event, _errorCode, errorDescription) => {
+    latestDashboardSnapshot = {
+      channel: latestDashboardSnapshot.channel,
+      fetchedAtIso: new Date().toISOString(),
+      error: `Dashboard failed to load: ${errorDescription}`,
+    }
+    updateTrayPresentation()
   })
 
-  void mainWindow.loadFile(join(__dirname, '../src/ui/index.html'))
+  void mainWindow.loadFile(join(__dirname, '../src/ui/index.html')).then(() => {
+    if (!hidden) {
+      showWindow()
+    }
+  })
 }
 
 function showWindow(): void {
@@ -465,6 +550,13 @@ function createTray(): void {
 }
 
 app.whenReady().then(async () => {
+  process.env.GHOST_AGENT_DATA_DIR = resolveAgentDataDir()
+  registerCustomProtocol()
+  const bootProvisioningToken = extractProvisioningTokenFromArgs(process.argv.slice(1))
+  if (bootProvisioningToken) {
+    pendingProvisioningToken = bootProvisioningToken
+  }
+
   if (registerAutostartMode) {
     await enableAutostart().catch(() => undefined)
     app.quit()
@@ -479,14 +571,22 @@ app.whenReady().then(async () => {
 
   const { loadLocalConfig } = await loadStore()
   const saved = loadLocalConfig()
-  if (saved) {
-    await startWorkerFromSaved(saved).catch(() => undefined)
-  }
 
+  createWindow(startHidden)
   createTray()
   startTelemetryLoop()
-  await refreshAutostartState().catch(() => undefined)
-  createWindow(startHidden)
+  void refreshAutostartState().catch(() => undefined)
+
+  if (saved) {
+    void startWorkerFromSaved(saved).catch((error) => {
+      latestDashboardSnapshot = {
+        channel: null,
+        fetchedAtIso: new Date().toISOString(),
+        error: error instanceof Error ? error.message : String(error),
+      }
+      updateTrayPresentation()
+    })
+  }
 
   app.on('activate', () => {
     openDashboard()
@@ -494,6 +594,11 @@ app.whenReady().then(async () => {
 })
 
 app.on('second-instance', (_event, commandLine) => {
+  const provisioningToken = extractProvisioningTokenFromArgs(commandLine)
+  if (provisioningToken) {
+    queueProvisioningToken(provisioningToken)
+    return
+  }
   if (commandLine.includes('--hidden') && !commandLine.includes('--open-dashboard')) {
     return
   }
@@ -513,6 +618,43 @@ app.on('before-quit', () => {
 
 ipcMain.handle('load-config', () => {
   return loadStore().then(({ loadLocalConfig }) => loadLocalConfig())
+})
+
+ipcMain.handle('get-device-context', async () => {
+  return {
+    deviceName: defaultDeviceName(),
+    dataDir: resolveAgentDataDir(),
+    hasPendingProvisioning: Boolean(pendingProvisioningToken),
+  }
+})
+
+ipcMain.handle('get-pending-provisioning-token', async () => {
+  return pendingProvisioningToken
+})
+
+ipcMain.handle('clear-pending-provisioning-token', async () => {
+  pendingProvisioningToken = null
+  return { ok: true }
+})
+
+ipcMain.handle('consume-provisioning-session', async (_event: IpcMainInvokeEvent, payload: {
+  token: string
+  deviceName?: string
+  deviceId?: string
+  apiBaseUrl?: string
+}) => {
+  const [{ GhostApiClient }, { DEFAULT_API_BASE_URL }] = await Promise.all([
+    loadApiClient(),
+    loadStore(),
+  ])
+  const resolved = await GhostApiClient.consumeProvisioningSession(
+    payload.apiBaseUrl?.trim() || DEFAULT_API_BASE_URL,
+    payload.token,
+    payload.deviceName?.trim() || defaultDeviceName(),
+    payload.deviceId,
+  )
+  pendingProvisioningToken = null
+  return resolved
 })
 
 ipcMain.handle('connect-agent', async (_event: IpcMainInvokeEvent, payload: {
@@ -560,6 +702,19 @@ ipcMain.handle('discover-cameras', async () => {
   return discoverCameras({ usbCameras })
 })
 
+ipcMain.handle('get-hikvision-sdk-status', async () => {
+  try {
+    const { assertHikvisionSdkAvailable } = await loadCameraProvisioning()
+    const sdkDir = assertHikvisionSdkAvailable()
+    return { available: true, sdkDir }
+  } catch (error) {
+    return {
+      available: false,
+      error: error instanceof Error ? error.message : String(error),
+    }
+  }
+})
+
 ipcMain.handle('save-camera', async (_event: IpcMainInvokeEvent, payload: {
   cameraId?: string
   label: string
@@ -574,6 +729,10 @@ ipcMain.handle('save-camera', async (_event: IpcMainInvokeEvent, payload: {
     port?: number
     channel?: number
     useHttps?: boolean
+    discoveryType?: 'usb-dshow' | 'hikvision-sdk' | 'onvif' | 'network-scan' | 'manual'
+    sourceType?: 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
+    manufacturer?: string
+    suggestedSource?: Record<string, unknown>
   }
   enabled?: boolean
 }) => {
@@ -587,7 +746,7 @@ ipcMain.handle('save-camera', async (_event: IpcMainInvokeEvent, payload: {
   const cameraId = payload.cameraId?.trim() || `camera-${Math.random().toString(36).slice(2, 10)}`
   const previousCamera = existing.cameras.find((camera) => camera.cameraId === cameraId)
   const source = mergeCameraSourceWithExisting(
-    normalizeCameraSourcePayload(payload.source),
+    await normalizeCameraSourcePayload(payload.source),
     previousCamera?.source,
   )
   const savedCamera = {
@@ -630,6 +789,10 @@ ipcMain.handle('test-camera', async (_event: IpcMainInvokeEvent, payload: {
     port?: number
     channel?: number
     useHttps?: boolean
+    discoveryType?: 'usb-dshow' | 'hikvision-sdk' | 'onvif' | 'network-scan' | 'manual'
+    sourceType?: 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
+    manufacturer?: string
+    suggestedSource?: Record<string, unknown>
   }
 }) => {
   const [{ buildConfigFromSaved }, { CameraRegistry }, { loadMaskedAgentConfig, resolveAgentSecrets }] = await Promise.all([
@@ -638,15 +801,26 @@ ipcMain.handle('test-camera', async (_event: IpcMainInvokeEvent, payload: {
     loadCameraStore(),
   ])
 
-  const existing = loadMaskedAgentConfig()
-  if (!existing) {
-    throw new Error('Connect the local agent before testing cameras.')
+  const existing = loadMaskedAgentConfig() ?? {
+    organizationId: 'test-org',
+    organizationName: 'Test organization',
+    apiBaseUrl: 'http://127.0.0.1',
+    accessToken: 'test-access',
+    refreshToken: 'test-refresh',
+    username: 'test-user',
+    deviceId: 'test-device',
+    deviceName: 'Test device',
+    channelId: 'test-channel',
+    channelName: 'Test channel',
+    cameras: [],
+    bindings: [],
+    defaultCameraId: undefined,
   }
 
   const cameraId = payload.cameraId?.trim() || `test-${Date.now()}`
   const previousCamera = existing.cameras.find((camera) => camera.cameraId === cameraId)
   const source = mergeCameraSourceWithExisting(
-    normalizeCameraSourcePayload(payload.source),
+    await normalizeCameraSourcePayload(payload.source),
     previousCamera?.source,
   )
   const testCamera = {
@@ -677,23 +851,36 @@ ipcMain.handle('test-camera', async (_event: IpcMainInvokeEvent, payload: {
 })
 
 ipcMain.handle('save-binding', async (_event: IpcMainInvokeEvent, payload: SavedAgentConfig) => {
-  const [{ GhostApiClient }, { DEFAULT_API_BASE_URL, saveLocalConfig }, { loadMaskedAgentConfig, upsertCamera }] = await Promise.all([
+  const [{ GhostApiClient }, { DEFAULT_API_BASE_URL, saveLocalConfig }, { loadMaskedAgentConfig, sanitizeCameraForStorage }] = await Promise.all([
     loadApiClient(),
     loadStore(),
     loadCameraStore(),
   ])
 
   const existing = loadMaskedAgentConfig()
+  const session = existing ? { ...existing, ...payload } : payload
   const nowIso = new Date().toISOString()
   const requestedCameraId = (payload as SavedAgentConfig & { selectedCameraId?: string }).selectedCameraId?.trim()
+  const requestedCameraSource = (payload as SavedAgentConfig & {
+    cameraSourcePayload?: Parameters<typeof normalizeCameraSourcePayload>[0]
+  }).cameraSourcePayload
   const cameraName = payload.cameraName?.trim()
-  if (!payload.channelId || (!requestedCameraId && !cameraName)) {
+  if (!session.channelId || (!requestedCameraId && !cameraName && !requestedCameraSource)) {
     throw new Error('Channel and camera selection are required.')
   }
 
-  const nextCamera =
+  const rawNextCamera =
     requestedCameraId
       ? existing?.cameras.find((camera) => camera.cameraId === requestedCameraId)
+      : requestedCameraSource
+        ? {
+            cameraId: `${requestedCameraSource.type}-${Math.random().toString(36).slice(2, 10)}`,
+            label: cameraName || 'Network camera',
+            source: await normalizeCameraSourcePayload(requestedCameraSource),
+            enabled: true,
+            createdAtIso: nowIso,
+            updatedAtIso: nowIso,
+          }
       : {
           cameraId: `usb-${cameraName!.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'camera'}`,
           label: cameraName!,
@@ -705,19 +892,20 @@ ipcMain.handle('save-binding', async (_event: IpcMainInvokeEvent, payload: Saved
           createdAtIso: existing?.cameras.find((camera) => camera.cameraId === `usb-${cameraName!.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'camera'}`)?.createdAtIso ?? nowIso,
           updatedAtIso: nowIso,
         }
-  if (!nextCamera) {
+  if (!rawNextCamera) {
     throw new Error('Selected camera was not found in local storage.')
   }
+  const nextCamera = await sanitizeCameraForStorage(rawNextCamera)
 
   const api = new GhostApiClient({
     apiBaseUrl: DEFAULT_API_BASE_URL,
-    accessToken: payload.accessToken,
-    refreshToken: payload.refreshToken,
+    accessToken: session.accessToken,
+    refreshToken: session.refreshToken,
   })
   await api.bindChannel({
-    channelId: payload.channelId,
-    deviceId: payload.deviceId,
-    deviceName: payload.deviceName,
+    channelId: session.channelId,
+    deviceId: session.deviceId,
+    deviceName: session.deviceName,
     cameraId: nextCamera.cameraId,
     cameraLabel: nextCamera.label,
     cameraSourceType: nextCamera.source.type,
@@ -726,22 +914,19 @@ ipcMain.handle('save-binding', async (_event: IpcMainInvokeEvent, payload: Saved
 
   const normalizedPayload = {
     ...(existing ?? {}),
-    ...payload,
+    ...session,
     apiBaseUrl: DEFAULT_API_BASE_URL,
     cameras: [
       ...(existing?.cameras.filter((camera) => camera.cameraId !== nextCamera.cameraId) ?? []),
       nextCamera,
     ],
     bindings: [
-      ...(existing?.bindings.filter((binding) => binding.channelId !== payload.channelId) ?? []),
-      { channelId: payload.channelId, cameraId: nextCamera.cameraId },
+      { channelId: session.channelId, cameraId: nextCamera.cameraId },
     ],
-    defaultCameraId: existing?.defaultCameraId ?? nextCamera.cameraId,
+    defaultCameraId: nextCamera.cameraId,
+    channelId: session.channelId,
     boundAtIso: nowIso,
     cameraName: nextCamera.source.type === 'usb-dshow' ? nextCamera.source.name : nextCamera.label,
-  }
-  if (existing) {
-    await upsertCamera(existing, nextCamera)
   }
   saveLocalConfig(normalizedPayload)
   await startWorkerFromSaved(normalizedPayload)
@@ -810,7 +995,7 @@ ipcMain.handle('get-dashboard-data', async () => {
   }
 })
 
-function normalizeCameraSourcePayload(payload: {
+async function normalizeCameraSourcePayload(payload: {
   type: 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
   name?: string
   url?: string
@@ -821,6 +1006,10 @@ function normalizeCameraSourcePayload(payload: {
   port?: number
   channel?: number
   useHttps?: boolean
+  discoveryType?: 'usb-dshow' | 'hikvision-sdk' | 'onvif' | 'network-scan' | 'manual'
+  sourceType?: 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
+  manufacturer?: string
+  suggestedSource?: Record<string, unknown>
 }) {
   switch (payload.type) {
     case 'usb-dshow':
@@ -832,6 +1021,26 @@ function normalizeCameraSourcePayload(payload: {
         name: payload.name.trim(),
       }
     case 'rtsp':
+      if (payload.host?.trim()) {
+        const { assertHikvisionSdkAvailable, buildSourceFromRtspProvisioning } = await loadCameraProvisioning()
+        const source = buildSourceFromRtspProvisioning({
+          host: payload.host,
+          username: payload.username ?? '',
+          password: payload.password ?? '',
+          discovery: payload.sourceType || payload.discoveryType || payload.manufacturer || payload.suggestedSource
+            ? {
+                sourceType: payload.sourceType ?? 'rtsp',
+                discoveryType: payload.discoveryType ?? 'manual',
+                manufacturer: payload.manufacturer,
+                suggestedSource: payload.suggestedSource,
+              }
+            : undefined,
+        })
+        if (source.type === 'hikvision-sdk') {
+          assertHikvisionSdkAvailable()
+        }
+        return source
+      }
       if (!payload.url?.trim()) {
         throw new Error('RTSP URL is required.')
       }
@@ -846,6 +1055,8 @@ function normalizeCameraSourcePayload(payload: {
       if (!payload.host?.trim() || !payload.username?.trim() || !payload.password || !payload.channel) {
         throw new Error('Hikvision host, username, password, and channel are required.')
       }
+      const { assertHikvisionSdkAvailable } = await loadCameraProvisioning()
+      assertHikvisionSdkAvailable()
       return {
         type: 'hikvision-sdk' as const,
         host: payload.host.trim(),
@@ -858,7 +1069,7 @@ function normalizeCameraSourcePayload(payload: {
   }
 }
 
-function stripSecretFields(source: ReturnType<typeof normalizeCameraSourcePayload>) {
+function stripSecretFields(source: Awaited<ReturnType<typeof normalizeCameraSourcePayload>>) {
   if (source.type === 'usb-dshow') {
     return source
   }
@@ -869,7 +1080,7 @@ function stripSecretFields(source: ReturnType<typeof normalizeCameraSourcePayloa
 }
 
 function mergeCameraSourceWithExisting(
-  source: ReturnType<typeof normalizeCameraSourcePayload>,
+  source: Awaited<ReturnType<typeof normalizeCameraSourcePayload>>,
   previousSource: SavedAgentConfig['cameras'][number]['source'] | undefined,
 ) {
   if (!previousSource || previousSource.type !== source.type) {

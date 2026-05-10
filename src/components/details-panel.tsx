@@ -14,6 +14,18 @@ interface DetailsPanelProps {
   onOpenChannelsHub: () => void
 }
 
+function formatCaptureRoute(channel: Channel): string {
+  return channel.captureMode === 'local_agent' ? 'Installed local client' : 'Browser camera'
+}
+
+function formatAgentHeartbeat(lastHeartbeatAtIso?: string): string {
+  if (!lastHeartbeatAtIso) {
+    return 'No heartbeat yet'
+  }
+  const parsed = new Date(lastHeartbeatAtIso)
+  return Number.isNaN(parsed.getTime()) ? lastHeartbeatAtIso : parsed.toLocaleString('he-IL')
+}
+
 export function DetailsPanel({
   selectedChannel,
   isDetailsCollapsed,
@@ -98,6 +110,14 @@ export function DetailsPanel({
               <dd className="dp-field-mono">{selectedChannel.rtspFeed || 'לא הוגדר'}</dd>
             </div>
             <div className="dp-field">
+              <dt>Capture route</dt>
+              <dd>{formatCaptureRoute(selectedChannel)}</dd>
+            </div>
+            <div className="dp-field">
+              <dt>Snapshot interval</dt>
+              <dd>Every {selectedChannel.memoryInterval} sec</dd>
+            </div>
+            <div className="dp-field">
               <dt>חברים</dt>
               <dd>
                 <div className="dp-tags">
@@ -108,6 +128,38 @@ export function DetailsPanel({
                   )}
                 </div>
               </dd>
+            </div>
+          </dl>
+        </section>
+
+        <section className="dp-section">
+          <div className="dp-section-header">
+            <h3 className="dp-section-title">Local client</h3>
+          </div>
+          <dl className="dp-fields">
+            <div className="dp-field">
+              <dt>Client</dt>
+              <dd>{selectedChannel.localAgentBinding?.deviceName || 'Not bound'}</dd>
+            </div>
+            <div className="dp-field">
+              <dt>Camera</dt>
+              <dd>{selectedChannel.localAgentBinding?.cameraLabel || 'Not assigned'}</dd>
+            </div>
+            <div className="dp-field">
+              <dt>Source</dt>
+              <dd>{selectedChannel.localAgentBinding?.cameraSourceType || 'Not assigned'}</dd>
+            </div>
+            <div className="dp-field">
+              <dt>Agent status</dt>
+              <dd>{selectedChannel.localAgentStatus?.state || 'offline'}</dd>
+            </div>
+            <div className="dp-field">
+              <dt>Heartbeat</dt>
+              <dd>{formatAgentHeartbeat(selectedChannel.localAgentStatus?.lastHeartbeatAtIso)}</dd>
+            </div>
+            <div className="dp-field">
+              <dt>Last error</dt>
+              <dd>{selectedChannel.localAgentStatus?.lastError || 'None'}</dd>
             </div>
           </dl>
         </section>

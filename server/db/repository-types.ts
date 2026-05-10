@@ -149,7 +149,7 @@ export interface IAdminRepository {
   deleteFullChannel(organizationId: string, channelId: string): Promise<void>
 
   /** הודעות פר משתמש + ערוץ */
-  addMessage(organizationId: string, userId: string, channelId: string, message: Omit<MessageRecord, 'id' | 'organizationId' | 'userId' | 'channelId' | 'createdAtIso'>): Promise<MessageRecord>
+  addMessage(organizationId: string, userId: string, channelId: string, message: Omit<MessageRecord, 'id' | 'organizationId' | 'userId' | 'channelId' | 'createdAtIso'> & { id?: string }): Promise<MessageRecord>
   listMessages(organizationId: string, userId: string, channelId: string, opts?: { limit?: number; beforeIso?: string }): Promise<MessageRecord[]>
 
   /** מבצעים (operations) פר ערוץ */

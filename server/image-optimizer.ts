@@ -88,7 +88,7 @@ export async function optimizeImageDataUrl(dataUrl: string, profileKey: ImagePro
 
 export function getImageProfileByTask(task: 'chat' | 'scan', isComplexScan: boolean): ImageProfileKey {
   if (task === 'chat') {
-    return 'chat-high'
+    return 'scan-standard'
   }
   return isComplexScan ? 'scan-standard' : 'scan-low'
 }

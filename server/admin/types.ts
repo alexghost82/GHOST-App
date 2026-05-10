@@ -180,6 +180,7 @@ export interface MessageRecord {
   author: 'user' | 'ghost' | 'system'
   text: string
   time: string
+  replyToMessageId?: string
   alertLevel?: 'critical' | 'routine' | 'report' | 'rating' | 'assessment'
   score?: number
   frameDataUrl?: string

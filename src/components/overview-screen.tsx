@@ -1,6 +1,7 @@
 import { LIVE_STATE_META } from '../data/constants'
 import type { Channel } from '../types'
 import type { CriticalAlertItem } from '../utils/critical-alerts'
+import { getLastVisibleChannelMessage } from '../utils/chat-messages'
 
 interface OverviewScreenProps {
   channels: Channel[]
@@ -511,9 +512,9 @@ export function OverviewScreen({
                 >
                   <div>
                     <strong>{channel.name}</strong>
-                    <p>{channel.messages.at(-1)?.text ?? 'עדיין לא נלכדה היסטוריית הודעות.'}</p>
+                    <p>{getLastVisibleChannelMessage(channel)?.text ?? 'עדיין לא נלכדה היסטוריית הודעות.'}</p>
                   </div>
-                  <span>{channel.messages.at(-1)?.time ?? '--:--'}</span>
+                  <span>{getLastVisibleChannelMessage(channel)?.time ?? '--:--'}</span>
                 </button>
               ))
             )}

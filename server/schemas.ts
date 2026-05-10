@@ -14,6 +14,7 @@ export const ChatVisionRequestSchema = z.object({
   prompt: z.string().min(1),
   frameDataUrl: z.string().startsWith('data:image/'),
   analysisContext: z.string().max(6000).optional(),
+  viewerName: z.string().min(1).max(120).optional(),
 })
 
 export type ChatVisionRequest = z.infer<typeof ChatVisionRequestSchema>

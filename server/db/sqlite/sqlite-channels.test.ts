@@ -120,6 +120,63 @@ describe('SQLiteAdminRepository — ערוצים עשירים, הודעות, מ�
       const leaked = await repo.listMessages(orgB.id, 'user-1', channelA.id)
       expect(leaked).toHaveLength(0)
     })
+
+    it('שומר מזהה הודעה שסופק מהלקוח ולא יוצר כפילות ב-retry', async () => {
+      const org = createTestOrg(repo)
+      const channel = await repo.createFullChannel(org.id, CHANNEL_SEED)
+
+      const first = await repo.addMessage(org.id, 'user-a', channel.id, {
+        id: 'client-message-1',
+        author: 'user',
+        text: 'hello',
+        time: '10:00',
+      })
+      const second = await repo.addMessage(org.id, 'user-a', channel.id, {
+        id: 'client-message-1',
+        author: 'user',
+        text: 'hello',
+        time: '10:00',
+      })
+
+      const messages = await repo.listMessages(org.id, 'user-a', channel.id)
+      expect(first.id).toBe('client-message-1')
+      expect(second.id).toBe('client-message-1')
+      expect(messages).toHaveLength(1)
+    })
+
+    it('שומר replyToMessageId עבור תשובות GHOST', async () => {
+      const org = createTestOrg(repo)
+      const channel = await repo.createFullChannel(org.id, CHANNEL_SEED)
+
+      await repo.addMessage(org.id, 'user-a', channel.id, {
+        id: 'user-1',
+        author: 'user',
+        text: 'question',
+        time: '10:00',
+      })
+      await repo.addMessage(org.id, 'user-a', channel.id, {
+        id: 'ghost-1',
+        author: 'ghost',
+        text: 'answer',
+        time: '10:01',
+        replyToMessageId: 'user-1',
+      })
+
+      const messages = await repo.listMessages(org.id, 'user-a', channel.id)
+      expect(messages[1].replyToMessageId).toBe('user-1')
+    })
+
+    it('מחזיר את ההודעות האחרונות כאשר מוגדר limit, בסדר כרונולוגי עולה', async () => {
+      const org = createTestOrg(repo)
+      const channel = await repo.createFullChannel(org.id, CHANNEL_SEED)
+
+      await repo.addMessage(org.id, 'user-a', channel.id, { author: 'user', text: 'm1', time: '10:00' })
+      await repo.addMessage(org.id, 'user-a', channel.id, { author: 'user', text: 'm2', time: '10:01' })
+      await repo.addMessage(org.id, 'user-a', channel.id, { author: 'user', text: 'm3', time: '10:02' })
+
+      const messages = await repo.listMessages(org.id, 'user-a', channel.id, { limit: 2 })
+      expect(messages.map((message) => message.text)).toEqual(['m2', 'm3'])
+    })
   })
 
   describe('Operations', () => {

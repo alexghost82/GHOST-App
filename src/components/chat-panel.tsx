@@ -1,8 +1,11 @@
 import type { FormEvent, RefObject } from 'react'
 import type { Channel, TimelineSamplerState } from '../types'
 import { resolveChannelAvatarDataUrl } from '../utils/channel-avatar'
+import { getVisibleChannelMessages } from '../utils/chat-messages'
 import { MessageRow } from './message-row'
 import { StatusDot } from './status-dot'
+
+const ROUTINE_REALTIME_UPDATE_PHRASE = 'עדכון שגרתי בזמן אמת'
 
 interface NextScanInfo {
   deadline: number
@@ -41,8 +44,11 @@ export function ChatPanel({
   onShowDetails,
   onMessageStreamScroll,
 }: ChatPanelProps) {
+  const visibleMessages = getVisibleChannelMessages(selectedChannel).filter(
+    (message) => !(message.author === 'system' && message.text.includes(ROUTINE_REALTIME_UPDATE_PHRASE)),
+  )
   const presenceLabel = selectedChannel.liveState === 'LIVE' ? 'פעיל כעת' : 'במעקב'
-  const lastSeenLabel = selectedChannel.messages.at(-1)?.time ?? '--:--'
+  const lastSeenLabel = visibleMessages.at(-1)?.time ?? '--:--'
   const avatarDataUrl = resolveChannelAvatarDataUrl(selectedChannel)
 
   return (
@@ -86,14 +92,14 @@ export function ChatPanel({
       </header>
 
       <div className="message-stream" onScroll={onMessageStreamScroll} ref={messageStreamRef}>
-        {selectedChannel.messages.length === 0 ? (
+        {visibleMessages.length === 0 ? (
           <div className="chat-empty-state">
             <span className="chat-empty-kicker">סיכום מוצפן</span>
             <h3>אין עדיין הודעות</h3>
             <p>התחל את השיחה או בקש ניתוח מצלמה חדש מהערוץ הזה.</p>
           </div>
         ) : (
-          selectedChannel.messages.map((message) => (
+          visibleMessages.map((message) => (
             <MessageRow key={message.id} message={message} onDismissFrame={onDismissFrame} />
           ))
         )}

@@ -249,7 +249,15 @@ function Resolve-SdkDir {
     $candidates.Add($env:GHOST_HIKVISION_SDK_DIR)
   }
   $candidates.Add((Get-Location).Path)
-  $candidates.Add('C:\\Users\\User\\Downloads\\EN-HCNetSDKV6.1.9.4_build20220412_win64\\EN-HCNetSDKV6.1.9.4_build20220412_win64\\EN-HCNetSDKV6.1.9.4_build20220412_win64')
+  $candidates.Add((Join-Path (Get-Location).Path 'hikvision-sdk'))
+  if ($env:PORTABLE_EXECUTABLE_DIR) {
+    $candidates.Add((Join-Path $env:PORTABLE_EXECUTABLE_DIR 'resources\\hikvision-sdk'))
+  }
+  $processDir = [System.AppContext]::BaseDirectory
+  if ($processDir) {
+    $candidates.Add((Join-Path $processDir 'resources\\hikvision-sdk'))
+    $candidates.Add((Join-Path $processDir '..\\resources\\hikvision-sdk'))
+  }
 
   foreach ($candidate in $candidates) {
     if (-not $candidate) {

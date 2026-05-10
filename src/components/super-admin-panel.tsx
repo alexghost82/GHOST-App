@@ -322,25 +322,68 @@ export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }:
     return 'Ghost Live'
   }
 
+  function mobileSectionForTab(tab: SuperAdminTab): SuperAdminMobileSection {
+    if (tab === 'overview') {
+      return 'overview'
+    }
+    if (tab === 'suspendedOrganizations') {
+      return 'suspendedOrganizations'
+    }
+    if (tab === 'ghostLive') {
+      return 'ghostLive'
+    }
+    if (tab === 'users') {
+      return 'users'
+    }
+    if (tab === 'billing') {
+      return 'billing'
+    }
+    if (tab === 'usage') {
+      return 'usage'
+    }
+    if (tab === 'issues') {
+      return 'issues'
+    }
+    return 'events'
+  }
+
   function openAdminTab(tab: SuperAdminTab, nav: SuperAdminNavScreen = navForTab(tab)) {
     closeTopbarOverlays()
     setActiveAccountDialog(null)
     setSelectedTab(tab)
     setActiveTopbarNav(nav)
+    if (isMobileLayout) {
+      setMobileSection(mobileSectionForTab(tab))
+    }
   }
 
   function handleSuperAdminNavChange(item: TopbarNavItem) {
     closeTopbarOverlays()
     setActiveAccountDialog(null)
     if (item === 'Ghost Live') {
-      setSelectedTab((currentTab) => (currentTab === 'ghostLive' || currentTab === 'issues' || currentTab === 'events' ? currentTab : 'ghostLive'))
+      setSelectedTab((currentTab) => {
+        const nextTab = currentTab === 'ghostLive' || currentTab === 'issues' || currentTab === 'events' ? currentTab : 'ghostLive'
+        if (isMobileLayout) {
+          setMobileSection(mobileSectionForTab(nextTab))
+        }
+        return nextTab
+      })
       setActiveTopbarNav('Ghost Live')
       return
     }
     if (item === 'Command Center') {
-      setSelectedTab((currentTab) => (currentTab === 'users' || currentTab === 'billing' || currentTab === 'usage' ? currentTab : 'users'))
+      setSelectedTab((currentTab) => {
+        const nextTab = currentTab === 'users' || currentTab === 'billing' || currentTab === 'usage' ? currentTab : 'users'
+        if (isMobileLayout) {
+          setMobileSection(mobileSectionForTab(nextTab))
+        }
+        return nextTab
+      })
       setActiveTopbarNav('Command Center')
       return
+    }
+    if (isMobileLayout) {
+      setMobileSection('overview')
     }
     setSelectedTab('overview')
     setActiveTopbarNav('Super Admin')
@@ -521,14 +564,18 @@ export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }:
       setErrorMessage('יש לבחור ארגון למחיקה.')
       return
     }
+    const organizationId = selectedOrganizationId
     setIsBusy(true)
     setErrorMessage('')
     setSuccessMessage('')
     try {
-      await updateOrganization(selectedOrganizationId, { status: 'suspended' })
-      setSuccessMessage('בוצעה מחיקה לוגית: הארגון הושעה.')
+      await updateOrganization(organizationId, { status: 'suspended' })
+      openAdminTab('suspendedOrganizations', 'Super Admin')
+      setSelectedOrganizationId(organizationId)
+      setOrganizationStatusDraft('suspended')
       await reloadData()
-      await reloadOrganizationDetails(selectedOrganizationId)
+      await reloadOrganizationDetails(organizationId)
+      setSuccessMessage('בוצעה מחיקה לוגית: הארגון הושעה.')
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'מחיקה לוגית לארגון נכשלה.')
     } finally {
@@ -541,15 +588,18 @@ export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }:
       setErrorMessage('יש לבחור ארגון להפעלה מחדש.')
       return
     }
+    const organizationId = selectedOrganizationId
 
     setIsBusy(true)
     setErrorMessage('')
     setSuccessMessage('')
     try {
-      await updateOrganization(selectedOrganizationId, { status: 'active' })
-      await reloadData()
-      await reloadOrganizationDetails(selectedOrganizationId)
+      await updateOrganization(organizationId, { status: 'active' })
+      openAdminTab('overview', 'Super Admin')
+      setSelectedOrganizationId(organizationId)
       setOrganizationStatusDraft('active')
+      await reloadData()
+      await reloadOrganizationDetails(organizationId)
       setSuccessMessage('הארגון הופעל מחדש בהצלחה.')
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'הפעלת הארגון מחדש נכשלה.')
@@ -1522,12 +1572,22 @@ export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }:
     { id: 'more', label: 'עוד' },
   ] satisfies Array<{ id: SuperAdminMobileSection; label: string; badge?: number }>
 
-  function renderMobileTabSection(tab: SuperAdminTab) {
+  function renderMobileTabSection(
+    tab: SuperAdminTab,
+    options?: {
+      backLabel?: string
+      onBack?: () => void
+      action?: React.ReactNode
+    },
+  ) {
     const meta = getSectionMeta(tab)
     return (
       <main className="sa-mobile-shell">
         <MobileSectionHeader
           eyebrow="סופר אדמין"
+          backLabel={options?.backLabel}
+          onBack={options?.onBack}
+          action={options?.action}
           title={meta.title}
           description={meta.description}
         />
@@ -1540,24 +1600,60 @@ export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }:
   }
 
   function handleMobileSectionChange(section: SuperAdminMobileSection) {
-    setMobileSection(section)
     closeTopbarOverlays()
     if (section === 'overview') {
+      setMobileSection('overview')
       openAdminTab('overview', 'Super Admin')
-      return
-    }
-    if (section === 'users') {
-      openAdminTab('users', 'Command Center')
-      return
-    }
-    if (section === 'issues') {
-      openAdminTab('issues', 'Ghost Live')
       return
     }
     if (section === 'organizations') {
-      openAdminTab('overview', 'Super Admin')
+      if (selectedOrganization?.status === 'suspended' && activeOrganizations[0]) {
+        setSelectedOrganizationId(activeOrganizations[0].id)
+      }
+      setMobileSection('organizations')
+      setSelectedTab('overview')
+      setActiveTopbarNav('Super Admin')
       return
     }
+    if (section === 'suspendedOrganizations') {
+      if (selectedOrganization?.status !== 'suspended' && suspendedOrganizations[0]) {
+        setSelectedOrganizationId(suspendedOrganizations[0].id)
+      }
+      setMobileSection('suspendedOrganizations')
+      openAdminTab('suspendedOrganizations', 'Super Admin')
+      return
+    }
+    if (section === 'ghostLive') {
+      setMobileSection('ghostLive')
+      openAdminTab('ghostLive', 'Ghost Live')
+      return
+    }
+    if (section === 'users') {
+      setMobileSection('users')
+      openAdminTab('users', 'Command Center')
+      return
+    }
+    if (section === 'billing') {
+      setMobileSection('billing')
+      openAdminTab('billing', 'Command Center')
+      return
+    }
+    if (section === 'usage') {
+      setMobileSection('usage')
+      openAdminTab('usage', 'Command Center')
+      return
+    }
+    if (section === 'issues') {
+      setMobileSection('issues')
+      openAdminTab('issues', 'Ghost Live')
+      return
+    }
+    if (section === 'events') {
+      setMobileSection('events')
+      openAdminTab('events', 'Ghost Live')
+      return
+    }
+    setMobileSection('more')
     openAdminTab('usage', 'Command Center')
   }
 
@@ -1622,9 +1718,406 @@ export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }:
               </ul>
             )}
           </MobileSurfaceCard>
+
+          <MobileSurfaceCard title="Mobile admin shortcuts" description="Quick access to suspended organizations and event history.">
+            <div className="sa-inline-actions">
+              <button className="ghost-button" onClick={() => handleMobileSectionChange('suspendedOrganizations')} type="button">
+                Suspended orgs
+              </button>
+              <button className="ghost-button" onClick={() => handleMobileSectionChange('events')} type="button">
+                Events
+              </button>
+            </div>
+          </MobileSurfaceCard>
         </div>
       </main>
     )
+  }
+
+  void renderMobileOrganizationsSection
+  void renderMobileActiveOrganizationsSection
+  void renderMobileSuspendedOrganizationsSection
+
+  function renderMobileActiveOrganizationsSection() {
+    const selectedActiveOrganization =
+      activeOrganizations.find((organization) => organization.id === selectedOrganizationId) ?? activeOrganizations[0] ?? null
+
+    return (
+      <main className="sa-mobile-shell">
+        <MobileSectionHeader
+          eyebrow="×¡×•×¤×¨ ××“×ž×™×Ÿ"
+          action={
+            <button className="ghost-button" onClick={() => handleMobileSectionChange('suspendedOrganizations')} type="button">
+              ×ž×•×©×”×™×
+            </button>
+          }
+          title="××¨×’×•× ×™× ×¤×¢×™×œ×™×"
+          description="×”×—×œ×£ ×‘×™×Ÿ ××¨×’×•× ×™× ×¤×¢×™×œ×™× ×•×¢×‘×•×¨ ×œ×–×¨×™×ž×ª ×”× ×™×”×•×œ ×”×ž×ª××™×ž×”."
+        />
+
+        <div className="sa-mobile-stack">
+          <MobileSurfaceCard title="××¨×’×•× ×™× ×¤×¢×™×œ×™×" description={`${activeOrganizations.length} ×¡×”×´×›`}>
+            <div className="sa-mobile-chip-list">
+              {activeOrganizations.map((organization) => (
+                <button
+                  key={organization.id}
+                  className={`sa-mobile-chip${selectedOrganizationId === organization.id ? ' active' : ''}`}
+                  onClick={() => setSelectedOrganizationId(organization.id)}
+                  type="button"
+                >
+                  {organization.name}
+                </button>
+              ))}
+            </div>
+          </MobileSurfaceCard>
+
+          {selectedActiveOrganization ? (
+            <MobileSurfaceCard
+              title={selectedActiveOrganization.name}
+              description={ORGANIZATION_STATUS_LABELS[selectedActiveOrganization.status]}
+            >
+              <div className="sa-kpi-grid">
+                <div><span>×¢×¨×•×¦×™×</span><strong>{selectedActiveOrganization.usage.channelsCount}</strong></div>
+                <div><span>×ž×‘×¦×¢×™×</span><strong>{selectedActiveOrganization.usage.operationsCount ?? 0}</strong></div>
+                <div><span>× ×©×œ×—×•</span><strong>{selectedActiveOrganization.usage.sentMessages}</strong></div>
+                <div><span>×”×ª×§×‘×œ×•</span><strong>{selectedActiveOrganization.usage.receivedMessages}</strong></div>
+              </div>
+              <div className="sa-inline-actions">
+                <button className="primary-button" onClick={() => openAdminTab('overview', 'Super Admin')} type="button">
+                  ×¤×ª×— ×”×’×“×¨×•×ª ××¨×’×•×Ÿ
+                </button>
+                <button className="ghost-button" onClick={() => openAdminTab('ghostLive', 'Ghost Live')} type="button">
+                  ×¤×ª×— ×’×•×¡×˜ ×œ×™×™×‘
+                </button>
+              </div>
+            </MobileSurfaceCard>
+          ) : null}
+        </div>
+      </main>
+    )
+  }
+
+  function renderMobileSuspendedOrganizationsSection() {
+    return renderMobileTabSection('suspendedOrganizations', {
+      backLabel: '×¤×¢×™×œ×™×',
+      onBack: () => handleMobileSectionChange('organizations'),
+    })
+  }
+
+  function renderMobileGhostLiveSection() {
+    const meta = getSectionMeta('ghostLive')
+    const mobileChannels = (organizationDetails?.channels ?? []).slice(0, 8)
+    const mobileOperations = (organizationDetails?.operations ?? []).slice(0, 8)
+    const mobileRuns = (organizationDetails?.recentRuns ?? []).slice(0, 6)
+    const mobileEvents = events.slice(0, 6)
+
+    return (
+      <main className="sa-mobile-shell">
+        <MobileSectionHeader
+          eyebrow="Super Admin"
+          backLabel="More"
+          onBack={() => handleMobileSectionChange('more')}
+          title={meta.title}
+          description={meta.description}
+        />
+
+        <div className="sa-mobile-stack sa-mobile-stack-tab">
+          <MobileSurfaceCard title={selectedOrganization?.name ?? 'Organization'} description="Live organization snapshot.">
+            <div className="sa-kpi-grid">
+              <div><span>Channels</span><strong>{selectedOrganization?.usage.channelsCount ?? 0}</strong></div>
+              <div><span>Operations</span><strong>{selectedOrganization?.usage.operationsCount ?? 0}</strong></div>
+              <div><span>Sent</span><strong>{selectedOrganization?.usage.sentMessages ?? 0}</strong></div>
+              <div><span>Received</span><strong>{selectedOrganization?.usage.receivedMessages ?? 0}</strong></div>
+            </div>
+          </MobileSurfaceCard>
+
+          <MobileSurfaceCard title={`Channels (${organizationDetails?.channels?.length ?? 0})`}>
+            {mobileChannels.length === 0 ? (
+              <p className="sa-subtle">No channels available for this organization.</p>
+            ) : (
+              <ul className="sa-list">
+                {mobileChannels.map((channel) => {
+                  const stats = (organizationDetails?.channelStats ?? []).find(
+                    (stat: ChannelUsageMonthly) => stat.channelId === channel.id,
+                  )
+                  const totalMessages =
+                    (stats?.outgoingUser ?? 0) +
+                    (stats?.incomingGhost ?? 0) +
+                    (stats?.incomingSystem ?? 0) +
+                    (stats?.incomingOperations ?? 0)
+                  return (
+                    <li key={channel.id}>
+                      <div className="sa-ledger-row">
+                        <strong>{channel.name}</strong>
+                        <span>{channel.isBlocked ? 'Unavailable' : 'Active'}</span>
+                      </div>
+                      <p>Messages: {totalMessages} · Active ops: {stats?.operationsCountActive ?? 0}</p>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </MobileSurfaceCard>
+
+          <MobileSurfaceCard title={`Operations (${organizationDetails?.operations?.length ?? 0})`}>
+            {mobileOperations.length === 0 ? (
+              <p className="sa-subtle">No operations available for this organization.</p>
+            ) : (
+              <ul className="sa-list">
+                {mobileOperations.map((operation: AdminOperationRecord) => {
+                  const channelName = (organizationDetails?.channels ?? []).find((channel) => channel.id === operation.channelId)?.name ?? '—'
+                  return (
+                    <li key={operation.id}>
+                      <div className="sa-ledger-row">
+                        <strong>{operation.name}</strong>
+                        <span>{operation.enabled ? 'Active' : 'Paused'}</span>
+                      </div>
+                      <p>{channelName} · {OP_MODE_LABELS[operation.mode] ?? operation.mode} · {operation.schedule || 'No schedule'}</p>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </MobileSurfaceCard>
+
+          <MobileSurfaceCard title={`Recent runs (${organizationDetails?.recentRuns?.length ?? 0})`}>
+            {mobileRuns.length === 0 ? (
+              <p className="sa-subtle">No recent runs to display.</p>
+            ) : (
+              <ul className="sa-list">
+                {mobileRuns.map((run: AdminOperationRunRecord) => {
+                  const operationName =
+                    (organizationDetails?.operations ?? []).find((operation) => operation.id === run.operationId)?.name ??
+                    run.operationId.slice(0, 8)
+                  return (
+                    <li key={run.id}>
+                      <div className="sa-ledger-row">
+                        <strong>{operationName}</strong>
+                        <span>{RUN_STATUS_LABELS[run.status]}</span>
+                      </div>
+                      <p>{new Date(run.startedAtIso).toLocaleString('he-IL')}</p>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </MobileSurfaceCard>
+
+          <MobileSurfaceCard title={`Live events (${events.length})`}>
+            {mobileEvents.length === 0 ? (
+              <p className="sa-subtle">No live events right now.</p>
+            ) : (
+              <ul className="sa-list">
+                {mobileEvents.map((event, index) => (
+                  <li key={`${event.timestampIso}_${index}`}>
+                    <div className="sa-ledger-row">
+                      <strong>{event.eventType}</strong>
+                      <span>{event.severity}</span>
+                    </div>
+                    <p>{new Date(event.timestampIso).toLocaleString('he-IL')}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </MobileSurfaceCard>
+        </div>
+      </main>
+    )
+  }
+
+  function renderMobileUsageSection() {
+    const meta = getSectionMeta('usage')
+    const mobileLedger = (organizationDetails?.usageLedger ?? []).slice(0, 8)
+    const mobileChannels = (organizationDetails?.channels ?? []).slice(0, 8)
+    const mobileOperations = (organizationDetails?.operations ?? []).slice(0, 8)
+    const mobileRuns = (organizationDetails?.recentRuns ?? []).slice(0, 6)
+
+    return (
+      <main className="sa-mobile-shell">
+        <MobileSectionHeader
+          eyebrow="Super Admin"
+          backLabel="More"
+          onBack={() => handleMobileSectionChange('more')}
+          title={meta.title}
+          description={meta.description}
+        />
+
+        <div className="sa-mobile-stack sa-mobile-stack-tab">
+          <MobileSurfaceCard title="Usage summary" description="Current usage for the selected organization.">
+            <div className="sa-kpi-grid">
+              <div><span>Channels</span><strong>{selectedOrganization?.usage.channelsCount ?? 0}</strong></div>
+              <div><span>Operations</span><strong>{selectedOrganization?.usage.operationsCount ?? 0}</strong></div>
+              <div><span>Sent</span><strong>{selectedOrganization?.usage.sentMessages ?? 0}</strong></div>
+              <div><span>Received</span><strong>{selectedOrganization?.usage.receivedMessages ?? 0}</strong></div>
+              <div><span>AI cost</span><strong>${(selectedOrganization?.usage.aiTotalCost ?? 0).toFixed(2)}</strong></div>
+              <div><span>API cost</span><strong>${(selectedOrganization?.usage.apiTotalCost ?? 0).toFixed(2)}</strong></div>
+            </div>
+          </MobileSurfaceCard>
+
+          <MobileSurfaceCard title={`Usage ledger (${organizationDetails?.usageLedger?.length ?? 0})`}>
+            {mobileLedger.length === 0 ? (
+              <p className="sa-subtle">No usage ledger entries for this organization.</p>
+            ) : (
+              <ul className="sa-list">
+                {mobileLedger.map((ledger) => (
+                  <li key={ledger.id}>
+                    <div className="sa-ledger-row">
+                      <strong>{{ openai: 'Image analysis', api: 'API', agent: 'Agent', message: 'Message' }[ledger.metricType] ?? ledger.metricType}</strong>
+                      <span>${ledger.amount.toFixed(2)}</span>
+                    </div>
+                    <p>{ledger.details}</p>
+                    <p>{new Date(ledger.createdAtIso).toLocaleString('he-IL')}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </MobileSurfaceCard>
+
+          <MobileSurfaceCard title={`Channels usage (${organizationDetails?.channels?.length ?? 0})`}>
+            {mobileChannels.length === 0 ? (
+              <p className="sa-subtle">No channels available for this organization.</p>
+            ) : (
+              <ul className="sa-list">
+                {mobileChannels.map((channel) => {
+                  const stats = (organizationDetails?.channelStats ?? []).find(
+                    (stat: ChannelUsageMonthly) => stat.channelId === channel.id,
+                  )
+                  const totalMessages =
+                    (stats?.outgoingUser ?? 0) +
+                    (stats?.incomingGhost ?? 0) +
+                    (stats?.incomingSystem ?? 0) +
+                    (stats?.incomingOperations ?? 0)
+                  return (
+                    <li key={channel.id}>
+                      <div className="sa-ledger-row">
+                        <strong>{channel.name}</strong>
+                        <span>{totalMessages} messages</span>
+                      </div>
+                      <p>User: {stats?.outgoingUser ?? 0} · Ghost: {stats?.incomingGhost ?? 0} · System: {stats?.incomingSystem ?? 0} · Ops: {stats?.incomingOperations ?? 0}</p>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </MobileSurfaceCard>
+
+          <MobileSurfaceCard title={`Operations (${organizationDetails?.operations?.length ?? 0})`}>
+            {mobileOperations.length === 0 ? (
+              <p className="sa-subtle">No operations available for this organization.</p>
+            ) : (
+              <ul className="sa-list">
+                {mobileOperations.map((operation: AdminOperationRecord) => {
+                  const channelName = (organizationDetails?.channels ?? []).find((channel) => channel.id === operation.channelId)?.name ?? '—'
+                  const lastRun = (organizationDetails?.recentRuns ?? []).find(
+                    (run: AdminOperationRunRecord) => run.operationId === operation.id,
+                  )
+                  return (
+                    <li key={operation.id}>
+                      <div className="sa-ledger-row">
+                        <strong>{operation.name}</strong>
+                        <span>{operation.enabled ? 'Active' : 'Paused'}</span>
+                      </div>
+                      <p>{channelName} · {OP_MODE_LABELS[operation.mode] ?? operation.mode}</p>
+                      <p>{lastRun ? RUN_STATUS_LABELS[lastRun.status] : 'No recent run'}</p>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </MobileSurfaceCard>
+
+          <MobileSurfaceCard title={`Recent runs (${organizationDetails?.recentRuns?.length ?? 0})`}>
+            {mobileRuns.length === 0 ? (
+              <p className="sa-subtle">No recent runs to display.</p>
+            ) : (
+              <ul className="sa-list">
+                {mobileRuns.map((run: AdminOperationRunRecord) => {
+                  const operationName =
+                    (organizationDetails?.operations ?? []).find((operation) => operation.id === run.operationId)?.name ??
+                    run.operationId.slice(0, 8)
+                  return (
+                    <li key={run.id}>
+                      <div className="sa-ledger-row">
+                        <strong>{operationName}</strong>
+                        <span>{RUN_STATUS_LABELS[run.status]}</span>
+                      </div>
+                      <p>{new Date(run.startedAtIso).toLocaleString('he-IL')}</p>
+                      <p>{run.errorMessage ?? 'No error reported'}</p>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </MobileSurfaceCard>
+        </div>
+      </main>
+    )
+  }
+
+  function renderMobileActiveOrganizationsScreen() {
+    const selectedActiveOrganization =
+      activeOrganizations.find((organization) => organization.id === selectedOrganizationId) ?? activeOrganizations[0] ?? null
+
+    return (
+      <main className="sa-mobile-shell">
+        <MobileSectionHeader
+          eyebrow="Super Admin"
+          action={
+            <button className="ghost-button" onClick={() => handleMobileSectionChange('suspendedOrganizations')} type="button">
+              Suspended
+            </button>
+          }
+          title="Active organizations"
+          description="Choose an active organization and open the relevant management flow."
+        />
+
+        <div className="sa-mobile-stack">
+          <MobileSurfaceCard title="Active organizations" description={`${activeOrganizations.length} total`}>
+            <div className="sa-mobile-chip-list">
+              {activeOrganizations.map((organization) => (
+                <button
+                  key={organization.id}
+                  className={`sa-mobile-chip${selectedOrganizationId === organization.id ? ' active' : ''}`}
+                  onClick={() => setSelectedOrganizationId(organization.id)}
+                  type="button"
+                >
+                  {organization.name}
+                </button>
+              ))}
+            </div>
+          </MobileSurfaceCard>
+
+          {selectedActiveOrganization ? (
+            <MobileSurfaceCard
+              title={selectedActiveOrganization.name}
+              description={ORGANIZATION_STATUS_LABELS[selectedActiveOrganization.status]}
+            >
+              <div className="sa-kpi-grid">
+                <div><span>Channels</span><strong>{selectedActiveOrganization.usage.channelsCount}</strong></div>
+                <div><span>Operations</span><strong>{selectedActiveOrganization.usage.operationsCount ?? 0}</strong></div>
+                <div><span>Sent</span><strong>{selectedActiveOrganization.usage.sentMessages}</strong></div>
+                <div><span>Received</span><strong>{selectedActiveOrganization.usage.receivedMessages}</strong></div>
+              </div>
+              <div className="sa-inline-actions">
+                <button className="primary-button" onClick={() => openAdminTab('overview', 'Super Admin')} type="button">
+                  Open overview
+                </button>
+                <button className="ghost-button" onClick={() => openAdminTab('ghostLive', 'Ghost Live')} type="button">
+                  Open Ghost Live
+                </button>
+              </div>
+            </MobileSurfaceCard>
+          ) : null}
+        </div>
+      </main>
+    )
+  }
+
+  function renderMobileSuspendedOrganizationsScreen() {
+    return renderMobileTabSection('suspendedOrganizations', {
+      backLabel: 'Active',
+      onBack: () => handleMobileSectionChange('organizations'),
+    })
   }
 
   function renderMobileMoreSection() {
@@ -1643,10 +2136,10 @@ export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }:
               <div><span>סנכרון בינה מלאכותית</span><strong>{selectedOrganization?.openAiLastSyncIso ? 'סונכרן' : 'ממתין'}</strong></div>
             </div>
             <div className="sa-inline-actions">
-              <button className="primary-button" onClick={() => openAdminTab('billing', 'Command Center')} type="button">
+              <button className="primary-button" onClick={() => handleMobileSectionChange('billing')} type="button">
                 פתח חיוב
               </button>
-              <button className="ghost-button" onClick={() => openAdminTab('usage', 'Command Center')} type="button">
+              <button className="ghost-button" onClick={() => handleMobileSectionChange('usage')} type="button">
                 פתח שימוש
               </button>
             </div>
@@ -1731,9 +2224,14 @@ export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }:
           />
 
           {mobileSection === 'overview' ? renderMobileTabSection('overview') : null}
-          {mobileSection === 'organizations' ? renderMobileOrganizationsSection() : null}
+          {mobileSection === 'organizations' ? renderMobileActiveOrganizationsScreen() : null}
+          {mobileSection === 'suspendedOrganizations' ? renderMobileSuspendedOrganizationsScreen() : null}
+          {mobileSection === 'ghostLive' ? renderMobileGhostLiveSection() : null}
           {mobileSection === 'users' ? renderMobileTabSection('users') : null}
+          {mobileSection === 'billing' ? renderMobileTabSection('billing', { backLabel: 'More', onBack: () => handleMobileSectionChange('more') }) : null}
+          {mobileSection === 'usage' ? renderMobileUsageSection() : null}
           {mobileSection === 'issues' ? renderMobileTabSection('issues') : null}
+          {mobileSection === 'events' ? renderMobileTabSection('events', { backLabel: 'More', onBack: () => handleMobileSectionChange('more') }) : null}
           {mobileSection === 'more' ? renderMobileMoreSection() : null}
         </div>
 
@@ -2053,3 +2551,4 @@ export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }:
     </div>
   )
 }
+

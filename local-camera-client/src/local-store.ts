@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import type { LocalAgentBinding, SavedCameraConfig } from './types.js'
+import { ensureAgentDataFileMigrated } from './data-path.js'
 
 export interface SavedAgentConfig {
   organizationId: string
@@ -27,7 +27,7 @@ export const DEFAULT_API_BASE_URL = 'https://ghost-test-app-b906c.web.app'
 const CONFIG_FILENAME = 'ghost-agent.runtime.json'
 
 function configPath(): string {
-  return resolve(process.cwd(), CONFIG_FILENAME)
+  return ensureAgentDataFileMigrated(CONFIG_FILENAME)
 }
 
 export function loadLocalConfig(): SavedAgentConfig | null {
@@ -95,17 +95,18 @@ export function normalizeSavedConfig(config: SavedAgentConfig): SavedAgentConfig
     }
   }
 
-  const defaultCameraId = config.defaultCameraId
-    ?? bindings[0]?.cameraId
+  const activeBindings = bindings.slice(0, 1)
+  const defaultCameraId = activeBindings[0]?.cameraId
+    ?? config.defaultCameraId
     ?? cameras[0]?.cameraId
 
   return {
     ...config,
     apiBaseUrl: DEFAULT_API_BASE_URL,
     cameras,
-    bindings,
+    bindings: activeBindings,
     defaultCameraId,
-    channelId: legacyChannelId ?? bindings[0]?.channelId,
+    channelId: legacyChannelId ?? activeBindings[0]?.channelId,
     channelName: legacyChannelName,
     cameraName: legacyCameraName ?? cameras[0]?.label,
   }

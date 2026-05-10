@@ -59,7 +59,7 @@ export function clearAgentStorage(): void {
   clearSecretStore()
 }
 
-async function sanitizeCameraForStorage(camera: SavedCameraConfig): Promise<SavedCameraConfig> {
+export async function sanitizeCameraForStorage(camera: SavedCameraConfig): Promise<SavedCameraConfig> {
   switch (camera.source.type) {
     case 'usb-dshow':
       return {

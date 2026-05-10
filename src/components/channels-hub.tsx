@@ -17,6 +17,18 @@ const SCHEDULE_QUICK_SUGGESTIONS = [
 
 type ChannelsHubMobileView = 'list' | 'create-channel' | 'channel-details' | 'operations' | 'create-operation'
 
+function formatCaptureRoute(channel: Channel): string {
+  return channel.captureMode === 'local_agent' ? 'Installed local client' : 'Browser camera'
+}
+
+function formatHeartbeat(lastHeartbeatAtIso?: string): string {
+  if (!lastHeartbeatAtIso) {
+    return 'No heartbeat yet'
+  }
+  const parsed = new Date(lastHeartbeatAtIso)
+  return Number.isNaN(parsed.getTime()) ? lastHeartbeatAtIso : parsed.toLocaleString('he-IL')
+}
+
 function GroupChatIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
@@ -61,6 +73,7 @@ interface ChannelsHubProps {
   mobileMode?: boolean
   onSelectChannel: (channelId: string) => void
   onToggleNewChannelForm: () => void
+  onLaunchLocalAgentSetup: (channelId: string) => void | Promise<void>
   onNewChannelDraftChange: (field: keyof NewChannelDraft, value: string | number | ChannelType) => void
   onNewChannelSubmit: (event: FormEvent<HTMLFormElement>) => void
   onToggleLinkedChannelId: (channelId: string) => void
@@ -89,6 +102,7 @@ export function ChannelsHub({
   mobileMode = false,
   onSelectChannel,
   onToggleNewChannelForm,
+  onLaunchLocalAgentSetup,
   onNewChannelDraftChange,
   onNewChannelSubmit,
   onToggleLinkedChannelId,
@@ -588,6 +602,26 @@ export function ChannelsHub({
                     placeholder="rtsp://camera-feed"
                   />
                 </label>
+
+                <label>
+                  Capture route
+                  <input readOnly value={formatCaptureRoute(selectedChannel)} />
+                </label>
+
+                <label>
+                  Bound client
+                  <input readOnly value={selectedChannel.localAgentBinding?.deviceName || 'Not bound'} />
+                </label>
+
+                <label>
+                  Bound camera
+                  <input readOnly value={selectedChannel.localAgentBinding?.cameraLabel || 'Not assigned'} />
+                </label>
+
+                <label>
+                  Agent heartbeat
+                  <input readOnly value={formatHeartbeat(selectedChannel.localAgentStatus?.lastHeartbeatAtIso)} />
+                </label>
               </div>
             </MobileSurfaceCard>
 
@@ -801,6 +835,26 @@ export function ChannelsHub({
                 />
               </label>
 
+              <label>
+                Capture route
+                <input readOnly value={formatCaptureRoute(selectedChannel)} />
+              </label>
+
+              <label>
+                Bound client
+                <input readOnly value={selectedChannel.localAgentBinding?.deviceName || 'Not bound'} />
+              </label>
+
+              <label>
+                Bound camera
+                <input readOnly value={selectedChannel.localAgentBinding?.cameraLabel || 'Not assigned'} />
+              </label>
+
+              <label>
+                Agent heartbeat
+                <input readOnly value={formatHeartbeat(selectedChannel.localAgentStatus?.lastHeartbeatAtIso)} />
+              </label>
+
               <div className="channel-members chub-settings-members">
                 <span className="metric-label">
                   {selectedChannel.type === 'group' ? 'צ׳אטים מצורפים' : 'חברי הערוץ'}
@@ -813,6 +867,17 @@ export function ChannelsHub({
               </div>
 
               <div className="chub-settings-actions">
+                {selectedChannel.type === 'personal' ? (
+                  <button
+                    className="ghost-button"
+                    onClick={() => {
+                      void onLaunchLocalAgentSetup(selectedChannel.id)
+                    }}
+                    type="button"
+                  >
+                    Open Local Client Setup
+                  </button>
+                ) : null}
                 <button className="danger-button" onClick={onRequestDeleteSelectedChannel} type="button">
                   מחק ערוץ
                 </button>

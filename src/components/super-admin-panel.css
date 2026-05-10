@@ -1067,3 +1067,71 @@ html[data-theme='dark'] .sa-org-list li button:hover,
 html[data-theme='dark'] .sa-list li:hover {
   transform: translateY(-1px);
 }
+
+html[data-theme='dark'] .sa-shell {
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 255, 255, 0.05), transparent 20%),
+    radial-gradient(circle at 82% 20%, rgba(255, 255, 255, 0.04), transparent 22%),
+    linear-gradient(180deg, #49505a 0%, #3e444d 42%, #353941 100%) !important;
+}
+
+html[data-theme='dark'] .sa-sidebar,
+html[data-theme='dark'] .sa-content {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    rgba(56, 62, 71, 0.72) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 18px 42px rgba(0, 0, 0, 0.24) !important;
+}
+
+html[data-theme='dark'] .sa-sidebar-header,
+html[data-theme='dark'] .sa-sidebar-create,
+html[data-theme='dark'] .sa-sidebar-search,
+html[data-theme='dark'] .sa-sidebar-kpis,
+html[data-theme='dark'] .sa-content-header {
+  background: rgba(73, 80, 90, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+html[data-theme='dark'] .sa-org-list li button,
+html[data-theme='dark'] .sa-card,
+html[data-theme='dark'] .sa-kpi-grid div,
+html[data-theme='dark'] .sa-list li,
+html[data-theme='dark'] .sa-stats-table th,
+html[data-theme='dark'] .sa-stats-table td,
+html[data-theme='dark'] .sa-form-grid input,
+html[data-theme='dark'] .sa-form-grid textarea,
+html[data-theme='dark'] .sa-form-grid select,
+html[data-theme='dark'] .sa-sidebar-search input,
+html[data-theme='dark'] .sa-sidebar-create input,
+html[data-theme='dark'] .sa-mobile-chip {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
+    rgba(74, 81, 91, 0.58) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f2f5f8 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme='dark'] .sa-content-header h2,
+html[data-theme='dark'] .sa-card h3,
+html[data-theme='dark'] .sa-org-list-title strong,
+html[data-theme='dark'] .sa-kpi-grid strong,
+html[data-theme='dark'] .sa-ledger-row strong,
+html[data-theme='dark'] .sa-stats-table th,
+html[data-theme='dark'] .sa-mobile-shell-host .mobile-surface-card h3 {
+  color: #f5f7fa !important;
+}
+
+html[data-theme='dark'] .sa-subtle,
+html[data-theme='dark'] .sa-org-list-meta,
+html[data-theme='dark'] .sa-kpi-grid span,
+html[data-theme='dark'] .sa-form-grid label,
+html[data-theme='dark'] .sa-compact-list,
+html[data-theme='dark'] .sa-empty-state,
+html[data-theme='dark'] .sa-realtime-indicator,
+html[data-theme='dark'] .sa-stats-table td {
+  color: #d1d7dd !important;
+}

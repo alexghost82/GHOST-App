@@ -7,10 +7,6 @@ interface MessageRowProps {
 
 const ALERT_LABEL_MAP: Record<string, string> = {
   critical: 'Critical alert',
-  routine: 'Routine scan',
-  report: 'Report',
-  rating: 'Rating',
-  assessment: 'Assessment',
 }
 
 export function MessageRow({ message, onDismissFrame }: MessageRowProps) {
@@ -26,8 +22,8 @@ export function MessageRow({ message, onDismissFrame }: MessageRowProps) {
         {label ? <span className="message-scan-label">{label}</span> : null}
 
         <div className="message-bubble">
-          {isSystem ? <span className="message-author-tag">System</span> : null}
-          {!isOutgoing && !isSystem ? <span className="message-author-tag">Ghost</span> : null}
+          {isSystem ? <span className="message-author-tag">GHOST</span> : null}
+          {!isOutgoing && !isSystem ? <span className="message-author-tag">GHOST</span> : null}
           <p>{message.text}</p>
 
           {message.sources && message.sources.length > 0 ? (

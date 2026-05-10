@@ -58,6 +58,9 @@ export function LoginPage({ onAuthenticate, onGhostAccess, externalErrorMessage 
     }
 
     function handleKeyDown(event: KeyboardEvent) {
+      if (typeof event.key !== 'string' || event.key.length === 0) {
+        return
+      }
       const key = event.key.toLowerCase()
       if (!GHOST_ACCESS_COMBO.has(key)) return
       pressedKeysRef.current.add(key)
@@ -65,6 +68,9 @@ export function LoginPage({ onAuthenticate, onGhostAccess, externalErrorMessage 
     }
 
     function handleKeyUp(event: KeyboardEvent) {
+      if (typeof event.key !== 'string' || event.key.length === 0) {
+        return
+      }
       const key = event.key.toLowerCase()
       pressedKeysRef.current.delete(key)
       if (pressedKeysRef.current.size === 0) {

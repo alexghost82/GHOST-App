@@ -85,6 +85,9 @@ export function RootApp() {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLSelectElement) {
         return
       }
+      if (typeof event.key !== 'string' || event.key.length === 0) {
+        return
+      }
       const key = event.key.toLowerCase()
       if (!SUPER_ADMIN_COMBO.has(key)) return
       pressedKeysRef.current.add(key)
@@ -92,6 +95,9 @@ export function RootApp() {
     }
 
     function handleKeyUp(event: KeyboardEvent) {
+      if (typeof event.key !== 'string' || event.key.length === 0) {
+        return
+      }
       const key = event.key.toLowerCase()
       pressedKeysRef.current.delete(key)
       if (pressedKeysRef.current.size === 0) {

@@ -14,6 +14,8 @@ import {
   LocalAgentBindSchema,
   LocalAgentCaptureRequestSchema,
   LocalAgentConnectSchema,
+  LocalAgentProvisioningConsumeSchema,
+  LocalAgentProvisioningCreateSchema,
   LocalAgentHeartbeatSchema,
   LocalAgentWorkResultSchema,
   LocalAgentWorkPollSchema,
@@ -27,7 +29,18 @@ interface LocalAgentRouterDeps {
   captureBroker: LocalAgentCaptureBroker
 }
 
+interface ProvisioningSessionRecord {
+  token: string
+  organizationId: string
+  channelId: string
+  createdByUserId: string
+  createdAtIso: string
+  expiresAtIso: string
+  usedAtIso?: string
+}
+
 type LiveState = 'LIVE' | 'SYNC' | 'DEGRADED' | 'OFFLINE'
+const PROVISIONING_TOKEN_TTL_MS = 10 * 60 * 1000
 
 function buildAuthPayload(user: UserRecord, store: IAdminRepository): AuthAccessPayload {
   const org = store.getOrganizationById(user.organizationId)
@@ -81,6 +94,10 @@ function buildChannelSummary(channel: FullChannelRecord) {
     localAgentBinding: normalized.localAgentBinding,
     localAgentStatus: normalized.localAgentStatus,
   }
+}
+
+function buildProvisioningLaunchUrl(token: string): string {
+  return `ghost-agent://provision?token=${encodeURIComponent(token)}`
 }
 
 async function findBoundChannelByDeviceId(
@@ -161,6 +178,7 @@ async function issueAgentSession(
 
 export function createLocalAgentRouter({ store, realtimeHub, captureBroker }: LocalAgentRouterDeps): Router {
   const router = Router()
+  const provisioningSessions = new Map<string, ProvisioningSessionRecord>()
 
   router.post('/connect', async (req, res) => {
     try {
@@ -183,7 +201,114 @@ export function createLocalAgentRouter({ store, realtimeHub, captureBroker }: Lo
     }
   })
 
+  router.post('/provisioning-sessions/consume', async (req, res) => {
+    try {
+      const parsed = LocalAgentProvisioningConsumeSchema.safeParse(req.body)
+      if (!parsed.success) {
+        return res.status(400).json({ error: 'Invalid local agent provisioning consume request.', details: parsed.error.flatten() })
+      }
+
+      const session = provisioningSessions.get(parsed.data.token)
+      if (!session) {
+        return res.status(404).json({ error: 'Provisioning session not found.' })
+      }
+      if (session.usedAtIso) {
+        return res.status(409).json({ error: 'Provisioning session was already used.' })
+      }
+      if (Date.parse(session.expiresAtIso) <= Date.now()) {
+        provisioningSessions.delete(parsed.data.token)
+        return res.status(410).json({ error: 'Provisioning session expired.' })
+      }
+
+      const channel = await store.getFullChannel(session.organizationId, session.channelId)
+      if (!channel) {
+        provisioningSessions.delete(parsed.data.token)
+        return res.status(404).json({ error: 'Provisioning channel not found.' })
+      }
+      if (channel.type !== 'personal') {
+        provisioningSessions.delete(parsed.data.token)
+        return res.status(409).json({ error: 'Provisioning channel is no longer eligible.' })
+      }
+      const org = store.getOrganizationById(channel.organizationId)
+      if (!org) {
+        provisioningSessions.delete(parsed.data.token)
+        return res.status(404).json({ error: 'Provisioning organization not found.' })
+      }
+
+      const payload = await issueAgentSession(
+        store,
+        org.name,
+        parsed.data.deviceName,
+        parsed.data.deviceId,
+      )
+      session.usedAtIso = new Date().toISOString()
+      provisioningSessions.set(parsed.data.token, session)
+
+      return res.json({
+        ok: true,
+        organizationId: payload.organizationId,
+        organizationName: payload.organizationName,
+        accessToken: payload.accessToken,
+        refreshToken: payload.refreshToken,
+        profile: payload.profile,
+        deviceId: payload.deviceId,
+        channels: payload.channels,
+        priorBinding: payload.priorBinding,
+        targetChannel: buildChannelSummary(channel),
+        provisioning: {
+          token: parsed.data.token,
+          consumedAtIso: session.usedAtIso,
+          expiresAtIso: session.expiresAtIso,
+        },
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Local agent provisioning consume failed.'
+      return res.status(500).json({ error: message })
+    }
+  })
+
   router.use(requireAuth)
+
+  router.post('/provisioning-sessions', async (req, res) => {
+    try {
+      const { organizationId, userId } = extractTenantContext(req)
+      const parsed = LocalAgentProvisioningCreateSchema.safeParse(req.body)
+      if (!parsed.success) {
+        return res.status(400).json({ error: 'Invalid local agent provisioning request.', details: parsed.error.flatten() })
+      }
+
+      const channel = await store.getFullChannel(organizationId, parsed.data.channelId)
+      if (!channel) {
+        return res.status(404).json({ error: 'Channel not found.' })
+      }
+      if (channel.type !== 'personal') {
+        return res.status(409).json({ error: 'Only personal channels can be provisioned to a local client.' })
+      }
+
+      const token = randomBytes(24).toString('base64url')
+      const createdAtIso = new Date().toISOString()
+      const expiresAtIso = new Date(Date.now() + PROVISIONING_TOKEN_TTL_MS).toISOString()
+      provisioningSessions.set(token, {
+        token,
+        organizationId,
+        channelId: channel.id,
+        createdByUserId: userId,
+        createdAtIso,
+        expiresAtIso,
+      })
+
+      return res.status(201).json({
+        ok: true,
+        token,
+        launchUrl: buildProvisioningLaunchUrl(token),
+        expiresAtIso,
+        channel: buildChannelSummary(channel),
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Local agent provisioning session failed.'
+      return res.status(500).json({ error: message })
+    }
+  })
 
   router.post('/bind', async (req, res) => {
     try {
@@ -197,8 +322,20 @@ export function createLocalAgentRouter({ store, realtimeHub, captureBroker }: Lo
       if (!channel) {
         return res.status(404).json({ error: 'Channel not found.' })
       }
-      if (channel.type !== 'personal') {
-        return res.status(400).json({ error: 'Only personal channels can be bound to a local client.' })
+
+      const existingBoundChannel = await findBoundChannelByDeviceId(
+        store,
+        organizationId,
+        parsed.data.deviceId,
+      )
+      if (existingBoundChannel && existingBoundChannel.id !== channel.id) {
+        await store.updateChannelData(organizationId, existingBoundChannel.id, {
+          captureMode: 'browser',
+          cameraEnabled: false,
+          liveState: 'OFFLINE',
+          localAgentBinding: undefined,
+          localAgentStatus: undefined,
+        })
       }
 
       const boundAtIso = new Date().toISOString()

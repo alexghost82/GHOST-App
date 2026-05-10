@@ -3,7 +3,7 @@
  * מותאמת למעבר עתידי ל-Firebase Realtime + Firestore.
  */
 
-export const SCHEMA_VERSION = 5
+export const SCHEMA_VERSION = 6
 
 export const MIGRATE_V2_TO_V3_SQL = `
 ALTER TABLE organizations ADD COLUMN operations_count INTEGER NOT NULL DEFAULT 0;
@@ -21,6 +21,11 @@ ALTER TABLE channel_data ADD COLUMN capture_mode TEXT NOT NULL DEFAULT 'browser'
 ALTER TABLE channel_data ADD COLUMN local_agent_binding TEXT;
 ALTER TABLE channel_data ADD COLUMN local_agent_status TEXT;
 UPDATE schema_version SET version = 5;
+`
+
+export const MIGRATE_V5_TO_V6_SQL = `
+ALTER TABLE messages ADD COLUMN reply_to_message_id TEXT;
+UPDATE schema_version SET version = 6;
 `
 
 /** SQL מיגרציה מגרסה 1 לגרסה 2 — טבלאות ערוצים עשירים, הודעות, מבצעים והרצות. */
@@ -55,6 +60,7 @@ CREATE TABLE IF NOT EXISTS messages (
   author TEXT NOT NULL CHECK(author IN ('user', 'ghost', 'system')),
   text TEXT NOT NULL,
   time TEXT NOT NULL,
+  reply_to_message_id TEXT,
   alert_level TEXT,
   score REAL,
   frame_data_url TEXT,
@@ -278,6 +284,7 @@ CREATE TABLE IF NOT EXISTS messages (
   author TEXT NOT NULL CHECK(author IN ('user', 'ghost', 'system')),
   text TEXT NOT NULL,
   time TEXT NOT NULL,
+  reply_to_message_id TEXT,
   alert_level TEXT,
   score REAL,
   frame_data_url TEXT,

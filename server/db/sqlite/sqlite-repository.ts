@@ -30,7 +30,15 @@ import type {
   IAdminRepository,
   UsageEventRecord,
 } from '../repository-types'
-import { CREATE_TABLES_SQL, MIGRATE_V1_TO_V2_SQL, MIGRATE_V2_TO_V3_SQL, MIGRATE_V3_TO_V4_SQL, MIGRATE_V4_TO_V5_SQL, SCHEMA_VERSION } from './schema'
+import {
+  CREATE_TABLES_SQL,
+  MIGRATE_V1_TO_V2_SQL,
+  MIGRATE_V2_TO_V3_SQL,
+  MIGRATE_V3_TO_V4_SQL,
+  MIGRATE_V4_TO_V5_SQL,
+  MIGRATE_V5_TO_V6_SQL,
+  SCHEMA_VERSION,
+} from './schema'
 
 /** נתיב ברירת מחדל לקובץ DB לפי סביבה */
 function resolveDbPath(): string {
@@ -200,6 +208,7 @@ interface MessageRow {
   author: string
   text: string
   time: string
+  reply_to_message_id: string | null
   alert_level: string | null
   score: number | null
   frame_data_url: string | null
@@ -421,6 +430,7 @@ function rowToMessage(row: MessageRow): MessageRecord {
     author: row.author as MessageRecord['author'],
     text: row.text,
     time: row.time,
+    replyToMessageId: row.reply_to_message_id ?? undefined,
     alertLevel: (row.alert_level as MessageRecord['alertLevel']) ?? undefined,
     score: row.score ?? undefined,
     frameDataUrl: row.frame_data_url ?? undefined,
@@ -498,6 +508,9 @@ export class SQLiteAdminRepository implements IAdminRepository {
       }
       if (versionRow < 5) {
         this.db.exec(MIGRATE_V4_TO_V5_SQL)
+      }
+      if (versionRow < 6) {
+        this.db.exec(MIGRATE_V5_TO_V6_SQL)
       }
     }
   }
@@ -1132,19 +1145,24 @@ export class SQLiteAdminRepository implements IAdminRepository {
     organizationId: string,
     userId: string,
     channelId: string,
-    message: Omit<MessageRecord, 'id' | 'organizationId' | 'userId' | 'channelId' | 'createdAtIso'>,
+    message: Omit<MessageRecord, 'id' | 'organizationId' | 'userId' | 'channelId' | 'createdAtIso'> & { id?: string },
   ): Promise<MessageRecord> {
-    const id = randomUUID()
+    const id = message.id ?? randomUUID()
+    const existing = this.db.prepare('SELECT * FROM messages WHERE id = ?').get(id) as MessageRow | undefined
+    if (existing) {
+      return rowToMessage(existing)
+    }
     const createdAtIso = new Date().toISOString()
     this.db
       .prepare(
         `INSERT INTO messages (
           id, organization_id, user_id, channel_id, author, text, time,
-          alert_level, score, frame_data_url, sources, created_at_iso
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          reply_to_message_id, alert_level, score, frame_data_url, sources, created_at_iso
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         id, organizationId, userId, channelId, message.author, message.text, message.time,
+        message.replyToMessageId ?? null,
         message.alertLevel ?? null, message.score ?? null,
         message.frameDataUrl ?? null,
         message.sources ? JSON.stringify(message.sources) : null,
@@ -1161,21 +1179,19 @@ export class SQLiteAdminRepository implements IAdminRepository {
   ): Promise<MessageRecord[]> {
     const limit = opts?.limit ?? 200
     if (opts?.beforeIso) {
-      return (
-        this.db
-          .prepare(
-            'SELECT * FROM messages WHERE organization_id = ? AND user_id = ? AND channel_id = ? AND created_at_iso < ? ORDER BY created_at_iso ASC LIMIT ?',
-          )
-          .all(organizationId, userId, channelId, opts.beforeIso, limit) as MessageRow[]
-      ).map(rowToMessage)
-    }
-    return (
-      this.db
+      const rows = this.db
         .prepare(
-          'SELECT * FROM messages WHERE organization_id = ? AND user_id = ? AND channel_id = ? ORDER BY created_at_iso ASC LIMIT ?',
+          'SELECT * FROM messages WHERE organization_id = ? AND user_id = ? AND channel_id = ? AND created_at_iso < ? ORDER BY created_at_iso DESC LIMIT ?',
         )
-        .all(organizationId, userId, channelId, limit) as MessageRow[]
-    ).map(rowToMessage)
+        .all(organizationId, userId, channelId, opts.beforeIso, limit) as MessageRow[]
+      return rows.reverse().map(rowToMessage)
+    }
+    const rows = this.db
+      .prepare(
+        'SELECT * FROM messages WHERE organization_id = ? AND user_id = ? AND channel_id = ? ORDER BY created_at_iso DESC LIMIT ?',
+      )
+      .all(organizationId, userId, channelId, limit) as MessageRow[]
+    return rows.reverse().map(rowToMessage)
   }
 
   /* ============================= מבצעים פר ערוץ ============================= */

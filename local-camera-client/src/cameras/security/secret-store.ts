@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
-import { resolve } from 'node:path'
 import { execFile } from 'node:child_process'
+import { ensureAgentDataFileMigrated } from '../../data-path.js'
 
 const POWERSHELL_PATH = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe'
 const SECRET_STORE_FILENAME = 'ghost-camera-secrets.runtime.json'
@@ -12,7 +12,7 @@ interface SecretStoreFile {
 }
 
 function secretStorePath(): string {
-  return resolve(process.cwd(), SECRET_STORE_FILENAME)
+  return ensureAgentDataFileMigrated(SECRET_STORE_FILENAME)
 }
 
 function loadSecretStoreFile(): SecretStoreFile {
