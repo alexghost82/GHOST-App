@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+<<<<<<< HEAD
 import type { CSSProperties, FormEvent, ReactNode, TouchEvent } from 'react'
+=======
+import type { CSSProperties, FormEvent, TouchEvent } from 'react'
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 import './App.css'
 import './styles/live-ops-chat.css'
 import type { AccountMenuItem } from './components/account-menu'
@@ -12,7 +16,10 @@ import { GroupNameModal } from './components/group-name-modal'
 import { InboxPanel } from './components/inbox-panel'
 import { ChannelsHub } from './components/channels-hub'
 import { MobileSectionHeader, MobileSurfaceCard, MobileTabBar } from './components/mobile-shell'
+<<<<<<< HEAD
 import { BellOutlineIcon, HomeLiveIcon, PhoneChatIcon, RadioWavesIcon, UserIcon, UsersIcon } from './components/chat-icons'
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 import { SurfaceDialog } from './components/surface-dialog'
 import { Topbar } from './components/topbar'
 import type { TopbarNavItem } from './components/topbar'
@@ -64,7 +71,10 @@ import { memberNamesFromLinkedChannelIds } from './utils/group-channel'
 import { getCurrentTime, getMinutesSinceTimeLabel } from './utils/time'
 import { createLocalAgentProvisioningSession } from './services/local-agent-provisioning'
 import { getLastVisibleChannelMessage, getVisibleChannelMessages } from './utils/chat-messages'
+<<<<<<< HEAD
 import { mergeServerMessagesWithPending, sortMessagesChronologically } from './utils/channel-history'
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 
 function buildDefaultTimelineState(): TimelineSamplerState {
   return {
@@ -309,6 +319,28 @@ function reconcilePendingMessagesByServer(serverChannels: Channel[]): void {
   writePendingMessagesByChannel(nextPendingByChannel)
 }
 
+<<<<<<< HEAD
+=======
+function mergeServerMessagesWithPending(serverMessages: Message[], pendingMessages: Message[]): Message[] {
+  const mergedById = new Map<string, Message>()
+
+  for (const serverMessage of serverMessages) {
+    mergedById.set(serverMessage.id, {
+      ...serverMessage,
+      syncStatus: 'confirmed',
+    })
+  }
+
+  for (const pendingMessage of pendingMessages) {
+    if (!mergedById.has(pendingMessage.id)) {
+      mergedById.set(pendingMessage.id, pendingMessage)
+    }
+  }
+
+  return sortMessagesChronologically([...mergedById.values()])
+}
+
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 function mergeServerChannelsWithLocalState(serverChannels: Channel[], currentChannels: Channel[]): Channel[] {
   const currentById = new Map(currentChannels.map((channel) => [channel.id, channel]))
   const pendingMessagesByChannel = readPendingMessagesByChannel()
@@ -327,13 +359,32 @@ function mergeServerChannelsWithLocalState(serverChannels: Channel[], currentCha
     return {
       ...serverChannel,
       unread: currentChannel.unread,
+<<<<<<< HEAD
       messages: mergeServerMessagesWithPending(serverChannel.messages, pendingMessages, currentChannel.messages),
+=======
+      messages: mergeServerMessagesWithPending(serverChannel.messages, pendingMessages),
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
       timelineState: currentChannel.timelineState ?? buildDefaultTimelineState(),
       lastFrameDataUrl: currentChannel.lastFrameDataUrl ?? serverChannel.lastFrameDataUrl,
     }
   })
 }
 
+<<<<<<< HEAD
+=======
+function sortMessagesChronologically(messages: Message[]): Message[] {
+  return [...messages].sort((left, right) => {
+    if (left.createdAtIso && right.createdAtIso && left.createdAtIso !== right.createdAtIso) {
+      return left.createdAtIso.localeCompare(right.createdAtIso)
+    }
+    if (left.time === right.time) {
+      return left.id.localeCompare(right.id)
+    }
+    return left.time.localeCompare(right.time)
+  })
+}
+
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 function buildGhostRecoveryReply(operatorName: string, error: unknown): string {
   const rawMessage = error instanceof Error ? error.message : String(error)
   const normalized = rawMessage.toLowerCase()
@@ -361,8 +412,11 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
   const [isMobileLayout, setIsMobileLayout] = useState(false)
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>('chat')
   const [operatorMobileSection, setOperatorMobileSection] = useState<OperatorMobileSection>('live')
+<<<<<<< HEAD
   const [channelsHubMobileInitialView, setChannelsHubMobileInitialView] = useState<'list' | 'channel-details' | 'operations' | 'create-operation'>('list')
   const [channelsHubMobileInitialViewToken, setChannelsHubMobileInitialViewToken] = useState(0)
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   const [isDetailsCollapsed, setIsDetailsCollapsed] = useState(true)
   const [isSending, setIsSending] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -1875,6 +1929,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
     }
   }
 
+<<<<<<< HEAD
   function openMobileChannelsHub(view: 'list' | 'channel-details' | 'operations' | 'create-operation') {
     setChannelsHubMobileInitialView(view)
     setChannelsHubMobileInitialViewToken((current) => current + 1)
@@ -1884,6 +1939,8 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
     }
   }
 
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   function handleTopbarNavChange(nextNav: TopbarNavItem) {
     if (nextNav === 'Command Center' && !canAccessCommandCenter) {
       return
@@ -1926,6 +1983,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
   }
 
   const operatorMobileNavItems = [
+<<<<<<< HEAD
     { id: 'live', label: 'גוסט\nלייב', icon: <HomeLiveIcon />, tone: 'mint' },
     { id: 'channels', label: 'ערוצים', icon: <UsersIcon />, tone: 'sky' },
     { id: 'alerts', label: 'התראות', icon: <BellOutlineIcon />, badge: totalUnreadAlerts > 0 ? totalUnreadAlerts : undefined, tone: 'amber' },
@@ -1941,6 +1999,23 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
   function renderOperatorMobileAlertsScreen() {
     return (
       <main className="operator-mobile-screen operator-mobile-reference-screen operator-mobile-alerts-screen">
+=======
+    { id: 'live', label: 'גוסט לייב' },
+    { id: 'channels', label: 'ערוצים' },
+    { id: 'alerts', label: 'התראות', badge: totalUnreadAlerts > 0 ? totalUnreadAlerts : undefined },
+    { id: 'account', label: 'חשבון' },
+  ] satisfies Array<{ id: OperatorMobileSection; label: string; badge?: number }>
+
+  const liveOpsMobilePanelItems = [
+    { id: 'inbox', label: 'שיחות' },
+    { id: 'chat', label: 'צ׳אט' },
+    { id: 'details', label: 'ערוץ' },
+  ] satisfies Array<{ id: MobilePanel; label: string }>
+
+  function renderOperatorMobileAlertsScreen() {
+    return (
+      <main className="operator-mobile-screen">
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
         <MobileSectionHeader
           eyebrow="התראות"
           title="התראות קריטיות"
@@ -1965,7 +2040,11 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
 
   function renderOperatorMobileAccountScreen() {
     return (
+<<<<<<< HEAD
       <main className="operator-mobile-screen operator-mobile-account operator-mobile-reference-screen">
+=======
+      <main className="operator-mobile-screen operator-mobile-account">
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
         <MobileSectionHeader
           eyebrow="חשבון"
           title={fullName}
@@ -2069,7 +2148,10 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
             className="live-ops-mobile-tabs mobile-only"
             items={liveOpsMobilePanelItems}
             onChange={(id) => handleLiveOpsPanelChange(id as MobilePanel)}
+<<<<<<< HEAD
             variant="segment"
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
           />
         ) : null}
 
@@ -2118,7 +2200,10 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
             onStopTimelineSampling={handleStopTimelineSampling}
             onSuggestionClick={setMessageDraft}
             selectedChannel={selectedChannel}
+<<<<<<< HEAD
             mobileLayout={isMobileLayout}
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
             timelineSamplerState={selectedTimelineSamplerState}
           />
 
@@ -2137,12 +2222,17 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
             onExpandDetails={() => setIsDetailsCollapsed(false)}
             onOpenChannelsHub={() => {
               if (canAccessCommandCenter) {
+<<<<<<< HEAD
                 openMobileChannelsHub(isMobileLayout ? 'channel-details' : 'list')
               }
             }}
             onOpenChannelOperationsHub={() => {
               if (canAccessCommandCenter) {
                 openMobileChannelsHub('operations')
+=======
+                setOperatorMobileSection('channels')
+                setActiveTopbarNav('Command Center')
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
               }
             }}
             onSetMobilePanelChat={() => setMobilePanel('chat')}
@@ -2171,8 +2261,11 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
           availableChannelsForLink={availableForGrouping}
           channels={channels}
           linkedChannelIdSet={linkedChannelIdSet}
+<<<<<<< HEAD
           mobileInitialView={channelsHubMobileInitialView}
           mobileInitialViewToken={channelsHubMobileInitialViewToken}
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
           mobileMode={isMobileLayout}
           onLaunchLocalAgentSetup={handleLaunchLocalAgentSetup}
           newChannelDraft={newChannelDraft}
@@ -2210,7 +2303,10 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
     return (
       <div
         className={`app-shell operator-mobile-app-shell ${operatorMobileSection === 'live' ? 'surface-live-ops operator-mobile-live-shell' : ''}`}
+<<<<<<< HEAD
         data-mobile-section={operatorMobileSection}
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
         data-mobile-panel={mobilePanel}
       >
         <div className="app-surface">
@@ -2242,7 +2338,10 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
             totalOperations={totalOperations}
             totalUnreadAlerts={totalUnreadAlerts}
             themeMode={themeMode}
+<<<<<<< HEAD
             mobileLiveDesign
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
           />
 
           {renderOperatorSurface()}
@@ -2254,11 +2353,16 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
           className="operator-mobile-primary-nav mobile-only"
           items={operatorMobileNavItems}
           onChange={(id) => handleOperatorMobileSectionChange(id as OperatorMobileSection)}
+<<<<<<< HEAD
           variant="floating"
         />
 
         <AppFooter variant="compact-mobile" />
 
+=======
+        />
+
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
         {isCommandPaletteOpen ? (
           <SurfaceDialog
             eyebrow="פקודה מהירה"
@@ -2421,8 +2525,11 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
           availableChannelsForLink={availableForGrouping}
           channels={channels}
           linkedChannelIdSet={linkedChannelIdSet}
+<<<<<<< HEAD
           mobileInitialView={channelsHubMobileInitialView}
           mobileInitialViewToken={channelsHubMobileInitialViewToken}
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
           newChannelDraft={newChannelDraft}
           onLaunchLocalAgentSetup={handleLaunchLocalAgentSetup}
           onDeleteOperation={deleteOperationFromSelectedChannel}
@@ -2547,6 +2654,7 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
               onExpandDetails={() => setIsDetailsCollapsed(false)}
               onOpenChannelsHub={() => {
                 if (canAccessCommandCenter) {
+<<<<<<< HEAD
                   if (isMobileLayout) {
                     openMobileChannelsHub('channel-details')
                     return
@@ -2560,6 +2668,8 @@ function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationN
                     openMobileChannelsHub('operations')
                     return
                   }
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
                   setActiveTopbarNav('Command Center')
                 }
               }}

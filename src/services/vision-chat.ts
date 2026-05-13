@@ -87,7 +87,10 @@ export async function requestVisionReply(
         frameDataUrl,
         analysisContext,
         viewerName,
+<<<<<<< HEAD
         allowHistoryRecall: shouldAllowHistoryRecall(userPrompt),
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
       }),
     })
 

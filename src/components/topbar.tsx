@@ -30,7 +30,10 @@ interface TopbarProps {
   onNavChange: (item: TopbarNavItem) => void
   onOpenNotificationsCenter: () => void
   onAccountAction: (itemId: string) => void
+<<<<<<< HEAD
   mobileLiveDesign?: boolean
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 }
 
 const NAV_ITEMS = ['Ghost Live', 'Command Center'] as const
@@ -151,6 +154,7 @@ function ThemeIcon({ themeMode }: { themeMode: 'light' | 'dark' }) {
   if (themeMode === 'dark') {
     return (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+<<<<<<< HEAD
         <circle cx="8" cy="8" r="3.1" stroke="currentColor" strokeWidth="1.35" />
         <path d="M8 1.6V3.2" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
         <path d="M8 12.8V14.4" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
@@ -160,12 +164,22 @@ function ThemeIcon({ themeMode }: { themeMode: 'light' | 'dark' }) {
         <path d="M11.38 11.38L12.52 12.52" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
         <path d="M11.38 4.62L12.52 3.48" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
         <path d="M3.48 12.52L4.62 11.38" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
+=======
+        <path
+          d="M11.9 10.65A4.9 4.9 0 0 1 5.35 4.1a5.75 5.75 0 1 0 6.55 6.55Z"
+          stroke="currentColor"
+          strokeWidth="1.35"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
       </svg>
     )
   }
 
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+<<<<<<< HEAD
       <path
         d="M10.98 2.64A5.85 5.85 0 1 0 13.36 9.9a4.95 4.95 0 1 1-2.38-7.26Z"
         stroke="currentColor"
@@ -173,6 +187,10 @@ function ThemeIcon({ themeMode }: { themeMode: 'light' | 'dark' }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+=======
+      <circle cx="8" cy="8" r="2.7" stroke="currentColor" strokeWidth="1.35" />
+      <path d="M8 1.25V2.8M8 13.2v1.55M1.25 8H2.8M13.2 8h1.55M3.3 3.3l1.1 1.1M11.6 11.6l1.1 1.1M12.7 3.3l-1.1 1.1M4.4 11.6l-1.1 1.1" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
     </svg>
   )
 }
@@ -211,7 +229,11 @@ export function Topbar({
   const fallbackBrandSrc = themeMode === 'dark' ? '/favicon.svg' : '/favicon-64.png'
 
   return (
+<<<<<<< HEAD
     <header className={`topbar${mobileLiveDesign ? ' topbar-mobile-live-design' : ''}`}>
+=======
+    <header className="topbar">
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
       <button aria-label="חזרה למרחב הראשי" className="topbar-brand topbar-brand-button" onClick={onBrandClick} type="button">
         <img
           className={`brand-mark brand-mark-${themeMode}`}
@@ -268,6 +290,7 @@ export function Topbar({
         ) : null}
 
         {showMetrics ? <div className="topbar-actions-divider desktop-only" /> : null}
+<<<<<<< HEAD
 
         <button
           aria-label="חיפוש"
@@ -279,6 +302,13 @@ export function Topbar({
           <SearchIcon />
         </button>
 
+=======
+
+        <button aria-label="חיפוש" className="topbar-icon-btn mobile-only" onClick={onCommandTrigger} title="חיפוש" type="button">
+          <SearchIcon />
+        </button>
+
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
         {showSupportActions ? (
           <button
             aria-label="קיצורי מערכת"
@@ -294,7 +324,11 @@ export function Topbar({
         {showNotifications ? (
           <button
             aria-label={`התראות שלא נקראו: ${totalUnreadAlerts}`}
+<<<<<<< HEAD
             className="topbar-icon-btn topbar-notifications-btn topbar-theme-btn"
+=======
+            className="topbar-icon-btn topbar-theme-btn"
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
             onClick={onOpenNotificationsCenter}
             type="button"
           >
@@ -318,7 +352,11 @@ export function Topbar({
         {showThemeToggle ? (
           <button
             aria-label={themeMode === 'light' ? 'מעבר לערכת נושא כהה' : 'מעבר לערכת נושא בהירה'}
+<<<<<<< HEAD
             className="topbar-icon-btn topbar-theme-toggle-btn"
+=======
+            className="topbar-icon-btn"
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
             onClick={onToggleTheme}
             title={themeMode === 'light' ? 'ערכת נושא כהה' : 'ערכת נושא בהירה'}
             type="button"

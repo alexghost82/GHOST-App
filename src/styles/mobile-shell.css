@@ -1,5 +1,6 @@
 .operator-mobile-app-shell,
 .sa-mobile-shell {
+<<<<<<< HEAD
   --mobile-primary-nav-space: calc(72px + env(safe-area-inset-bottom));
   --mobile-footer-space: calc(84px + env(safe-area-inset-bottom));
 }
@@ -447,6 +448,9 @@
   .sa-mobile-shell .sa-ledger-row {
     gap: 10px;
   }
+=======
+  --mobile-primary-nav-space: calc(84px + env(safe-area-inset-bottom));
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 }
 
 .operator-mobile-app-shell:not(.surface-live-ops),
@@ -482,11 +486,18 @@ html[data-theme='dark'] .sa-mobile-shell-host {
 @media (max-width: 980px) {
   .operator-mobile-app-shell,
   .sa-mobile-shell-host {
+<<<<<<< HEAD
     height: 100dvh;
     min-height: 100vh;
     min-height: 100dvh;
     display: grid;
     grid-template-rows: minmax(0, 1fr) auto auto;
+=======
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
     overflow: hidden;
   }
 
@@ -581,6 +592,7 @@ html[data-theme='dark'] .sa-mobile-shell-host {
   padding-inline: 6px;
 }
 
+<<<<<<< HEAD
 .mobile-tab-bar-icon {
   display: inline-grid;
   place-items: center;
@@ -593,6 +605,8 @@ html[data-theme='dark'] .sa-mobile-shell-host {
   display: block;
 }
 
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 .mobile-surface-card {
   border: 1px solid var(--border);
   border-radius: 24px;
@@ -708,6 +722,7 @@ html[data-theme='dark'] .sa-mobile-shell-host .topbar-action-card {
 
 .operator-mobile-primary-nav,
 .sa-mobile-primary-nav {
+<<<<<<< HEAD
   position: relative;
   inset: auto;
   z-index: 30;
@@ -718,6 +733,20 @@ html[data-theme='dark'] .sa-mobile-shell-host .topbar-action-card {
     max(16px, env(safe-area-inset-right))
     12px
     max(16px, env(safe-area-inset-left));
+=======
+  position: sticky;
+  inset: auto;
+  bottom: 0;
+  z-index: 30;
+  gap: 10px;
+  align-items: stretch;
+  margin-top: auto;
+  padding:
+    12px
+    max(12px, env(safe-area-inset-right))
+    calc(12px + env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-left));
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0), color-mix(in srgb, var(--surface-1) 96%, transparent) 34%),
     radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--brand-primary, #0f766e) 12%, transparent), transparent 64%);
@@ -735,16 +764,26 @@ html[data-theme='dark'] .sa-mobile-shell-host .topbar-action-card {
   overflow-x: hidden;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+<<<<<<< HEAD
   padding-bottom: 0;
   scroll-padding-bottom: 20px;
+=======
+  padding-bottom: 16px;
+  scroll-padding-bottom: calc(var(--mobile-primary-nav-space) + 24px);
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 }
 
 .operator-mobile-stack,
 .mobile-command-center-stack,
 .sa-mobile-stack {
   display: grid;
+<<<<<<< HEAD
   gap: 12px;
   padding: 0 14px 14px;
+=======
+  gap: 14px;
+  padding: 0 16px 16px;
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   align-content: start;
 }
 
@@ -801,12 +840,17 @@ html[data-theme='dark'] .sa-mobile-shell-host .topbar-action-card {
 }
 
 .live-ops-mobile-tabs {
+<<<<<<< HEAD
   padding: 8px 12px 10px;
+=======
+  padding: 10px 12px 12px;
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   position: relative;
   z-index: 5;
   background: linear-gradient(180deg, color-mix(in srgb, var(--ops-panel-muted, var(--surface-2)) 88%, transparent), rgba(255, 255, 255, 0));
 }
 
+<<<<<<< HEAD
 .mobile-tab-bar-floating {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -882,6 +926,15 @@ html[data-theme='dark'] .sa-mobile-shell-host .topbar-action-card {
   justify-items: center;
   align-content: center;
   row-gap: 12px;
+=======
+.operator-mobile-primary-nav .mobile-tab-bar-button,
+.sa-mobile-primary-nav .mobile-tab-bar-button {
+  min-height: 56px;
+  padding: 10px 10px 12px;
+  border-radius: 22px;
+  flex-direction: column;
+  gap: 4px;
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   background: color-mix(in srgb, var(--surface-2) 84%, transparent);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
@@ -895,17 +948,27 @@ html[data-theme='dark'] .sa-mobile-shell-host .topbar-action-card {
 
 .operator-mobile-primary-nav .mobile-tab-bar-button span:first-child,
 .sa-mobile-primary-nav .mobile-tab-bar-button span:first-child {
+<<<<<<< HEAD
   font-size: 1rem;
+=======
+  font-size: 0.73rem;
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   letter-spacing: 0.02em;
 }
 
 .live-ops-mobile-tabs .mobile-tab-bar-button {
+<<<<<<< HEAD
   min-height: 90px;
   border-radius: 28px;
+=======
+  min-height: 46px;
+  border-radius: 18px;
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   background: color-mix(in srgb, var(--ops-panel-bg, var(--surface-2)) 90%, transparent);
   border-color: color-mix(in srgb, var(--ops-panel-border, var(--border)) 82%, transparent);
 }
 
+<<<<<<< HEAD
 .operator-mobile-app-shell > .app-footer.app-footer-compact-mobile,
 .operator-mobile-app-shell > .app-footer.app-footer-compact-mobile.app-footer-show,
 .sa-mobile-shell-host > .app-footer.app-footer-compact-mobile,
@@ -936,6 +999,8 @@ html[data-theme='dark'] .sa-mobile-shell-host > .app-footer.app-footer-compact-m
     linear-gradient(180deg, rgba(18, 27, 39, 0.94), rgba(12, 20, 30, 0.98));
 }
 
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 .live-ops-mobile-tabs .mobile-tab-bar-button.active {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.34), color-mix(in srgb, var(--ops-panel-bg, var(--surface-3)) 96%, transparent));
@@ -976,6 +1041,7 @@ html:not([data-theme='dark']) .live-ops-mobile-tabs .mobile-tab-bar-button.activ
     0 10px 20px rgba(166, 185, 204, 0.18);
 }
 
+<<<<<<< HEAD
 html[data-theme='dark'] .mobile-tab-tone-mint.active {
   background: linear-gradient(180deg, rgba(14, 67, 54, 0.92), rgba(10, 54, 44, 0.92));
   border-color: rgba(16, 185, 129, 0.44);
@@ -1000,6 +1066,8 @@ html[data-theme='dark'] .mobile-tab-tone-violet.active {
   color: #d0adff;
 }
 
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 .alerts-center-embedded {
   width: auto;
   max-width: none;
@@ -1034,6 +1102,7 @@ html[data-theme='dark'] .mobile-tab-tone-violet.active {
   .sa-mobile-primary-nav {
     display: none !important;
   }
+<<<<<<< HEAD
 
 .operator-mobile-app-shell > .app-footer.app-footer-compact-mobile,
 .sa-mobile-shell-host > .app-footer.app-footer-compact-mobile {
@@ -1047,6 +1116,11 @@ html[data-theme='dark'] .mobile-tab-tone-violet.active {
     display: none !important;
   }
 
+=======
+}
+
+@media (max-width: 980px) {
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   .operator-mobile-app-shell,
   .sa-mobile-shell-host,
   .sa-mobile-shell,
@@ -1054,6 +1128,7 @@ html[data-theme='dark'] .mobile-tab-tone-violet.active {
     overflow-x: clip;
   }
 
+<<<<<<< HEAD
   .operator-mobile-app-shell:not(.surface-live-ops) .topbar,
   .sa-mobile-shell-host .topbar {
     min-height: 92px;
@@ -1184,6 +1259,8 @@ html[data-theme='dark'] .mobile-tab-tone-violet.active {
     border-color: color-mix(in srgb, var(--mobile-shell-border) 88%, rgba(255, 255, 255, 0.08));
   }
 
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   .mobile-command-center-stack,
   .operator-mobile-stack,
   .sa-mobile-stack,
@@ -1218,22 +1295,31 @@ html[data-theme='dark'] .mobile-tab-tone-violet.active {
 
   .mobile-section-header-action .ghost-button,
   .mobile-section-header-action .primary-button {
+<<<<<<< HEAD
     min-height: 47px;
     border-radius: 14px;
     padding: 0 18px;
     font-size: 0.94rem;
     font-weight: 650;
+=======
+    min-height: 40px;
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   }
 
   .operator-mobile-screen,
   .channels-hub-mobile,
   .sa-mobile-shell {
+<<<<<<< HEAD
     padding-bottom: 0;
+=======
+    padding-bottom: 20px;
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   }
 
   .operator-mobile-action-list {
     gap: 8px;
   }
+<<<<<<< HEAD
 
   .channels-hub-mobile .chub-sidebar-search {
     min-height: 46px;
@@ -2347,4 +2433,6 @@ html[data-theme='dark'] .mobile-tab-tone-violet.active {
   html[data-theme='dark'] .sa-mobile-shell-host > .app-footer.app-footer-compact-mobile.app-footer-show .footer-clock {
     color: var(--mobile-ref-text-soft);
   }
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 }

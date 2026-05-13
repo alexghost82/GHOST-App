@@ -27,6 +27,18 @@ function formatAgentHeartbeat(lastHeartbeatAtIso?: string): string {
   return Number.isNaN(parsed.getTime()) ? lastHeartbeatAtIso : parsed.toLocaleString('he-IL')
 }
 
+function formatCaptureRoute(channel: Channel): string {
+  return channel.captureMode === 'local_agent' ? 'Installed local client' : 'Browser camera'
+}
+
+function formatAgentHeartbeat(lastHeartbeatAtIso?: string): string {
+  if (!lastHeartbeatAtIso) {
+    return 'No heartbeat yet'
+  }
+  const parsed = new Date(lastHeartbeatAtIso)
+  return Number.isNaN(parsed.getTime()) ? lastHeartbeatAtIso : parsed.toLocaleString('he-IL')
+}
+
 export function DetailsPanel({
   selectedChannel,
   isDetailsCollapsed,
@@ -170,9 +182,12 @@ export function DetailsPanel({
           <div className="dp-section-header">
             <h3 className="dp-section-title">אוטומציות</h3>
             <span className="dp-section-badge">{enabledOpsCount}/{selectedChannel.operations.length}</span>
+<<<<<<< HEAD
             <button className="ghost-button mobile-only" onClick={onOpenChannelOperationsHub} type="button">
               נהל מבצעים
             </button>
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
           </div>
 
           {selectedChannel.operations.length === 0 ? (

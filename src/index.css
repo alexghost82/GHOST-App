@@ -22,8 +22,13 @@
   --text-muted: #4f5863;
   /* צל עדין בסגנון כלי עבודה enterprise */
   --soft-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+<<<<<<< HEAD
   --font-hebrew: 'Heebo', 'Inter', Arial, sans-serif;
   --font-latin: 'Inter', 'Rubik', 'Segoe UI', sans-serif;
+=======
+  --font-hebrew: 'Miriam Libre', Arial, sans-serif;
+  --font-latin: 'Rubik', 'Segoe UI', sans-serif;
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 
   /* scale מרווחים קשיח (4–24 בלבד) */
   --space-1: 4px;

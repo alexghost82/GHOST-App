@@ -43,6 +43,7 @@
   color: var(--ops-text);
 }
 
+<<<<<<< HEAD
 @media (max-width: 980px) {
   .operator-mobile-app-shell {
     --mobile-reference-shell-x: max(16px, env(safe-area-inset-left));
@@ -785,6 +786,8 @@
   }
 }
 
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 html[data-theme='dark'] .app-shell.surface-live-ops {
   --ops-shell-border: rgba(214, 224, 232, 0.08);
   --ops-topbar-bg: rgba(13, 20, 26, 0.72);
@@ -966,7 +969,11 @@ html[data-theme='dark'] .app-shell.surface-live-ops {
   border-radius: 0;
   box-shadow: none;
   color: var(--ops-text);
+<<<<<<< HEAD
   font-family: var(--font-hebrew), var(--font-latin), sans-serif;
+=======
+  font-family: "Segoe UI", sans-serif;
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 }
 
 .app-shell.surface-live-ops .inbox-panel {
@@ -2116,8 +2123,13 @@ html[data-theme='dark'] .app-shell.surface-live-ops .app-footer * {
     min-height: 0;
   }
 
+<<<<<<< HEAD
   .app-shell.surface-live-ops .app-surface > .app-footer,
   .app-shell.surface-live-ops .app-surface > .app-footer.app-footer-show,
+=======
+  .app-shell.surface-live-ops .app-footer,
+  .app-shell.surface-live-ops .app-footer.app-footer-show,
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   .app-shell.surface-live-ops .desktop-only,
   .app-shell.surface-live-ops .details-drawer-backdrop {
     display: none !important;
@@ -2128,6 +2140,7 @@ html[data-theme='dark'] .app-shell.surface-live-ops .app-footer * {
   }
 
   .app-shell.surface-live-ops .topbar {
+<<<<<<< HEAD
     height: auto;
     min-height: 54px;
     padding:
@@ -2135,16 +2148,24 @@ html[data-theme='dark'] .app-shell.surface-live-ops .app-footer * {
       max(12px, env(safe-area-inset-right))
       8px
       max(12px, env(safe-area-inset-left));
+=======
+    height: 56px;
+    min-height: 56px;
+    padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
     position: sticky;
     top: 0;
     z-index: 20;
   }
 
+<<<<<<< HEAD
   .app-shell.surface-live-ops .topbar:has(.account-trigger.open) {
     z-index: 4000 !important;
     overflow: visible !important;
   }
 
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   .app-shell.surface-live-ops .workspace {
     height: 100%;
     min-height: 0;
@@ -2172,6 +2193,7 @@ html[data-theme='dark'] .app-shell.surface-live-ops .app-footer * {
     display: flex;
   }
 
+<<<<<<< HEAD
   .app-shell.surface-live-ops[data-mobile-panel='inbox'] .chat-panel,
   .app-shell.surface-live-ops[data-mobile-panel='inbox'] .details-panel,
   .app-shell.surface-live-ops[data-mobile-panel='chat'] .inbox-panel,
@@ -2181,6 +2203,8 @@ html[data-theme='dark'] .app-shell.surface-live-ops .app-footer * {
     display: none !important;
   }
 
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   .app-shell.surface-live-ops .message-stream {
     padding: 12px 8px var(--ops-composer-safe-space) !important;
   }
@@ -2250,7 +2274,11 @@ html[data-theme='dark'] .app-shell.surface-live-ops .app-footer * {
     padding: 10px 12px 22px;
   }
 
+<<<<<<< HEAD
   .app-shell.surface-live-ops:not(.operator-mobile-live-shell) .chat-empty-state {
+=======
+  .app-shell.surface-live-ops .chat-empty-state {
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
     max-width: min(100%, 320px);
     padding: 20px 18px;
   }
@@ -2349,15 +2377,24 @@ html:not([data-theme='dark']) .app-shell.surface-live-ops .inbox-search-shell {
     color-mix(in srgb, var(--ops-panel-bg) 68%, transparent);
 }
 
+<<<<<<< HEAD
 .app-shell.surface-live-ops:not(.operator-mobile-live-shell) .topbar-brand-button {
   border-radius: 16px;
 }
 
 .app-shell.surface-live-ops:not(.operator-mobile-live-shell) .topbar-actions {
+=======
+.app-shell.surface-live-ops .topbar-brand-button {
+  border-radius: 16px;
+}
+
+.app-shell.surface-live-ops .topbar-actions {
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   gap: 6px;
   flex-wrap: nowrap;
 }
 
+<<<<<<< HEAD
 .app-shell.surface-live-ops:not(.operator-mobile-live-shell) .topbar-icon-btn,
 .app-shell.surface-live-ops:not(.operator-mobile-live-shell) .account-trigger,
 .app-shell.surface-live-ops:not(.operator-mobile-live-shell) .topbar-command-trigger,
@@ -2368,11 +2405,24 @@ html:not([data-theme='dark']) .app-shell.surface-live-ops .inbox-search-shell {
 
 html[data-theme='dark'] .app-shell.surface-live-ops:not(.operator-mobile-live-shell) .topbar,
 html[data-theme='dark'] .app-shell.surface-live-ops:not(.operator-mobile-live-shell) .app-footer {
+=======
+.app-shell.surface-live-ops .topbar-icon-btn,
+.app-shell.surface-live-ops .account-trigger,
+.app-shell.surface-live-ops .topbar-command-trigger,
+.app-shell.surface-live-ops .topbar-metric-tile,
+.app-shell.surface-live-ops .topbar-nav-item {
+  border: 1px solid transparent;
+}
+
+html[data-theme='dark'] .app-shell.surface-live-ops .topbar,
+html[data-theme='dark'] .app-shell.surface-live-ops .app-footer {
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   background:
     linear-gradient(180deg, rgba(88, 95, 105, 0.28), rgba(47, 52, 60, 0.22)),
     rgba(40, 45, 53, 0.78);
 }
 
+<<<<<<< HEAD
 html[data-theme='dark'] .app-shell.surface-live-ops:not(.operator-mobile-live-shell) .topbar-command-trigger,
 html[data-theme='dark'] .app-shell.surface-live-ops:not(.operator-mobile-live-shell) .topbar-metric-tile,
 html[data-theme='dark'] .app-shell.surface-live-ops:not(.operator-mobile-live-shell) .topbar-nav-item,
@@ -2380,6 +2430,15 @@ html[data-theme='dark'] .app-shell.surface-live-ops:not(.operator-mobile-live-sh
 html[data-theme='dark'] .app-shell.surface-live-ops:not(.operator-mobile-live-shell) .account-trigger,
 html[data-theme='dark'] .app-shell.surface-live-ops:not(.operator-mobile-live-shell) .footer-pill,
 html[data-theme='dark'] .app-shell.surface-live-ops:not(.operator-mobile-live-shell) .footer-live-tag {
+=======
+html[data-theme='dark'] .app-shell.surface-live-ops .topbar-command-trigger,
+html[data-theme='dark'] .app-shell.surface-live-ops .topbar-metric-tile,
+html[data-theme='dark'] .app-shell.surface-live-ops .topbar-nav-item,
+html[data-theme='dark'] .app-shell.surface-live-ops .topbar-icon-btn,
+html[data-theme='dark'] .app-shell.surface-live-ops .account-trigger,
+html[data-theme='dark'] .app-shell.surface-live-ops .footer-pill,
+html[data-theme='dark'] .app-shell.surface-live-ops .footer-live-tag {
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
     rgba(82, 88, 98, 0.34);
@@ -2423,6 +2482,7 @@ html:not([data-theme='dark']) .app-shell.surface-live-ops .message-row.ghost .me
   color: rgba(71, 85, 105, 0.9) !important;
 }
 
+<<<<<<< HEAD
 @media (max-width: 980px) {
   .app-shell.surface-live-ops {
     --ops-composer-safe-space: 196px;
@@ -2796,6 +2856,8 @@ html:not([data-theme='dark']) .app-shell.surface-live-ops .message-row.ghost .me
   }
 }
 
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 .app-shell.surface-live-ops .message-bubble > .timestamp {
   inset-inline-end: 12px;
   inset-block-end: 7px;
@@ -2806,6 +2868,7 @@ html:not([data-theme='dark']) .app-shell.surface-live-ops .message-row.ghost .me
 .app-shell.surface-live-ops .app-footer.app-footer-show {
   box-shadow: var(--ops-glass-inset) !important;
 }
+<<<<<<< HEAD
 
 @media (max-width: 980px) {
   @keyframes ops-glow-pulse {
@@ -3601,3 +3664,5 @@ html:not([data-theme='dark']) .app-shell.surface-live-ops .message-row.ghost .me
     border-color: rgba(255, 255, 255, 0.06);
   }
 }
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d

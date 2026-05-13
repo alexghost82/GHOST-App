@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { useEffect, useMemo, useRef, useState } from 'react'
+=======
+import { useEffect, useMemo, useState } from 'react'
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 import type { FormEvent } from 'react'
 import { LIVE_STATE_META, OPERATION_MODE_META, OPERATION_MODES } from '../data/constants'
 import { parseSchedule, describeSchedule } from '../services/schedule-parser'
@@ -71,8 +75,11 @@ interface ChannelsHubProps {
   availableChannelsForLink: Channel[]
   operationDraft: OperationDraft
   mobileMode?: boolean
+<<<<<<< HEAD
   mobileInitialView?: ChannelsHubMobileView
   mobileInitialViewToken?: number
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   onSelectChannel: (channelId: string) => void
   onToggleNewChannelForm: () => void
   onLaunchLocalAgentSetup: (channelId: string) => void | Promise<void>
@@ -102,8 +109,11 @@ export function ChannelsHub({
   availableChannelsForLink,
   operationDraft,
   mobileMode = false,
+<<<<<<< HEAD
   mobileInitialView = 'list',
   mobileInitialViewToken = 0,
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   onSelectChannel,
   onToggleNewChannelForm,
   onLaunchLocalAgentSetup,
@@ -120,13 +130,17 @@ export function ChannelsHub({
 }: ChannelsHubProps) {
   const [listQuery, setListQuery] = useState('')
   const [mobileView, setMobileView] = useState<ChannelsHubMobileView>('list')
+<<<<<<< HEAD
   const lastMobileInitialViewTokenRef = useRef(0)
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 
   useEffect(() => {
     if (!mobileMode) {
       setMobileView(showNewChannelForm ? 'create-channel' : 'list')
       return
     }
+<<<<<<< HEAD
 
     if (mobileInitialViewToken !== lastMobileInitialViewTokenRef.current) {
       lastMobileInitialViewTokenRef.current = mobileInitialViewToken
@@ -138,13 +152,19 @@ export function ChannelsHub({
       return
     }
 
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
     if (selectedChannelId && mobileView === 'list' && channels.length > 0) {
       return
     }
     if (!selectedChannelId && channels.length > 0) {
       onSelectChannel(channels[0].id)
     }
+<<<<<<< HEAD
   }, [channels, mobileInitialView, mobileInitialViewToken, mobileMode, mobileView, onSelectChannel, selectedChannelId, showNewChannelForm])
+=======
+  }, [channels, mobileMode, mobileView, onSelectChannel, selectedChannelId, showNewChannelForm])
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 
   const sortedChannels = useMemo(() => {
     return [...channels].sort((a, b) => a.name.localeCompare(b.name, 'he'))

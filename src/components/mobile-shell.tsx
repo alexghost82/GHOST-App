@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 import type { ReactNode } from 'react'
 
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 interface MobileSectionHeaderProps {
   eyebrow?: string
   title: string
@@ -13,8 +16,11 @@ interface MobileTabItem {
   id: string
   label: string
   badge?: string | number
+<<<<<<< HEAD
   icon?: ReactNode
   tone?: 'neutral' | 'mint' | 'sky' | 'amber' | 'violet'
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 }
 
 interface MobileTabBarProps {
@@ -23,14 +29,21 @@ interface MobileTabBarProps {
   activeId: string
   onChange: (id: string) => void
   className?: string
+<<<<<<< HEAD
   variant?: 'default' | 'segment' | 'floating'
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 }
 
 interface MobileSurfaceCardProps {
   title?: string
   eyebrow?: string
   description?: string
+<<<<<<< HEAD
   children: ReactNode
+=======
+  children: React.ReactNode
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   className?: string
 }
 
@@ -72,6 +85,7 @@ export function MobileTabBar({
   activeId,
   onChange,
   className = '',
+<<<<<<< HEAD
   variant = 'default',
 }: MobileTabBarProps) {
   return (
@@ -84,6 +98,18 @@ export function MobileTabBar({
           type="button"
         >
           {item.icon ? <span className="mobile-tab-bar-icon" aria-hidden>{item.icon}</span> : null}
+=======
+}: MobileTabBarProps) {
+  return (
+    <nav aria-label={ariaLabel} className={`mobile-tab-bar ${className}`.trim()}>
+      {items.map((item) => (
+        <button
+          key={item.id}
+          className={`mobile-tab-bar-button${item.id === activeId ? ' active' : ''}`}
+          onClick={() => onChange(item.id)}
+          type="button"
+        >
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
           <span>{item.label}</span>
           {item.badge !== undefined ? <span className="mobile-tab-bar-badge">{item.badge}</span> : null}
         </button>

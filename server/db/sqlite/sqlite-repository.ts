@@ -1178,6 +1178,7 @@ export class SQLiteAdminRepository implements IAdminRepository {
     opts?: { limit?: number; beforeIso?: string },
   ): Promise<MessageRecord[]> {
     if (opts?.beforeIso) {
+<<<<<<< HEAD
       const rows = opts.limit != null
         ? this.db
           .prepare(
@@ -1202,6 +1203,20 @@ export class SQLiteAdminRepository implements IAdminRepository {
           'SELECT * FROM messages WHERE organization_id = ? AND user_id = ? AND channel_id = ? ORDER BY created_at_iso DESC',
         )
         .all(organizationId, userId, channelId) as MessageRow[]
+=======
+      const rows = this.db
+        .prepare(
+          'SELECT * FROM messages WHERE organization_id = ? AND user_id = ? AND channel_id = ? AND created_at_iso < ? ORDER BY created_at_iso DESC LIMIT ?',
+        )
+        .all(organizationId, userId, channelId, opts.beforeIso, limit) as MessageRow[]
+      return rows.reverse().map(rowToMessage)
+    }
+    const rows = this.db
+      .prepare(
+        'SELECT * FROM messages WHERE organization_id = ? AND user_id = ? AND channel_id = ? ORDER BY created_at_iso DESC LIMIT ?',
+      )
+      .all(organizationId, userId, channelId, limit) as MessageRow[]
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
     return rows.reverse().map(rowToMessage)
   }
 

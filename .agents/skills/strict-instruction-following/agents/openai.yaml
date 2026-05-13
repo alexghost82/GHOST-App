@@ -1,0 +1,4 @@
+interface:
+  display_name: "Strict Instruction Following"
+  short_description: "Execute exactly what the user asked"
+  default_prompt: "Use $strict-instruction-following to follow the user's explicit instructions exactly, minimize scope, ask instead of guessing, and verify before answering."

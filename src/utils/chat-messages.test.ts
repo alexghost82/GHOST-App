@@ -22,6 +22,7 @@ describe('chat message visibility helpers', () => {
     ).toBe(true)
   })
 
+<<<<<<< HEAD
   it('hides bootstrap system messages so a fresh channel can render the empty state', () => {
     expect(
       isVisibleChatMessage(
@@ -46,6 +47,8 @@ describe('chat message visibility helpers', () => {
     ).toBe(false)
   })
 
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   it('keeps all ghost replies in personal channels', () => {
     const messages = [
       buildMessage({ id: 'u1', author: 'user', text: 'hello', time: '10:00' }),

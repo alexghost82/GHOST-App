@@ -178,6 +178,7 @@ describe('SQLiteAdminRepository — ערוצים עשירים, הודעות, מ�
       const messages = await repo.listMessages(org.id, 'user-a', channel.id, { limit: 2 })
       expect(messages.map((message) => message.text)).toEqual(['m2', 'm3'])
     })
+<<<<<<< HEAD
 
     it('מחזיר את כל ההיסטוריה כאשר לא מוגדר limit', async () => {
       const org = createTestOrg(repo)
@@ -196,6 +197,8 @@ describe('SQLiteAdminRepository — ערוצים עשירים, הודעות, מ�
       expect(messages[0].text).toBe('m1')
       expect(messages.at(-1)?.text).toBe('m205')
     })
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   })
 
   describe('Operations', () => {

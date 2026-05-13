@@ -29,6 +29,10 @@ import {
 import { impersonateUser } from '../services/auth-api'
 import { connectAdminRealtime, type RealtimeEvent, type RealtimeMode } from '../services/realtime-socket'
 import { MobileSectionHeader, MobileSurfaceCard, MobileTabBar } from './mobile-shell'
+<<<<<<< HEAD
+=======
+import { AppFooter } from './app-footer'
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 import { SurfaceDialog } from './surface-dialog'
 import { Topbar } from './topbar'
 import type { TopbarNavItem } from './topbar'
@@ -114,7 +118,10 @@ function formatFooterClock(date: Date): string {
 export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }: SuperAdminPanelProps) {
   const [overview, setOverview] = useState<SuperAdminOverviewResponse | null>(null)
   const [isMobileLayout, setIsMobileLayout] = useState(false)
+<<<<<<< HEAD
   const [mobileFooterClock, setMobileFooterClock] = useState(() => formatFooterClock(new Date()))
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   const [allUsers, setAllUsers] = useState<OrganizationUser[]>([])
   const [issues, setIssues] = useState<SuperAdminIssue[]>([])
   const [organizationDetails, setOrganizationDetails] = useState<OrganizationDetailsResponse | null>(null)
@@ -222,11 +229,14 @@ export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }:
   }, [])
 
   useEffect(() => {
+<<<<<<< HEAD
     const timer = setInterval(() => setMobileFooterClock(formatFooterClock(new Date())), 1_000)
     return () => clearInterval(timer)
   }, [])
 
   useEffect(() => {
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
     if (!selectedOrganizationId) {
       return
     }
@@ -2230,7 +2240,10 @@ export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }:
             onOpenSupport={() => handleMobileSectionChange('more')}
             onToggleTheme={onToggleTheme}
             themeMode={themeMode}
+<<<<<<< HEAD
             mobileLiveDesign
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
           />
 
           {mobileSection === 'overview' ? renderMobileTabSection('overview') : null}
@@ -2251,7 +2264,10 @@ export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }:
           className="sa-mobile-primary-nav mobile-only"
           items={mobileNavItems}
           onChange={(id) => handleMobileSectionChange(id as SuperAdminMobileSection)}
+<<<<<<< HEAD
           variant="floating"
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
         />
 
         {isCommandPaletteOpen ? (
@@ -2557,6 +2573,7 @@ export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }:
           </SurfaceDialog>
         ) : null}
 
+<<<<<<< HEAD
         <footer className="app-footer app-footer-compact-mobile">
           <span className="footer-pill footer-pill-compact-link">פרטיות</span>
           <span className="footer-pill footer-pill-compact-link">עזרה</span>
@@ -2578,6 +2595,9 @@ export function SuperAdminPanel({ onLogout, onToggleTheme, profile, themeMode }:
             <strong className="footer-pill-value">v0.8.3</strong>
           </span>
         </footer>
+=======
+        <AppFooter />
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
       </div>
     </div>
   )

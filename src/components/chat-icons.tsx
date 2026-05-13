@@ -30,6 +30,7 @@ export function SearchIcon(props: IconProps) {
   )
 }
 
+<<<<<<< HEAD
 export function BellOutlineIcon(props: IconProps) {
   return (
     <BaseIcon {...props}>
@@ -39,6 +40,8 @@ export function BellOutlineIcon(props: IconProps) {
   )
 }
 
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 export function MoreIcon(props: IconProps) {
   return (
     <BaseIcon {...props}>
@@ -70,6 +73,7 @@ export function EmojiIcon(props: IconProps) {
   )
 }
 
+<<<<<<< HEAD
 export function LockIcon(props: IconProps) {
   return (
     <BaseIcon {...props}>
@@ -80,6 +84,8 @@ export function LockIcon(props: IconProps) {
   )
 }
 
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 export function AttachmentIcon(props: IconProps) {
   return (
     <BaseIcon {...props}>
@@ -123,6 +129,7 @@ export function ArrowChevronIcon(props: IconProps) {
     </BaseIcon>
   )
 }
+<<<<<<< HEAD
 
 export function PlusIcon(props: IconProps) {
   return (
@@ -191,3 +198,5 @@ export function HomeLiveIcon(props: IconProps) {
     </BaseIcon>
   )
 }
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d

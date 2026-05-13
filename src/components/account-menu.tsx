@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
+<<<<<<< HEAD
 import type { CSSProperties } from 'react'
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 
 export interface AccountMenuItem {
   id: string
@@ -33,8 +36,11 @@ function getInitials(fullName: string): string {
 export function AccountMenu({ fullName, organizationName, role, items, onSelect }: AccountMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const wrapRef = useRef<HTMLDivElement>(null)
+<<<<<<< HEAD
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [dropdownStyle, setDropdownStyle] = useState<CSSProperties>()
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 
   useEffect(() => {
     if (!isOpen) return undefined
@@ -128,7 +134,11 @@ export function AccountMenu({ fullName, organizationName, role, items, onSelect 
       </button>
 
       {isOpen ? (
+<<<<<<< HEAD
         <div className="account-dropdown" ref={dropdownRef} role="menu" style={dropdownStyle}>
+=======
+        <div className="account-dropdown" role="menu">
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
           <div className="account-dropdown-profile">
             <span className="account-dropdown-avatar" aria-hidden>{initials}</span>
             <div className="account-dropdown-identity">

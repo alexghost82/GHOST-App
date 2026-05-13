@@ -2,7 +2,10 @@ import type { FormEvent, RefObject } from 'react'
 import type { Channel, TimelineSamplerState } from '../types'
 import { resolveChannelAvatarDataUrl } from '../utils/channel-avatar'
 import { getVisibleChannelMessages } from '../utils/chat-messages'
+<<<<<<< HEAD
 import { LockIcon, SendIcon } from './chat-icons'
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 import { MessageRow } from './message-row'
 import { StatusDot } from './status-dot'
 
@@ -31,7 +34,10 @@ interface ChatPanelProps {
   onShowDetails: () => void
   onSuggestionClick: (prompt: string) => void
   onMessageStreamScroll: () => void
+<<<<<<< HEAD
   mobileLayout?: boolean
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 }
 
 export function ChatPanel({
@@ -45,17 +51,24 @@ export function ChatPanel({
   onShowInbox,
   onShowDetails,
   onMessageStreamScroll,
+<<<<<<< HEAD
   mobileLayout = false,
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
 }: ChatPanelProps) {
   const visibleMessages = getVisibleChannelMessages(selectedChannel).filter(
     (message) => !(message.author === 'system' && message.text.includes(ROUTINE_REALTIME_UPDATE_PHRASE)),
   )
+<<<<<<< HEAD
   const isEmpty = visibleMessages.length === 0
+=======
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
   const presenceLabel = selectedChannel.liveState === 'LIVE' ? 'פעיל כעת' : 'במעקב'
   const lastSeenLabel = visibleMessages.at(-1)?.time ?? '--:--'
   const avatarDataUrl = resolveChannelAvatarDataUrl(selectedChannel)
 
   return (
+<<<<<<< HEAD
     <section className={`panel chat-panel${mobileLayout ? ' chat-panel-mobile-design' : ''}${isEmpty ? ' chat-panel-empty' : ''}`}>
       {mobileLayout ? null : (
         <header className="chat-header">
@@ -114,6 +127,51 @@ export function ChatPanel({
               <span>סיכום מוצפן</span>
               <LockIcon />
             </span>
+=======
+    <section className="panel chat-panel">
+      <header className="chat-header">
+        <div className="chat-header-main">
+          <button className="ghost-button mobile-only" onClick={onShowInbox} type="button">
+            שיחות
+          </button>
+
+          <button aria-label="פתח פרטי ערוץ" className="title-cluster" onClick={onShowDetails} type="button">
+            {avatarDataUrl ? (
+              <img
+                className="chat-avatar chat-avatar-image"
+                src={avatarDataUrl}
+                alt={selectedChannel.name}
+              />
+            ) : (
+              <div className="chat-avatar">
+                {selectedChannel.type === 'group' ? 'ק' : selectedChannel.name.slice(0, 1).toUpperCase()}
+              </div>
+            )}
+
+            <div className="title-cluster-text">
+              <h2>{selectedChannel.name}</h2>
+              <p className="route">
+                <StatusDot liveState={selectedChannel.liveState} className="channel-status-dot" />
+                <span>{presenceLabel}</span>
+                <span className="header-meta-separator">·</span>
+                <span>{lastSeenLabel}</span>
+              </p>
+            </div>
+          </button>
+        </div>
+
+        <div className="chat-header-utility">
+          <button aria-label="פרטי ערוץ" className="messenger-icon-button" onClick={onShowDetails} type="button">
+            <span aria-hidden>⋮</span>
+          </button>
+        </div>
+      </header>
+
+      <div className="message-stream" onScroll={onMessageStreamScroll} ref={messageStreamRef}>
+        {visibleMessages.length === 0 ? (
+          <div className="chat-empty-state">
+            <span className="chat-empty-kicker">סיכום מוצפן</span>
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
             <h3>אין עדיין הודעות</h3>
             <p>התחל את השיחה או בקש ניתוח מצלמה חדש מהערוץ הזה.</p>
           </div>
@@ -124,6 +182,7 @@ export function ChatPanel({
         )}
       </div>
 
+<<<<<<< HEAD
       <form className={`composer${mobileLayout ? ' composer-mobile-shell' : ''}`} onSubmit={onMessageSubmit}>
         <div className="composer-shell">
           {mobileLayout ? (
@@ -138,6 +197,14 @@ export function ChatPanel({
                 הודעה
               </label>
             )}
+=======
+      <form className="composer" onSubmit={onMessageSubmit}>
+        <div className="composer-shell">
+          <div className="composer-input-shell">
+            <label className="composer-input-label" htmlFor="live-ops-composer">
+              הודעה
+            </label>
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
             <textarea
               id="live-ops-composer"
               rows={1}
@@ -149,6 +216,7 @@ export function ChatPanel({
                   event.currentTarget.form?.requestSubmit()
                 }
               }}
+<<<<<<< HEAD
               placeholder={mobileLayout ? 'הקלד הודעה...' : 'הקלד הודעה'}
             />
           </div>
@@ -163,6 +231,20 @@ export function ChatPanel({
               <span aria-hidden>{isSending ? '…' : '➤'}</span>
             </button>
           )}
+=======
+              placeholder="הקלד הודעה"
+            />
+          </div>
+
+          <button
+            aria-label={isSending ? 'שולח הודעה' : 'שלח הודעה'}
+            className="composer-send-button"
+            disabled={isSending || !messageDraft.trim()}
+            type="submit"
+          >
+            <span aria-hidden>{isSending ? '…' : '➤'}</span>
+          </button>
+>>>>>>> bc6fd7897cf748544dfe79db1218b867c9b6c83d
         </div>
       </form>
     </section>
