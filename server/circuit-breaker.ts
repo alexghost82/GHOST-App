@@ -18,6 +18,7 @@ const DEFAULT_CONFIG: CircuitBreakerConfig = {
   resetTimeoutMs: 30_000,
   halfOpenMaxAttempts: 1,
 }
+const NON_CIRCUIT_ERROR_PREFIXES = ['AI_QUOTA_EXCEEDED:'] as const
 
 /**
  * מגן על קריאות לספק חיצוני בזמן תקלות מתמשכות, כדי למנוע עומס ותקיעות.
@@ -57,6 +58,10 @@ export class CircuitBreaker {
       this.onSuccess()
       return result
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      if (NON_CIRCUIT_ERROR_PREFIXES.some((prefix) => message.startsWith(prefix))) {
+        throw error
+      }
       this.onFailure()
       throw error
     }

@@ -1,0 +1,177 @@
+{
+  "user": "slon",
+  "desktop": {
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-responsive-qa\\desktop-1440x960.png",
+    "metrics": {
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "activeSurface": null,
+      "topbar": {
+        "selector": ".topbar",
+        "display": "flex",
+        "width": 1440,
+        "height": 59,
+        "top": 0,
+        "left": 0,
+        "right": 1440,
+        "bottom": 59
+      },
+      "workspace": {
+        "selector": ".workspace",
+        "display": "flex",
+        "width": 1440,
+        "height": 844,
+        "top": 59,
+        "left": 0,
+        "right": 1440,
+        "bottom": 903
+      },
+      "footer": {
+        "selector": ".app-footer",
+        "display": "grid",
+        "width": 1440,
+        "height": 57,
+        "top": 903,
+        "left": 0,
+        "right": 1440,
+        "bottom": 960
+      },
+      "inbox": {
+        "selector": ".inbox-panel",
+        "display": "flex",
+        "width": 380,
+        "height": 844,
+        "top": 59,
+        "left": 1060,
+        "right": 1440,
+        "bottom": 903
+      },
+      "chat": {
+        "selector": ".chat-panel",
+        "display": "flex",
+        "width": 1060,
+        "height": 844,
+        "top": 59,
+        "left": 0,
+        "right": 1060,
+        "bottom": 903
+      },
+      "details": {
+        "selector": ".details-panel",
+        "display": "none",
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "left": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "bottomNav": {
+        "selector": ".bottom-nav",
+        "display": "none",
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "left": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "shell": {
+        "selector": ".app-surface",
+        "display": "grid",
+        "width": 1440,
+        "height": 960,
+        "top": 0,
+        "left": 0,
+        "right": 1440,
+        "bottom": 960
+      },
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440,
+      "bodyScrollHeight": 960,
+      "bodyClientHeight": 960,
+      "activePanel": "chat",
+      "textSample": "פקודה מהירה\nCtrl+K\nגוסט לייב\nמרכז פיקוד\nחי\n1\nערוצים\n1\nמבצעים\n0\nבריאות\n100%\nאב\nאלכס בו\nTEST\nגל\nגוסט לייב\nתיבת ניטור מאובטחת\n+\n⋮\nשיחות\n1\nב\nבית\nWEB\nפעיל\n20:04\n\nאתה: מה מצב?\n\nב\nבית\n\nפעיל כעת·20:04\n\n⋮\nSystem\n\nערוץ חדש נוצר ומוכן לשיחה. אפשר לעדכן RTSP, זיכרון ומבצעים בפאנל הימני.\n\n18:45\n\n?\n\n18:52\n\n?\n\n18:54\n\nבדוק אם יש חסימה בכניסה\n\n18:54\n\nчто ты видишь?\n\n18:57\n\n,\n\n15:31\n\nמה מצב\n\n19:35\n\n??\n\n19:36\n\nעוד פעם\n\n19:36\n\nтм тьс\n\n20:02\n\nמה מצב?\n\n20:04\nהודעה\n➤\nגרסה\nv0.8.3\nבילד\n2026.03\nמיקום\n34.7843°N 32.0853°E\nמערכת\nOK\nשעה\n16:33:31\nחי\nעזרה\nפרטיות\nתנאים"
+    }
+  },
+  "mobile": {
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-responsive-qa\\mobile-390x844.png",
+    "metrics": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "activeSurface": null,
+      "topbar": {
+        "selector": ".topbar",
+        "display": "flex",
+        "width": 390,
+        "height": 73,
+        "top": 0,
+        "left": 0,
+        "right": 390,
+        "bottom": 73
+      },
+      "workspace": {
+        "selector": ".workspace",
+        "display": "flex",
+        "width": 390,
+        "height": 690,
+        "top": 73,
+        "left": 0,
+        "right": 390,
+        "bottom": 763
+      },
+      "footer": null,
+      "inbox": {
+        "selector": ".inbox-panel",
+        "display": "none",
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "left": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "chat": {
+        "selector": ".chat-panel",
+        "display": "flex",
+        "width": 390,
+        "height": 622,
+        "top": 141,
+        "left": 0,
+        "right": 390,
+        "bottom": 763
+      },
+      "details": {
+        "selector": ".details-panel",
+        "display": "none",
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "left": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "bottomNav": null,
+      "shell": {
+        "selector": ".app-surface",
+        "display": "grid",
+        "width": 390,
+        "height": 763,
+        "top": 0,
+        "left": 0,
+        "right": 390,
+        "bottom": 763
+      },
+      "bodyScrollWidth": 390,
+      "bodyClientWidth": 390,
+      "bodyScrollHeight": 844,
+      "bodyClientHeight": 844,
+      "activePanel": "chat",
+      "textSample": "אב\nInbox\nChat\nChannel\nשיחות\nב\nבית\n\nפעיל כעת·20:04\n\n⋮\nSystem\n\nערוץ חדש נוצר ומוכן לשיחה. אפשר לעדכן RTSP, זיכרון ומבצעים בפאנל הימני.\n\n18:45\n\n?\n\n18:52\n\n?\n\n18:54\n\nבדוק אם יש חסימה בכניסה\n\n18:54\n\nчто ты видишь?\n\n18:57\n\n,\n\n15:31\n\nמה מצב\n\n19:35\n\n??\n\n19:36\n\nעוד פעם\n\n19:36\n\nтм тьс\n\n20:02\n\nמה מצב?\n\n20:04\nהודעה\n➤\nLive Ops\nChannels\nAlerts\nAccount"
+    }
+  }
+}

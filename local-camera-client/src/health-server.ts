@@ -7,6 +7,19 @@ export interface AgentRuntimeState {
   lastError?: string
   status: 'starting' | 'online' | 'scanning' | 'degraded' | 'offline'
   scannedOperations: number
+  cameraStatuses?: Array<{
+    cameraId: string
+    cameraLabel: string
+    label: string
+    sourceType: string
+    status: 'online' | 'degraded' | 'offline'
+    lastCaptureAtIso?: string
+    lastSuccessfulCaptureAtIso?: string
+    lastSuccessAtIso?: string
+    lastError?: string
+    latencyMs?: number
+    lastLatencyMs?: number
+  }>
 }
 
 export function startHealthServer(port: number, state: AgentRuntimeState): Server {
@@ -28,4 +41,3 @@ export function startHealthServer(port: number, state: AgentRuntimeState): Serve
   server.listen(port, '127.0.0.1')
   return server
 }
-

@@ -1,0 +1,158 @@
+[
+  {
+    "mode": "operator-desktop",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\operator-desktop-dropdown.png",
+    "triggerBox": {
+      "x": 18,
+      "y": 11,
+      "width": 129.28125,
+      "height": 46
+    },
+    "dropdownBox": {
+      "x": 18,
+      "y": 58,
+      "width": 322,
+      "height": 612.578125
+    },
+    "menuItems": [
+      "+צור ארגון",
+      "1סקירה",
+      "2ארגון מושהה",
+      "3משתמשים",
+      "4תשלומים",
+      "5שימוש",
+      "6תקלות",
+      "7אירועים חיים",
+      "◎התראות",
+      "?עזרה ותמיכה",
+      "⏻יציאה מהמערכת"
+    ],
+    "fitsHorizontally": true,
+    "fitsVertically": true,
+    "overflowsRight": false,
+    "overflowsLeft": false,
+    "overflowsBottom": false,
+    "overflowsTop": false
+  },
+  {
+    "mode": "operator-mobile",
+    "viewport": {
+      "width": 375,
+      "height": 812
+    },
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\operator-mobile-dropdown.png",
+    "triggerBox": {
+      "x": 12,
+      "y": 11,
+      "width": 77.25,
+      "height": 46
+    },
+    "dropdownBox": {
+      "x": 12,
+      "y": 58,
+      "width": 322,
+      "height": 612.578125
+    },
+    "menuItems": [
+      "+צור ארגון",
+      "1סקירה",
+      "2ארגון מושהה",
+      "3משתמשים",
+      "4תשלומים",
+      "5שימוש",
+      "6תקלות",
+      "7אירועים חיים",
+      "◎התראות",
+      "?עזרה ותמיכה",
+      "⏻יציאה מהמערכת"
+    ],
+    "fitsHorizontally": true,
+    "fitsVertically": true,
+    "overflowsRight": false,
+    "overflowsLeft": false,
+    "overflowsBottom": false,
+    "overflowsTop": false
+  },
+  {
+    "mode": "admin-desktop",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\admin-desktop-dropdown.png",
+    "triggerBox": {
+      "x": 18,
+      "y": 11,
+      "width": 129.28125,
+      "height": 46
+    },
+    "dropdownBox": {
+      "x": 18,
+      "y": 58,
+      "width": 322,
+      "height": 612.578125
+    },
+    "menuItems": [
+      "+צור ארגון",
+      "1סקירה",
+      "2ארגון מושהה",
+      "3משתמשים",
+      "4תשלומים",
+      "5שימוש",
+      "6תקלות",
+      "7אירועים חיים",
+      "◎התראות",
+      "?עזרה ותמיכה",
+      "⏻יציאה מהמערכת"
+    ],
+    "fitsHorizontally": true,
+    "fitsVertically": true,
+    "overflowsRight": false,
+    "overflowsLeft": false,
+    "overflowsBottom": false,
+    "overflowsTop": false
+  },
+  {
+    "mode": "admin-mobile",
+    "viewport": {
+      "width": 375,
+      "height": 812
+    },
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\admin-mobile-dropdown.png",
+    "triggerBox": {
+      "x": 12,
+      "y": 11,
+      "width": 90.015625,
+      "height": 46
+    },
+    "dropdownBox": {
+      "x": 12,
+      "y": 58,
+      "width": 322,
+      "height": 612.578125
+    },
+    "menuItems": [
+      "+צור ארגון",
+      "1סקירה",
+      "2ארגון מושהה",
+      "3משתמשים",
+      "4תשלומים",
+      "5שימוש",
+      "6תקלות",
+      "7אירועים חיים",
+      "◎התראות",
+      "?עזרה ותמיכה",
+      "⏻יציאה מהמערכת"
+    ],
+    "fitsHorizontally": true,
+    "fitsVertically": true,
+    "overflowsRight": false,
+    "overflowsLeft": false,
+    "overflowsBottom": false,
+    "overflowsTop": false
+  }
+]

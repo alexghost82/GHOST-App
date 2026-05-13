@@ -1,0 +1,52 @@
+{
+  "name": "ghost-local-camera-client",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/main.cjs",
+  "scripts": {
+    "dev": "npm run build && set \"ELECTRON_RUN_AS_NODE=\" && electron .",
+    "build": "tsc -p tsconfig.json && node scripts/copy-preload.cjs",
+    "start": "set \"ELECTRON_RUN_AS_NODE=\" && electron .",
+    "start:worker": "node dist/index.js",
+    "test": "vitest run src/scheduler.test.ts",
+    "build:exe": "npm run build && electron-builder --win nsis",
+    "build:portable": "npm run build && electron-builder --win portable"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "node-windows": "^1.0.0-beta.8"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.0",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "tsx": "^4.21.0",
+    "typescript": "~5.9.3",
+    "esbuild": "^0.25.0",
+    "vitest": "^4.1.1"
+  },
+  "build": {
+    "appId": "com.ghost.camera-agent",
+    "productName": "GHOST Camera Agent",
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/**"
+    ],
+    "directories": {
+      "output": "build"
+    },
+    "win": {
+      "icon": "ghost.ico",
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": false,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true,
+      "include": "scripts/installer.nsh"
+    }
+  }
+}

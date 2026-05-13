@@ -1,0 +1,846 @@
+[
+  {
+    "filename": "operator-live-light.png",
+    "screenshotPath": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-all-pages-qa/operator-live-light.png",
+    "metrics": {
+      "scope": "operator-live-light",
+      "shellClass": "app-shell operator-mobile-app-shell surface-live-ops operator-mobile-live-shell",
+      "topbar": {
+        "selector": ".topbar",
+        "width": 402,
+        "height": 80,
+        "top": 0,
+        "left": 0,
+        "bottom": 80
+      },
+      "brand": {
+        "selector": ".topbar-brand-button",
+        "width": 43,
+        "height": 43,
+        "top": 16,
+        "left": 343,
+        "bottom": 59
+      },
+      "themeButton": {
+        "selector": ".topbar-theme-toggle-btn",
+        "width": 37,
+        "height": 37,
+        "top": 19,
+        "left": 87,
+        "bottom": 56
+      },
+      "accountTrigger": {
+        "selector": ".account-trigger",
+        "width": 50,
+        "height": 40,
+        "top": 18,
+        "left": 14,
+        "bottom": 58
+      },
+      "bottomNav": {
+        "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+        "width": 402,
+        "height": 75,
+        "top": 763,
+        "left": 0,
+        "bottom": 838
+      },
+      "bottomNavButton": {
+        "selector": ".operator-mobile-primary-nav .mobile-tab-bar-button.active, .sa-mobile-primary-nav .mobile-tab-bar-button.active",
+        "width": 83,
+        "height": 59,
+        "top": 771,
+        "left": 300,
+        "bottom": 830
+      },
+      "footer": {
+        "selector": ".app-footer.app-footer-compact-mobile",
+        "width": 402,
+        "height": 35,
+        "top": 838,
+        "left": 0,
+        "bottom": 873
+      },
+      "footerPill": {
+        "selector": ".app-footer.app-footer-compact-mobile .footer-pill",
+        "width": 39,
+        "height": 25,
+        "top": 840,
+        "left": 14,
+        "bottom": 865
+      },
+      "bodyWidth": 402,
+      "bodyScrollWidth": 402,
+      "textSample": "SS\nשיחות\nצ׳אט\nערוץ\n✦\n✦\n✦\nסיכום מוצפן\nאין עדיין הודעות\n\nהתחל את השיחה או בקש ניתוח מצלמה חדש מהערוץ הזה.\n\nגוסט\nלייב\nערוצים\nהתראות\nחשבון\nפרטיות\nעזרה\nשעה\n19:23:07\nמערכת\nOK\nבילד\n2026.03\nגרסה\nv0.8.3"
+    }
+  },
+  {
+    "filename": "operator-channels-light.png",
+    "screenshotPath": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-all-pages-qa/operator-channels-light.png",
+    "metrics": {
+      "scope": "operator-channels-light",
+      "shellClass": "app-shell operator-mobile-app-shell ",
+      "topbar": {
+        "selector": ".topbar",
+        "width": 402,
+        "height": 80,
+        "top": 0,
+        "left": 0,
+        "bottom": 80
+      },
+      "brand": {
+        "selector": ".topbar-brand-button",
+        "width": 43,
+        "height": 43,
+        "top": 16,
+        "left": 343,
+        "bottom": 59
+      },
+      "themeButton": {
+        "selector": ".topbar-theme-toggle-btn",
+        "width": 37,
+        "height": 37,
+        "top": 19,
+        "left": 99,
+        "bottom": 56
+      },
+      "accountTrigger": {
+        "selector": ".account-trigger",
+        "width": 47,
+        "height": 40,
+        "top": 18,
+        "left": 14,
+        "bottom": 58
+      },
+      "bottomNav": {
+        "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+        "width": 402,
+        "height": 75,
+        "top": 763,
+        "left": 0,
+        "bottom": 838
+      },
+      "bottomNavButton": {
+        "selector": ".operator-mobile-primary-nav .mobile-tab-bar-button.active, .sa-mobile-primary-nav .mobile-tab-bar-button.active",
+        "width": 83,
+        "height": 59,
+        "top": 771,
+        "left": 207,
+        "bottom": 830
+      },
+      "footer": {
+        "selector": ".app-footer.app-footer-compact-mobile",
+        "width": 402,
+        "height": 35,
+        "top": 838,
+        "left": 0,
+        "bottom": 873
+      },
+      "footerPill": {
+        "selector": ".app-footer.app-footer-compact-mobile .footer-pill",
+        "width": 39,
+        "height": 25,
+        "top": 840,
+        "left": 14,
+        "bottom": 865
+      },
+      "bodyWidth": 402,
+      "bodyScrollWidth": 402,
+      "textSample": "SS\n+ ערוץ\n\nמרכז פיקוד\n\nערוצים\n\nבחר ערוץ כדי לנהל הגדרות ומבצעים, או צור ערוץ חדש.\n\nחיפוש ערוצים\nמאגר ערוצים\n\n2 ערוצים זמינים\n\nמשרד\nפעיל\nBrowser QA Empty Channel\nפעיל\nגוסט\nלייב\nערוצים\nהתראות\nחשבון\nפרטיות\nעזרה\nשעה\n19:23:08\nמערכת\nOK\nבילד\n2026.03\nגרסה\nv0.8.3"
+    }
+  },
+  {
+    "filename": "operator-alerts-light.png",
+    "screenshotPath": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-all-pages-qa/operator-alerts-light.png",
+    "metrics": {
+      "scope": "operator-alerts-light",
+      "shellClass": "app-shell operator-mobile-app-shell ",
+      "topbar": {
+        "selector": ".topbar",
+        "width": 402,
+        "height": 80,
+        "top": 0,
+        "left": 0,
+        "bottom": 80
+      },
+      "brand": {
+        "selector": ".topbar-brand-button",
+        "width": 43,
+        "height": 43,
+        "top": 16,
+        "left": 343,
+        "bottom": 59
+      },
+      "themeButton": {
+        "selector": ".topbar-theme-toggle-btn",
+        "width": 37,
+        "height": 37,
+        "top": 19,
+        "left": 99,
+        "bottom": 56
+      },
+      "accountTrigger": {
+        "selector": ".account-trigger",
+        "width": 47,
+        "height": 40,
+        "top": 18,
+        "left": 14,
+        "bottom": 58
+      },
+      "bottomNav": {
+        "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+        "width": 402,
+        "height": 75,
+        "top": 763,
+        "left": 0,
+        "bottom": 838
+      },
+      "bottomNavButton": {
+        "selector": ".operator-mobile-primary-nav .mobile-tab-bar-button.active, .sa-mobile-primary-nav .mobile-tab-bar-button.active",
+        "width": 83,
+        "height": 59,
+        "top": 771,
+        "left": 113,
+        "bottom": 830
+      },
+      "footer": {
+        "selector": ".app-footer.app-footer-compact-mobile",
+        "width": 402,
+        "height": 35,
+        "top": 838,
+        "left": 0,
+        "bottom": 873
+      },
+      "footerPill": {
+        "selector": ".app-footer.app-footer-compact-mobile .footer-pill",
+        "width": 39,
+        "height": 25,
+        "top": 840,
+        "left": 14,
+        "bottom": 865
+      },
+      "bodyWidth": 402,
+      "bodyScrollWidth": 402,
+      "textSample": "SS\n\nהתראות\n\nהתראות קריטיות\n\nסקור, אשר או עבור ישירות לערוץ שנפגע.\n\nהתראות\n\nהתראות קריטיות\n0 פתוחות\n0 אושרו\n0 הושתקו\n\nתקין\n\nכרגע אין התראות קריטיות במערכת.\n\nגוסט\nלייב\nערוצים\nהתראות\nחשבון\nפרטיות\nעזרה\nשעה\n19:23:08\nמערכת\nOK\nבילד\n2026.03\nגרסה\nv0.8.3"
+    }
+  },
+  {
+    "filename": "operator-account-light.png",
+    "screenshotPath": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-all-pages-qa/operator-account-light.png",
+    "metrics": {
+      "scope": "operator-account-light",
+      "shellClass": "app-shell operator-mobile-app-shell ",
+      "topbar": {
+        "selector": ".topbar",
+        "width": 402,
+        "height": 80,
+        "top": 0,
+        "left": 0,
+        "bottom": 80
+      },
+      "brand": {
+        "selector": ".topbar-brand-button",
+        "width": 43,
+        "height": 43,
+        "top": 16,
+        "left": 343,
+        "bottom": 59
+      },
+      "themeButton": {
+        "selector": ".topbar-theme-toggle-btn",
+        "width": 37,
+        "height": 37,
+        "top": 19,
+        "left": 99,
+        "bottom": 56
+      },
+      "accountTrigger": {
+        "selector": ".account-trigger",
+        "width": 47,
+        "height": 40,
+        "top": 18,
+        "left": 14,
+        "bottom": 58
+      },
+      "bottomNav": {
+        "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+        "width": 402,
+        "height": 75,
+        "top": 763,
+        "left": 0,
+        "bottom": 838
+      },
+      "bottomNavButton": {
+        "selector": ".operator-mobile-primary-nav .mobile-tab-bar-button.active, .sa-mobile-primary-nav .mobile-tab-bar-button.active",
+        "width": 83,
+        "height": 59,
+        "top": 771,
+        "left": 113,
+        "bottom": 830
+      },
+      "footer": {
+        "selector": ".app-footer.app-footer-compact-mobile",
+        "width": 402,
+        "height": 35,
+        "top": 838,
+        "left": 0,
+        "bottom": 873
+      },
+      "footerPill": {
+        "selector": ".app-footer.app-footer-compact-mobile .footer-pill",
+        "width": 39,
+        "height": 25,
+        "top": 840,
+        "left": 14,
+        "bottom": 865
+      },
+      "bodyWidth": 402,
+      "bodyScrollWidth": 402,
+      "textSample": "SS\nSS\nslon slon\nמנהל מערכת\nGhost HQ\n◈\nפרופיל אישי\n⊞\nצוות וחברים\n◉\nהתראות\n≡\nיומן פעילות\n⏻\nיציאה מהמערכת\n\nהתראות\n\nהתראות קריטיות\n\nסקור, אשר או עבור ישירות לערוץ שנפגע.\n\nהתראות\n\nהתראות קריטיות\n0 פתוחות\n0 אושרו\n0 הושתקו\n\nתקין\n\nכרגע אין התראות קריטיות במערכת.\n\nגוסט\nלייב\nערוצים\nהתראות\nחשבון\nפרטיות\nעזרה\nשעה\n19:23:09\nמערכת\nOK\nבילד\n2026.03\nגרסה\nv0.8.3"
+    }
+  },
+  {
+    "filename": "super-admin-overview-light.png",
+    "screenshotPath": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-all-pages-qa/super-admin-overview-light.png",
+    "metrics": {
+      "scope": "super-admin-overview-light",
+      "shellClass": "app-shell sa-mobile-shell-host",
+      "topbar": {
+        "selector": ".topbar",
+        "width": 402,
+        "height": 80,
+        "top": 0,
+        "left": 0,
+        "bottom": 80
+      },
+      "brand": {
+        "selector": ".topbar-brand-button",
+        "width": 43,
+        "height": 43,
+        "top": 16,
+        "left": 343,
+        "bottom": 59
+      },
+      "themeButton": {
+        "selector": ".topbar-theme-toggle-btn",
+        "width": 37,
+        "height": 37,
+        "top": 19,
+        "left": 99,
+        "bottom": 56
+      },
+      "accountTrigger": {
+        "selector": ".account-trigger",
+        "width": 47,
+        "height": 40,
+        "top": 18,
+        "left": 14,
+        "bottom": 58
+      },
+      "bottomNav": {
+        "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+        "width": 402,
+        "height": 78,
+        "top": 795,
+        "left": 0,
+        "bottom": 873
+      },
+      "bottomNavButton": {
+        "selector": ".operator-mobile-primary-nav .mobile-tab-bar-button.active, .sa-mobile-primary-nav .mobile-tab-bar-button.active",
+        "width": 66,
+        "height": 62,
+        "top": 803,
+        "left": 317,
+        "bottom": 865
+      },
+      "footer": null,
+      "footerPill": null,
+      "bodyWidth": 402,
+      "bodyScrollWidth": 402,
+      "textSample": "עא\n\nסופר אדמין\n\nסקירה\n\nעריכת הארגון, מגבלות ותקרות, ויצירת ארגון חדש.\n\nפרטי ארגון\nשם ארגון\nסטטוס\nפעיל\nמושהה\nמגבלות ותקרות\nמספר ערוצים\nהודעות לערוץ בחודש\nחיוב חודשי\nתקרת עלות סוכנים\nתקרת עלות בינה מלאכותית\nתקרת עלות ממשק\nנתוני שימוש חיים\nערוצים\n2\nמבצעים\n0\nהודעות יוצאות\n3\nהודעות נכנסות\n1\nעלות בינה מלאכותית\n$0.00\nעלות ממשק\n$0.00\nשמור שינויים בארגוןמחיקה לוגית לארגון\nסקירה\nארגונים\n2\nמשתמשים\n3\nתקלות\nעוד"
+    }
+  },
+  {
+    "filename": "super-admin-organizations-light.png",
+    "screenshotPath": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-all-pages-qa/super-admin-organizations-light.png",
+    "metrics": {
+      "scope": "super-admin-organizations-light",
+      "shellClass": "app-shell sa-mobile-shell-host",
+      "topbar": {
+        "selector": ".topbar",
+        "width": 402,
+        "height": 80,
+        "top": 0,
+        "left": 0,
+        "bottom": 80
+      },
+      "brand": {
+        "selector": ".topbar-brand-button",
+        "width": 43,
+        "height": 43,
+        "top": 16,
+        "left": 343,
+        "bottom": 59
+      },
+      "themeButton": {
+        "selector": ".topbar-theme-toggle-btn",
+        "width": 37,
+        "height": 37,
+        "top": 19,
+        "left": 99,
+        "bottom": 56
+      },
+      "accountTrigger": {
+        "selector": ".account-trigger",
+        "width": 47,
+        "height": 40,
+        "top": 18,
+        "left": 14,
+        "bottom": 58
+      },
+      "bottomNav": {
+        "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+        "width": 402,
+        "height": 78,
+        "top": 795,
+        "left": 0,
+        "bottom": 873
+      },
+      "bottomNavButton": {
+        "selector": ".operator-mobile-primary-nav .mobile-tab-bar-button.active, .sa-mobile-primary-nav .mobile-tab-bar-button.active",
+        "width": 66,
+        "height": 62,
+        "top": 803,
+        "left": 242,
+        "bottom": 865
+      },
+      "footer": null,
+      "footerPill": null,
+      "bodyWidth": 402,
+      "bodyScrollWidth": 402,
+      "textSample": "עא\nSuspended\n\nSuper Admin\n\nActive organizations\n\nChoose an active organization and open the relevant management flow.\n\nActive organizations\n\n1 total\n\nבר לב\nבר לב\n\nפעיל\n\nCHANNELS\n1\nOPERATIONS\n1\nSENT\n3\nRECEIVED\n5\nOpen overview\nOpen Ghost Live\nסקירה\nארגונים\n2\nמשתמשים\n1\nתקלות\nעוד"
+    }
+  },
+  {
+    "filename": "operator-live-dark.png",
+    "screenshotPath": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-all-pages-qa/operator-live-dark.png",
+    "metrics": {
+      "scope": "operator-live-dark",
+      "shellClass": "app-shell operator-mobile-app-shell surface-live-ops operator-mobile-live-shell",
+      "topbar": {
+        "selector": ".topbar",
+        "width": 402,
+        "height": 80,
+        "top": 0,
+        "left": 0,
+        "bottom": 80
+      },
+      "brand": {
+        "selector": ".topbar-brand-button",
+        "width": 43,
+        "height": 43,
+        "top": 16,
+        "left": 343,
+        "bottom": 59
+      },
+      "themeButton": {
+        "selector": ".topbar-theme-toggle-btn",
+        "width": 37,
+        "height": 37,
+        "top": 19,
+        "left": 87,
+        "bottom": 56
+      },
+      "accountTrigger": {
+        "selector": ".account-trigger",
+        "width": 50,
+        "height": 40,
+        "top": 18,
+        "left": 14,
+        "bottom": 58
+      },
+      "bottomNav": {
+        "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+        "width": 402,
+        "height": 75,
+        "top": 763,
+        "left": 0,
+        "bottom": 838
+      },
+      "bottomNavButton": {
+        "selector": ".operator-mobile-primary-nav .mobile-tab-bar-button.active, .sa-mobile-primary-nav .mobile-tab-bar-button.active",
+        "width": 83,
+        "height": 59,
+        "top": 771,
+        "left": 300,
+        "bottom": 830
+      },
+      "footer": {
+        "selector": ".app-footer.app-footer-compact-mobile",
+        "width": 402,
+        "height": 35,
+        "top": 838,
+        "left": 0,
+        "bottom": 873
+      },
+      "footerPill": {
+        "selector": ".app-footer.app-footer-compact-mobile .footer-pill",
+        "width": 39,
+        "height": 25,
+        "top": 840,
+        "left": 14,
+        "bottom": 865
+      },
+      "bodyWidth": 402,
+      "bodyScrollWidth": 402,
+      "textSample": "SS\nשיחות\nצ׳אט\nערוץ\n✦\n✦\n✦\nסיכום מוצפן\nאין עדיין הודעות\n\nהתחל את השיחה או בקש ניתוח מצלמה חדש מהערוץ הזה.\n\nגוסט\nלייב\nערוצים\nהתראות\nחשבון\nפרטיות\nעזרה\nשעה\n19:23:18\nמערכת\nOK\nבילד\n2026.03\nגרסה\nv0.8.3"
+    }
+  },
+  {
+    "filename": "operator-channels-dark.png",
+    "screenshotPath": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-all-pages-qa/operator-channels-dark.png",
+    "metrics": {
+      "scope": "operator-channels-dark",
+      "shellClass": "app-shell operator-mobile-app-shell ",
+      "topbar": {
+        "selector": ".topbar",
+        "width": 402,
+        "height": 80,
+        "top": 0,
+        "left": 0,
+        "bottom": 80
+      },
+      "brand": {
+        "selector": ".topbar-brand-button",
+        "width": 43,
+        "height": 43,
+        "top": 16,
+        "left": 343,
+        "bottom": 59
+      },
+      "themeButton": {
+        "selector": ".topbar-theme-toggle-btn",
+        "width": 37,
+        "height": 37,
+        "top": 19,
+        "left": 99,
+        "bottom": 56
+      },
+      "accountTrigger": {
+        "selector": ".account-trigger",
+        "width": 47,
+        "height": 40,
+        "top": 18,
+        "left": 14,
+        "bottom": 58
+      },
+      "bottomNav": {
+        "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+        "width": 402,
+        "height": 75,
+        "top": 763,
+        "left": 0,
+        "bottom": 838
+      },
+      "bottomNavButton": {
+        "selector": ".operator-mobile-primary-nav .mobile-tab-bar-button.active, .sa-mobile-primary-nav .mobile-tab-bar-button.active",
+        "width": 83,
+        "height": 59,
+        "top": 771,
+        "left": 207,
+        "bottom": 830
+      },
+      "footer": {
+        "selector": ".app-footer.app-footer-compact-mobile",
+        "width": 402,
+        "height": 35,
+        "top": 838,
+        "left": 0,
+        "bottom": 873
+      },
+      "footerPill": {
+        "selector": ".app-footer.app-footer-compact-mobile .footer-pill",
+        "width": 39,
+        "height": 25,
+        "top": 840,
+        "left": 14,
+        "bottom": 865
+      },
+      "bodyWidth": 402,
+      "bodyScrollWidth": 402,
+      "textSample": "SS\n+ ערוץ\n\nמרכז פיקוד\n\nערוצים\n\nבחר ערוץ כדי לנהל הגדרות ומבצעים, או צור ערוץ חדש.\n\nחיפוש ערוצים\nמאגר ערוצים\n\n2 ערוצים זמינים\n\nמשרד\nפעיל\nBrowser QA Empty Channel\nפעיל\nגוסט\nלייב\nערוצים\nהתראות\nחשבון\nפרטיות\nעזרה\nשעה\n19:23:19\nמערכת\nOK\nבילד\n2026.03\nגרסה\nv0.8.3"
+    }
+  },
+  {
+    "filename": "operator-alerts-dark.png",
+    "screenshotPath": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-all-pages-qa/operator-alerts-dark.png",
+    "metrics": {
+      "scope": "operator-alerts-dark",
+      "shellClass": "app-shell operator-mobile-app-shell ",
+      "topbar": {
+        "selector": ".topbar",
+        "width": 402,
+        "height": 80,
+        "top": 0,
+        "left": 0,
+        "bottom": 80
+      },
+      "brand": {
+        "selector": ".topbar-brand-button",
+        "width": 43,
+        "height": 43,
+        "top": 16,
+        "left": 343,
+        "bottom": 59
+      },
+      "themeButton": {
+        "selector": ".topbar-theme-toggle-btn",
+        "width": 37,
+        "height": 37,
+        "top": 19,
+        "left": 99,
+        "bottom": 56
+      },
+      "accountTrigger": {
+        "selector": ".account-trigger",
+        "width": 47,
+        "height": 40,
+        "top": 18,
+        "left": 14,
+        "bottom": 58
+      },
+      "bottomNav": {
+        "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+        "width": 402,
+        "height": 75,
+        "top": 763,
+        "left": 0,
+        "bottom": 838
+      },
+      "bottomNavButton": {
+        "selector": ".operator-mobile-primary-nav .mobile-tab-bar-button.active, .sa-mobile-primary-nav .mobile-tab-bar-button.active",
+        "width": 83,
+        "height": 59,
+        "top": 771,
+        "left": 113,
+        "bottom": 830
+      },
+      "footer": {
+        "selector": ".app-footer.app-footer-compact-mobile",
+        "width": 402,
+        "height": 35,
+        "top": 838,
+        "left": 0,
+        "bottom": 873
+      },
+      "footerPill": {
+        "selector": ".app-footer.app-footer-compact-mobile .footer-pill",
+        "width": 39,
+        "height": 25,
+        "top": 840,
+        "left": 14,
+        "bottom": 865
+      },
+      "bodyWidth": 402,
+      "bodyScrollWidth": 402,
+      "textSample": "SS\n\nהתראות\n\nהתראות קריטיות\n\nסקור, אשר או עבור ישירות לערוץ שנפגע.\n\nהתראות\n\nהתראות קריטיות\n0 פתוחות\n0 אושרו\n0 הושתקו\n\nתקין\n\nכרגע אין התראות קריטיות במערכת.\n\nגוסט\nלייב\nערוצים\nהתראות\nחשבון\nפרטיות\nעזרה\nשעה\n19:23:19\nמערכת\nOK\nבילד\n2026.03\nגרסה\nv0.8.3"
+    }
+  },
+  {
+    "filename": "operator-account-dark.png",
+    "screenshotPath": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-all-pages-qa/operator-account-dark.png",
+    "metrics": {
+      "scope": "operator-account-dark",
+      "shellClass": "app-shell operator-mobile-app-shell ",
+      "topbar": {
+        "selector": ".topbar",
+        "width": 402,
+        "height": 80,
+        "top": 0,
+        "left": 0,
+        "bottom": 80
+      },
+      "brand": {
+        "selector": ".topbar-brand-button",
+        "width": 43,
+        "height": 43,
+        "top": 16,
+        "left": 343,
+        "bottom": 59
+      },
+      "themeButton": {
+        "selector": ".topbar-theme-toggle-btn",
+        "width": 37,
+        "height": 37,
+        "top": 19,
+        "left": 99,
+        "bottom": 56
+      },
+      "accountTrigger": {
+        "selector": ".account-trigger",
+        "width": 47,
+        "height": 40,
+        "top": 18,
+        "left": 14,
+        "bottom": 58
+      },
+      "bottomNav": {
+        "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+        "width": 402,
+        "height": 75,
+        "top": 763,
+        "left": 0,
+        "bottom": 838
+      },
+      "bottomNavButton": {
+        "selector": ".operator-mobile-primary-nav .mobile-tab-bar-button.active, .sa-mobile-primary-nav .mobile-tab-bar-button.active",
+        "width": 83,
+        "height": 59,
+        "top": 771,
+        "left": 113,
+        "bottom": 830
+      },
+      "footer": {
+        "selector": ".app-footer.app-footer-compact-mobile",
+        "width": 402,
+        "height": 35,
+        "top": 838,
+        "left": 0,
+        "bottom": 873
+      },
+      "footerPill": {
+        "selector": ".app-footer.app-footer-compact-mobile .footer-pill",
+        "width": 39,
+        "height": 25,
+        "top": 840,
+        "left": 14,
+        "bottom": 865
+      },
+      "bodyWidth": 402,
+      "bodyScrollWidth": 402,
+      "textSample": "SS\nSS\nslon slon\nמנהל מערכת\nGhost HQ\n◈\nפרופיל אישי\n⊞\nצוות וחברים\n◉\nהתראות\n≡\nיומן פעילות\n⏻\nיציאה מהמערכת\n\nהתראות\n\nהתראות קריטיות\n\nסקור, אשר או עבור ישירות לערוץ שנפגע.\n\nהתראות\n\nהתראות קריטיות\n0 פתוחות\n0 אושרו\n0 הושתקו\n\nתקין\n\nכרגע אין התראות קריטיות במערכת.\n\nגוסט\nלייב\nערוצים\nהתראות\nחשבון\nפרטיות\nעזרה\nשעה\n19:23:20\nמערכת\nOK\nבילד\n2026.03\nגרסה\nv0.8.3"
+    }
+  },
+  {
+    "filename": "super-admin-overview-dark.png",
+    "screenshotPath": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-all-pages-qa/super-admin-overview-dark.png",
+    "metrics": {
+      "scope": "super-admin-overview-dark",
+      "shellClass": "app-shell sa-mobile-shell-host",
+      "topbar": {
+        "selector": ".topbar",
+        "width": 402,
+        "height": 80,
+        "top": 0,
+        "left": 0,
+        "bottom": 80
+      },
+      "brand": {
+        "selector": ".topbar-brand-button",
+        "width": 43,
+        "height": 43,
+        "top": 16,
+        "left": 343,
+        "bottom": 59
+      },
+      "themeButton": {
+        "selector": ".topbar-theme-toggle-btn",
+        "width": 37,
+        "height": 37,
+        "top": 19,
+        "left": 99,
+        "bottom": 56
+      },
+      "accountTrigger": {
+        "selector": ".account-trigger",
+        "width": 47,
+        "height": 40,
+        "top": 18,
+        "left": 14,
+        "bottom": 58
+      },
+      "bottomNav": {
+        "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+        "width": 402,
+        "height": 78,
+        "top": 795,
+        "left": 0,
+        "bottom": 873
+      },
+      "bottomNavButton": {
+        "selector": ".operator-mobile-primary-nav .mobile-tab-bar-button.active, .sa-mobile-primary-nav .mobile-tab-bar-button.active",
+        "width": 66,
+        "height": 62,
+        "top": 803,
+        "left": 317,
+        "bottom": 865
+      },
+      "footer": null,
+      "footerPill": null,
+      "bodyWidth": 402,
+      "bodyScrollWidth": 402,
+      "textSample": "עא\n\nסופר אדמין\n\nסקירה\n\nעריכת הארגון, מגבלות ותקרות, ויצירת ארגון חדש.\n\nפרטי ארגון\nשם ארגון\nסטטוס\nפעיל\nמושהה\nמגבלות ותקרות\nמספר ערוצים\nהודעות לערוץ בחודש\nחיוב חודשי\nתקרת עלות סוכנים\nתקרת עלות בינה מלאכותית\nתקרת עלות ממשק\nנתוני שימוש חיים\nערוצים\n2\nמבצעים\n0\nהודעות יוצאות\n3\nהודעות נכנסות\n1\nעלות בינה מלאכותית\n$0.00\nעלות ממשק\n$0.00\nשמור שינויים בארגוןמחיקה לוגית לארגון\nסקירה\nארגונים\n2\nמשתמשים\n3\nתקלות\nעוד"
+    }
+  },
+  {
+    "filename": "super-admin-organizations-dark.png",
+    "screenshotPath": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-all-pages-qa/super-admin-organizations-dark.png",
+    "metrics": {
+      "scope": "super-admin-organizations-dark",
+      "shellClass": "app-shell sa-mobile-shell-host",
+      "topbar": {
+        "selector": ".topbar",
+        "width": 402,
+        "height": 80,
+        "top": 0,
+        "left": 0,
+        "bottom": 80
+      },
+      "brand": {
+        "selector": ".topbar-brand-button",
+        "width": 43,
+        "height": 43,
+        "top": 16,
+        "left": 343,
+        "bottom": 59
+      },
+      "themeButton": {
+        "selector": ".topbar-theme-toggle-btn",
+        "width": 37,
+        "height": 37,
+        "top": 19,
+        "left": 99,
+        "bottom": 56
+      },
+      "accountTrigger": {
+        "selector": ".account-trigger",
+        "width": 47,
+        "height": 40,
+        "top": 18,
+        "left": 14,
+        "bottom": 58
+      },
+      "bottomNav": {
+        "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+        "width": 402,
+        "height": 78,
+        "top": 795,
+        "left": 0,
+        "bottom": 873
+      },
+      "bottomNavButton": {
+        "selector": ".operator-mobile-primary-nav .mobile-tab-bar-button.active, .sa-mobile-primary-nav .mobile-tab-bar-button.active",
+        "width": 66,
+        "height": 62,
+        "top": 803,
+        "left": 242,
+        "bottom": 865
+      },
+      "footer": null,
+      "footerPill": null,
+      "bodyWidth": 402,
+      "bodyScrollWidth": 402,
+      "textSample": "עא\nSuspended\n\nSuper Admin\n\nActive organizations\n\nChoose an active organization and open the relevant management flow.\n\nActive organizations\n\n1 total\n\nבר לב\nבר לב\n\nפעיל\n\nCHANNELS\n1\nOPERATIONS\n1\nSENT\n3\nRECEIVED\n5\nOpen overview\nOpen Ghost Live\nסקירה\nארגונים\n2\nמשתמשים\n1\nתקלות\nעוד"
+    }
+  }
+]

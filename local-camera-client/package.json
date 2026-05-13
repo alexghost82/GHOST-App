@@ -9,9 +9,9 @@
     "build": "tsc -p tsconfig.json && node scripts/copy-preload.cjs",
     "start": "set \"ELECTRON_RUN_AS_NODE=\" && electron .",
     "start:worker": "node dist/index.js",
-    "test": "vitest run src/scheduler.test.ts",
-    "build:exe": "npm run build && electron-builder --win nsis",
-    "build:portable": "npm run build && electron-builder --win portable"
+    "test": "vitest run --pool=threads",
+    "build:exe": "node scripts/validate-hikvision-sdk.cjs && node scripts/copy-hikvision-sdk.cjs && npm run build && electron-builder --win nsis --x64",
+    "build:portable": "node scripts/validate-hikvision-sdk.cjs && node scripts/copy-hikvision-sdk.cjs && npm run build && electron-builder --win portable"
   },
   "dependencies": {
     "ffmpeg-static": "^5.2.0",
@@ -30,15 +30,34 @@
     "appId": "com.ghost.camera-agent",
     "productName": "GHOST Camera Agent",
     "asarUnpack": [
-      "node_modules/ffmpeg-static/**"
+      "node_modules/ffmpeg-static/**",
+      "dist/hikvision-helper.cjs"
+    ],
+    "extraResources": [
+      {
+        "from": "hikvision-sdk",
+        "to": "hikvision-sdk",
+        "filter": [
+          "**/*"
+        ]
+      }
     ],
     "directories": {
       "output": "build"
     },
     "win": {
       "icon": "ghost.ico",
-      "target": "nsis"
+      "target": "nsis",
+      "artifactName": "GHOST-Camera-Agent-Setup-${version}-${arch}.${ext}"
     },
+    "protocols": [
+      {
+        "name": "GHOST Agent Provisioning",
+        "schemes": [
+          "ghost-agent"
+        ]
+      }
+    ],
     "nsis": {
       "oneClick": false,
       "perMachine": false,

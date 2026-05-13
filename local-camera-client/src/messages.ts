@@ -38,3 +38,17 @@ export function buildScanMessage(operation: Operation, result: OperationScanResu
   }
 }
 
+export function buildScanErrorMessage(
+  operation: Operation,
+  frameDataUrl: string,
+  errorMessage: string,
+  now: Date,
+): MessagePayload {
+  return {
+    author: 'system',
+    time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    frameDataUrl,
+    alertLevel: 'report',
+    text: `Report | ${operation.name}: scan failed. ${errorMessage}`.trim(),
+  }
+}

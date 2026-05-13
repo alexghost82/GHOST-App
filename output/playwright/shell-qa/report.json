@@ -1,0 +1,21 @@
+{
+  "login": {
+    "hasTopbar": true,
+    "hasFooter": true,
+    "bodyText": "Quick command\nCtrl+K\nSecure Access\nGhost Live\nCommand Center\nLIVE\n0\nCHANNELS\n0\nOPS\n0\nHEALTH\n0%\nGU\nGuest\nGHOST\nINIT::secure_bridge uplink=ready\nAUTH::operator handoff pending\nSCAN::zone-alpha anomaly_score=0.07\nTRACE::vision_proxy route=stabilized\nINTEL::channel-delta heartbeat=ok\nOPS::queue depth=2 retries=0 timeout=30s\nMEM::retention window=120m status=active\nPIPE::critical_alerts unread=0 pending=0\nMODEL::vision-chat provider=online\nNET::jitter=2ms packet_loss=0%\nFORENSICS::archive stream encrypted(AES256)\nWATCH::pattern_match result=clear\n\nSECURE ACCESS\n\nSign In\n\nEnter your user and passkey"
+  },
+  "superAdmin": {
+    "hasTopbar": true,
+    "hasFooter": true,
+    "navItems": [
+      "Ghost Live",
+      "Command Center",
+      "Super Admin"
+    ],
+    "bodyText": "Quick command\nCtrl+K\nGhost Live\nCommand Center\nSuper Admin\nLIVE\n3\nCHANNELS\n4\nOPS\n0\nHEALTH\n75%\nעא\nעומר אלפסי\nGHOST HQ\n\nסופר אדמין\n\nחדר בקרה Ghost\n\nמחובר כ־עומר אלפסי\n\nהתנתקות\nצור ארגון\nכל הארגונים (4)\nGhost HQ\nמושהה\nערוצים: 1\nמבצעים: 0\nהודעות: 1\nGhost HQ\nמושהה\nערוצים: 0\nמבצעים: 0\nהודעות: 0\nTest\nפעיל\nערוצים: 2\nמבצעים: 0\nהודעות: 6\nGhost HQ\nפעיל\nערוצים: 0\nמבצעים: 0\nהודעות: 0\nמדדי מערכת כלליים\nארגונים\n4\nמשתמשים\n7\nהודעות יוצאות\n6\nעלות AI\n$0.00\nמנותק\n\nעמוד ארגון\n\nGhost HQ\nסקירה\nמשתמשים\nתשלומים\nשימוש\nתקלות\nאירועים חיים\nפרטי ארגון\nשם ארגון\nסטטוס\nפעיל\nמושהה\nמגבלות ותקרות\nמספר ערוצים\nהודעות לערוץ בחודש\nחיוב חודשי\nתקרת עלות Agents\nתקרת עלות AI\nתקרת עלות API\nנתוני שימוש חיים\nערוצים\n1\nמבצעים\n0\nהודעות יוצאות\n1\nהודעות נכנסות\n0\nעלות AI\n$0.00\nעלות API\n$0.00\nשמור שינויים בארגוןמחיקה לוגית לארגון\nVERSION\nv0.8"
+  },
+  "screenshots": {
+    "login": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\shell-qa\\login.png",
+    "superAdmin": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\shell-qa\\super-admin.png"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "url": "http://127.0.0.1:4173",
+  "issues": [
+    "expected live-ops, got null",
+    "chat list item missing after regular-user login"
+  ],
+  "screenshots": {
+    "afterLogin": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\regular-user-live-ops-qa\\after-login.png"
+  },
+  "state": {
+    "activeSurface": null,
+    "title": "Ghost | Camera Chat Ops",
+    "hasChatListItem": false,
+    "inboxTitle": null,
+    "navItems": [],
+    "hasWorkspaceHeader": false,
+    "hasContextStrip": false
+  }
+}

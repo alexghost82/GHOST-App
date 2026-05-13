@@ -1,0 +1,152 @@
+[
+  {
+    "width": 1440,
+    "height": 960,
+    "theme": "dark",
+    "admin": {
+      "scrollWidth": 1425,
+      "clientWidth": 1440,
+      "hasHorizontalOverflow": false,
+      "pageScrollHeight": 960,
+      "viewportHeight": 960,
+      "rootOverflow": "auto",
+      "topbarHeight": 94,
+      "mobileOnlyVisible": false
+    },
+    "liveOps": {
+      "scrollWidth": 1425,
+      "clientWidth": 1440,
+      "hasHorizontalOverflow": false,
+      "pageScrollHeight": 1473,
+      "viewportHeight": 960,
+      "workspaceBottom": 1422.703125,
+      "topbarHeight": 94,
+      "mobileOnlyVisible": false
+    }
+  },
+  {
+    "width": 1440,
+    "height": 960,
+    "theme": "light",
+    "admin": {
+      "scrollWidth": 1425,
+      "clientWidth": 1440,
+      "hasHorizontalOverflow": false,
+      "pageScrollHeight": 960,
+      "viewportHeight": 960,
+      "rootOverflow": "auto",
+      "topbarHeight": 94,
+      "mobileOnlyVisible": false
+    },
+    "liveOps": {
+      "scrollWidth": 1425,
+      "clientWidth": 1440,
+      "hasHorizontalOverflow": false,
+      "pageScrollHeight": 1473,
+      "viewportHeight": 960,
+      "workspaceBottom": 1422.703125,
+      "topbarHeight": 94,
+      "mobileOnlyVisible": false
+    }
+  },
+  {
+    "width": 1280,
+    "height": 900,
+    "theme": "dark",
+    "admin": {
+      "scrollWidth": 1265,
+      "clientWidth": 1280,
+      "hasHorizontalOverflow": false,
+      "pageScrollHeight": 900,
+      "viewportHeight": 900,
+      "rootOverflow": "auto",
+      "topbarHeight": 94,
+      "mobileOnlyVisible": false
+    },
+    "liveOps": {
+      "scrollWidth": 1265,
+      "clientWidth": 1280,
+      "hasHorizontalOverflow": false,
+      "pageScrollHeight": 1515,
+      "viewportHeight": 900,
+      "workspaceBottom": 1465.078125,
+      "topbarHeight": 94,
+      "mobileOnlyVisible": false
+    }
+  },
+  {
+    "width": 1280,
+    "height": 900,
+    "theme": "light",
+    "admin": {
+      "scrollWidth": 1265,
+      "clientWidth": 1280,
+      "hasHorizontalOverflow": false,
+      "pageScrollHeight": 900,
+      "viewportHeight": 900,
+      "rootOverflow": "auto",
+      "topbarHeight": 94,
+      "mobileOnlyVisible": false
+    },
+    "liveOps": {
+      "scrollWidth": 1265,
+      "clientWidth": 1280,
+      "hasHorizontalOverflow": false,
+      "pageScrollHeight": 1515,
+      "viewportHeight": 900,
+      "workspaceBottom": 1465.078125,
+      "topbarHeight": 94,
+      "mobileOnlyVisible": false
+    }
+  },
+  {
+    "width": 1024,
+    "height": 900,
+    "theme": "dark",
+    "admin": {
+      "scrollWidth": 1009,
+      "clientWidth": 1024,
+      "hasHorizontalOverflow": false,
+      "pageScrollHeight": 1041,
+      "viewportHeight": 900,
+      "rootOverflow": "auto",
+      "topbarHeight": 94,
+      "mobileOnlyVisible": false
+    },
+    "liveOps": {
+      "scrollWidth": 1009,
+      "clientWidth": 1024,
+      "hasHorizontalOverflow": false,
+      "pageScrollHeight": 1515,
+      "viewportHeight": 900,
+      "workspaceBottom": 1465.078125,
+      "topbarHeight": 94,
+      "mobileOnlyVisible": false
+    }
+  },
+  {
+    "width": 1024,
+    "height": 900,
+    "theme": "light",
+    "admin": {
+      "scrollWidth": 1009,
+      "clientWidth": 1024,
+      "hasHorizontalOverflow": false,
+      "pageScrollHeight": 1041,
+      "viewportHeight": 900,
+      "rootOverflow": "auto",
+      "topbarHeight": 94,
+      "mobileOnlyVisible": false
+    },
+    "liveOps": {
+      "scrollWidth": 1009,
+      "clientWidth": 1024,
+      "hasHorizontalOverflow": false,
+      "pageScrollHeight": 1515,
+      "viewportHeight": 900,
+      "workspaceBottom": 1465.078125,
+      "topbarHeight": 94,
+      "mobileOnlyVisible": false
+    }
+  }
+]

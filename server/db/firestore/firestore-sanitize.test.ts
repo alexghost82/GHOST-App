@@ -12,6 +12,9 @@ describe('stripUndefinedDeep', () => {
       },
       localAgentBinding: {
         deviceId: 'device-1',
+        cameraId: 'camera-1',
+        cameraLabel: 'Integrated Webcam',
+        cameraSourceType: 'usb-dshow',
         cameraName: 'Integrated Webcam',
         deviceName: 'Office Gateway',
         channelId: 'channel-1',
@@ -27,6 +30,9 @@ describe('stripUndefinedDeep', () => {
       },
       localAgentBinding: {
         deviceId: 'device-1',
+        cameraId: 'camera-1',
+        cameraLabel: 'Integrated Webcam',
+        cameraSourceType: 'usb-dshow',
         cameraName: 'Integrated Webcam',
         deviceName: 'Office Gateway',
         channelId: 'channel-1',

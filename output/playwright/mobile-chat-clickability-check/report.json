@@ -1,0 +1,44 @@
+{
+  "screenshotPath": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-chat-clickability-check/mobile-clickability-dark.png",
+  "results": {
+    "theme_toggle": {
+      "ok": true,
+      "before": "dark",
+      "after": "light",
+      "changed": true
+    },
+    "live_tabs": {
+      "ok": true,
+      "before": "צ׳אט",
+      "after": "שיחות",
+      "changed": true
+    },
+    "bottom_nav": {
+      "ok": true,
+      "before": "גוסט\nלייב",
+      "after": "ערוצים",
+      "changed": true
+    },
+    "account_menu": {
+      "ok": true,
+      "dropdownVisible": true
+    },
+    "composer_buttons": {
+      "ok": true,
+      "sendBox": {
+        "x": 37,
+        "y": 691.53125,
+        "width": 42,
+        "height": 42
+      },
+      "emojiBox": {
+        "x": 333,
+        "y": 691.53125,
+        "width": 42,
+        "height": 42
+      },
+      "sendVisible": true,
+      "emojiVisible": true
+    }
+  }
+}

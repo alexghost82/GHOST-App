@@ -14,6 +14,16 @@ export const ChatVisionRequestSchema = z.object({
   prompt: z.string().min(1),
   frameDataUrl: z.string().startsWith('data:image/'),
   analysisContext: z.string().max(6000).optional(),
+  viewerName: z.string().min(1).max(120).optional(),
+  allowHistoryRecall: z.boolean().optional(),
+  conversationHistory: z.array(
+    z.object({
+      author: z.enum(['user', 'ghost', 'system']),
+      text: z.string().min(1),
+      time: z.string().min(1),
+      createdAtIso: z.string().min(1).optional(),
+    }),
+  ).optional(),
 })
 
 export type ChatVisionRequest = z.infer<typeof ChatVisionRequestSchema>

@@ -38,6 +38,11 @@ interface VisionChatJobResult {
   detail: VisionDetailLevel
 }
 
+function isNonRetryableAiError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error)
+  return message.startsWith('AI_QUOTA_EXCEEDED:')
+}
+
 const DEFAULT_CONFIG: QueueRuntimeConfig = {
   concurrency: Number(process.env.QUEUE_CONCURRENCY ?? 2),
   rateLimitRpm: Number(process.env.QUEUE_RATE_LIMIT_RPM ?? 50),
@@ -46,7 +51,16 @@ const DEFAULT_CONFIG: QueueRuntimeConfig = {
 }
 
 const runtimeConfig = DEFAULT_CONFIG
-const queueMode: QueueMode = process.env.REDIS_URL ? 'redis' : 'direct'
+
+function resolveQueueMode(): QueueMode {
+  const explicitMode = process.env.QUEUE_MODE?.trim().toLowerCase()
+  if (explicitMode === 'direct' || explicitMode === 'redis') {
+    return explicitMode
+  }
+  return process.env.REDIS_URL?.trim() ? 'redis' : 'direct'
+}
+
+const queueMode: QueueMode = resolveQueueMode()
 const circuitBreaker = new CircuitBreaker()
 
 const redisConnection =
@@ -176,7 +190,7 @@ async function runWithRetries<T>(operation: (signal: AbortSignal) => Promise<T>)
     } catch (error) {
       timeout.dispose()
       lastError = error
-      if (attempt >= runtimeConfig.attempts) {
+      if (attempt >= runtimeConfig.attempts || isNonRetryableAiError(error)) {
         break
       }
       await new Promise((resolve) => setTimeout(resolve, 1_000 * attempt))

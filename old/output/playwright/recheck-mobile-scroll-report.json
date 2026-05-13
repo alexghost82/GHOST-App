@@ -1,0 +1,31 @@
+{
+  "initial": {
+    "theme": "light",
+    "scrollHeight": 876,
+    "innerHeight": 844,
+    "scrollY": 0
+  },
+  "adminBefore": {
+    "path": "/",
+    "scrollHeight": 1222,
+    "innerHeight": 844,
+    "scrollY": 0,
+    "bodyOverflowY": "auto",
+    "rootOverflowY": "auto",
+    "shellOverflow": "visible"
+  },
+  "adminAfterWheel": {
+    "scrollY": 378,
+    "scrollHeight": 1222
+  },
+  "adminAfterJump": {
+    "scrollY": 378,
+    "maxScroll": 378
+  },
+  "operator": {
+    "scrollHeight": 844,
+    "innerHeight": 844,
+    "scrollY": 0,
+    "shellOverflow": "visible"
+  }
+}

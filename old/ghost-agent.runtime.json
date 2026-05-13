@@ -1,0 +1,14 @@
+{
+  "organizationId": "da43a574-f2a9-4629-bada-d2ed8ff856c8",
+  "organizationName": "test",
+  "apiBaseUrl": "https://ghost-test-app-b906c.web.app",
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzYTUxN2Y1Zi1lMTZkLTRmZTktYmQ0MC00YzYxYjc0Zjc2MWYiLCJvcmdhbml6YXRpb25JZCI6ImRhNDNhNTc0LWYyYTktNDYyOS1iYWRhLWQyZWQ4ZmY4NTZjOCIsIm9yZ2FuaXphdGlvbk5hbWUiOiJ0ZXN0Iiwicm9sZSI6InJlZ3VsYXJfdXNlciIsInVzZXJuYW1lIjoiYWdlbnRfZ2hvc3QtYWdlbnQtNTc1ZjE0YjdfZTJiZDIxIiwiZmlyc3ROYW1lIjoiTG9jYWwiLCJsYXN0TmFtZSI6Ik9mZmljZSBHYXRld2F5IiwiaWF0IjoxNzc3MzA4NjAwLCJleHAiOjE3NzczMDk1MDB9.a1KVqBe0LlAPng5Wy5cTw-Kw5xf6QIajxNrL66QObIs",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbklkIjoiYzQ0OTcwM2EtZDg1Zi00ZDM4LWJiZWEtNjQ4NjI5Y2I4NDAxIiwidXNlcklkIjoiM2E1MTdmNWYtZTE2ZC00ZmU5LWJkNDAtNGM2MWI3NGY3NjFmIiwiaWF0IjoxNzc3MzA4NjAwLCJleHAiOjE3Nzc5MTM0MDB9.UsXPrHmiuuwP57tfs3pMJ_-Gugl7GoB4KvVjJnrme5k",
+  "username": "agent_ghost-agent-575f14b7_e2bd21",
+  "deviceId": "ghost-agent-575f14b7",
+  "deviceName": "Office Gateway",
+  "channelId": "2e3b2c31-bab4-4c1c-b784-630ecd60d2f7",
+  "channelName": "בית",
+  "cameraName": "Integrated Webcam",
+  "boundAtIso": "2026-04-27T16:50:09.990Z"
+}

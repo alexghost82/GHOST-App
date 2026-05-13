@@ -603,9 +603,9 @@ export class FirestoreAdminRepository implements IAdminRepository {
     organizationId: string,
     userId: string,
     channelId: string,
-    message: Omit<MessageRecord, 'id' | 'organizationId' | 'userId' | 'channelId' | 'createdAtIso'>,
+    message: Omit<MessageRecord, 'id' | 'organizationId' | 'userId' | 'channelId' | 'createdAtIso'> & { id?: string },
   ): Promise<MessageRecord> {
-    const id = randomUUID()
+    const id = message.id ?? randomUUID()
     const createdAtIso = new Date().toISOString()
     const record: MessageRecord = {
       ...message, id, organizationId, userId, channelId, createdAtIso,
@@ -621,13 +621,15 @@ export class FirestoreAdminRepository implements IAdminRepository {
     channelId: string,
     opts?: { limit?: number; beforeIso?: string },
   ): Promise<MessageRecord[]> {
-    let query = this.messagesCol(organizationId, userId, channelId).orderBy('createdAtIso', 'asc')
+    let query = this.messagesCol(organizationId, userId, channelId).orderBy('createdAtIso', 'desc')
     if (opts?.beforeIso) {
       query = query.where('createdAtIso', '<', opts.beforeIso)
     }
-    query = query.limit(opts?.limit ?? 200)
+    if (opts?.limit != null) {
+      query = query.limit(opts.limit)
+    }
     const snap = await query.get()
-    return snap.docs.map((doc) => doc.data() as MessageRecord)
+    return snap.docs.map((doc) => doc.data() as MessageRecord).reverse()
   }
 
   /* ============================= מבצעים פר ערוץ (מקוננים) ============================= */

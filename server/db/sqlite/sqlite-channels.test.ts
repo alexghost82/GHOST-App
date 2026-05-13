@@ -1,13 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { existsSync, unlinkSync, mkdirSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { tmpdir } from 'node:os'
 import { SQLiteAdminRepository } from './sqlite-repository'
 
-const TEST_DB_PATH = resolve(process.cwd(), 'server/db/sqlite/test_channels.db')
+const TEST_DB_PATH = resolve(tmpdir(), 'ghost_test_channels.db')
 
 function createTestRepo(): SQLiteAdminRepository {
   if (existsSync(TEST_DB_PATH)) unlinkSync(TEST_DB_PATH)
-  mkdirSync(resolve(process.cwd(), 'server/db/sqlite'), { recursive: true })
+  mkdirSync(tmpdir(), { recursive: true })
   return new SQLiteAdminRepository(TEST_DB_PATH)
 }
 
@@ -119,6 +120,81 @@ describe('SQLiteAdminRepository — ערוצים עשירים, הודעות, מ�
 
       const leaked = await repo.listMessages(orgB.id, 'user-1', channelA.id)
       expect(leaked).toHaveLength(0)
+    })
+
+    it('שומר מזהה הודעה שסופק מהלקוח ולא יוצר כפילות ב-retry', async () => {
+      const org = createTestOrg(repo)
+      const channel = await repo.createFullChannel(org.id, CHANNEL_SEED)
+
+      const first = await repo.addMessage(org.id, 'user-a', channel.id, {
+        id: 'client-message-1',
+        author: 'user',
+        text: 'hello',
+        time: '10:00',
+      })
+      const second = await repo.addMessage(org.id, 'user-a', channel.id, {
+        id: 'client-message-1',
+        author: 'user',
+        text: 'hello',
+        time: '10:00',
+      })
+
+      const messages = await repo.listMessages(org.id, 'user-a', channel.id)
+      expect(first.id).toBe('client-message-1')
+      expect(second.id).toBe('client-message-1')
+      expect(messages).toHaveLength(1)
+    })
+
+    it('שומר replyToMessageId עבור תשובות GHOST', async () => {
+      const org = createTestOrg(repo)
+      const channel = await repo.createFullChannel(org.id, CHANNEL_SEED)
+
+      await repo.addMessage(org.id, 'user-a', channel.id, {
+        id: 'user-1',
+        author: 'user',
+        text: 'question',
+        time: '10:00',
+      })
+      await repo.addMessage(org.id, 'user-a', channel.id, {
+        id: 'ghost-1',
+        author: 'ghost',
+        text: 'answer',
+        time: '10:01',
+        replyToMessageId: 'user-1',
+      })
+
+      const messages = await repo.listMessages(org.id, 'user-a', channel.id)
+      expect(messages[1].replyToMessageId).toBe('user-1')
+    })
+
+    it('מחזיר את ההודעות האחרונות כאשר מוגדר limit, בסדר כרונולוגי עולה', async () => {
+      const org = createTestOrg(repo)
+      const channel = await repo.createFullChannel(org.id, CHANNEL_SEED)
+
+      await repo.addMessage(org.id, 'user-a', channel.id, { author: 'user', text: 'm1', time: '10:00' })
+      await repo.addMessage(org.id, 'user-a', channel.id, { author: 'user', text: 'm2', time: '10:01' })
+      await repo.addMessage(org.id, 'user-a', channel.id, { author: 'user', text: 'm3', time: '10:02' })
+
+      const messages = await repo.listMessages(org.id, 'user-a', channel.id, { limit: 2 })
+      expect(messages.map((message) => message.text)).toEqual(['m2', 'm3'])
+    })
+
+    it('מחזיר את כל ההיסטוריה כאשר לא מוגדר limit', async () => {
+      const org = createTestOrg(repo)
+      const channel = await repo.createFullChannel(org.id, CHANNEL_SEED)
+
+      for (let index = 0; index < 205; index += 1) {
+        await repo.addMessage(org.id, 'user-a', channel.id, {
+          author: 'user',
+          text: `m${index + 1}`,
+          time: `10:${String(index).padStart(2, '0')}`,
+        })
+      }
+
+      const messages = await repo.listMessages(org.id, 'user-a', channel.id)
+      expect(messages).toHaveLength(205)
+      expect(messages[0].text).toBe('m1')
+      expect(messages.at(-1)?.text).toBe('m205')
     })
   })
 

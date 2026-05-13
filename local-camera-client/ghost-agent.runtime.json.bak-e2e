@@ -1,0 +1,53 @@
+{
+  "organizationId": "da43a574-f2a9-4629-bada-d2ed8ff856c8",
+  "organizationName": "test",
+  "apiBaseUrl": "https://ghost-test-app-b906c.web.app",
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODdlZTUwNy05ZGU3LTQ3YzYtOWQzYi1iZGIxNWZhMGMxOTYiLCJvcmdhbml6YXRpb25JZCI6ImRhNDNhNTc0LWYyYTktNDYyOS1iYWRhLWQyZWQ4ZmY4NTZjOCIsIm9yZ2FuaXphdGlvbk5hbWUiOiJ0ZXN0Iiwicm9sZSI6InJlZ3VsYXJfdXNlciIsInVzZXJuYW1lIjoiYWdlbnRfZ2hvc3QtYWdlbnQtZTBiM2YyZDdfMTZhZTIxIiwiZmlyc3ROYW1lIjoiTG9jYWwiLCJsYXN0TmFtZSI6IkdIT1NUIEhpa3Zpc2lvbiBFMkUgQWdlbnQiLCJpYXQiOjE3Nzc5MjAzMjcsImV4cCI6MTc3NzkyMTIyN30.YNjl_t3Bhw-CbyLGWkPsXvy0D2dTEDkZJ-q95UqlCWQ",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbklkIjoiNjI2MGY5YzQtZWViNS00MDEwLTkzOTYtMmVlNGMxMWQwNWIxIiwidXNlcklkIjoiNjg3ZWU1MDctOWRlNy00N2M2LTlkM2ItYmRiMTVmYTBjMTk2IiwiaWF0IjoxNzc3OTIwMzI3LCJleHAiOjE3Nzg1MjUxMjd9.0d4PR86kBGWPPTkZ4ZelwQXRUGOHV6eW1BNt1CHbC8E",
+  "username": "agent_ghost-agent-e0b3f2d7_16ae21",
+  "deviceId": "ghost-agent-e0b3f2d7",
+  "deviceName": "GHOST Hikvision E2E Agent",
+  "cameras": [
+    {
+      "cameraId": "legacy-integrated-webcam",
+      "label": "Integrated Webcam",
+      "source": {
+        "type": "usb-dshow",
+        "name": "Integrated Webcam"
+      },
+      "enabled": true,
+      "createdAtIso": "2026-04-27T15:30:47.339Z",
+      "updatedAtIso": "2026-04-27T15:30:47.339Z"
+    },
+    {
+      "cameraId": "hikvision-sdk-20260504-214525",
+      "label": "Hikvision 10.0.0.10",
+      "enabled": true,
+      "createdAtIso": "2026-05-04T18:45:27.453Z",
+      "updatedAtIso": "2026-05-04T18:45:27.453Z",
+      "source": {
+        "type": "hikvision-sdk",
+        "host": "10.0.0.10",
+        "port": 8000,
+        "username": "admin",
+        "channel": 1,
+        "passwordRef": "camera-hikvision-sdk-20260504-214525-hikvision-password-ad878ce5-8936-4c75-ae29-01e50d5c7b96"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "channelId": "2e3b2c31-bab4-4c1c-b784-630ecd60d2f7",
+      "cameraId": "legacy-integrated-webcam"
+    },
+    {
+      "channelId": "93399a4a-974f-43ef-af25-c9bf0165705a",
+      "cameraId": "hikvision-sdk-20260504-214525"
+    }
+  ],
+  "channelId": "93399a4a-974f-43ef-af25-c9bf0165705a",
+  "channelName": "Hikvision E2E 20260504-214525",
+  "cameraName": "Hikvision 10.0.0.10",
+  "boundAtIso": "2026-05-04T18:45:28.195Z",
+  "defaultCameraId": "hikvision-sdk-20260504-214525"
+}

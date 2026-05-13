@@ -5,6 +5,7 @@ export interface CaptureWorkItem {
   organizationId: string
   channelId: string
   deviceId: string
+  cameraId: string
   profile: 'scan-standard' | 'chat-high' | 'scan-low'
   purpose: 'chat' | 'timeline' | 'preview'
   createdAtIso: string
@@ -93,13 +94,16 @@ export class LocalAgentCaptureBroker {
     }
   }
 
-  submitResult(workId: string, deviceId: string, frameDataUrl: string, capturedAtIso: string): void {
+  submitResult(workId: string, deviceId: string, cameraId: string, frameDataUrl: string, capturedAtIso: string): void {
     const pending = this.pendingByWorkId.get(workId)
     if (!pending) {
       throw new Error('Capture request not found or already completed.')
     }
     if (pending.work.deviceId !== deviceId) {
       throw new Error('Capture result device mismatch.')
+    }
+    if (pending.work.cameraId !== cameraId) {
+      throw new Error('Capture result camera mismatch.')
     }
 
     clearTimeout(pending.timeout)

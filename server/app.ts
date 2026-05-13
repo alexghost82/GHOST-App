@@ -19,6 +19,7 @@ import type { IAdminRepository } from './db/repository-types'
 import type { IRealtimeHub } from './realtime/realtime-hub-types'
 import { decryptSensitiveValue } from './security/crypto-utils'
 import { mapQueueErrorToHttp } from './queue-error-mapper'
+import { extractTenantContext } from './middleware/tenant-context'
 
 const OPENAI_MODEL = 'gpt-4.1-mini'
 const OPENAI_TIMEOUT_MS = 20000
@@ -280,7 +281,23 @@ export function createApp(store: IAdminRepository, realtimeHub: IRealtimeHub): e
     }
 
     try {
-      const result = await enqueueVisionChat(parsed.data, apiKey, JobPriority.CRITICAL)
+      const tenantContext = extractTenantContext(request)
+      const conversationHistory = parsed.data.allowHistoryRecall
+        ? (await store.listMessages(tenantContext.organizationId, tenantContext.userId, parsed.data.channel.id)).map((message) => ({
+            author: message.author,
+            text: message.text,
+            time: message.time,
+            createdAtIso: message.createdAtIso,
+          }))
+        : undefined
+      const result = await enqueueVisionChat(
+        {
+          ...parsed.data,
+          conversationHistory,
+        },
+        apiKey,
+        JobPriority.CRITICAL,
+      )
       return response.json({ text: result.text, sources: result.sources })
     } catch (error) {
       const mapped = mapQueueErrorToHttp(error, 'ניתוח התמונה נכשל')

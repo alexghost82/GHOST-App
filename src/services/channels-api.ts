@@ -1,5 +1,6 @@
 import { httpRequest } from './http-client'
 import type { Channel, Message, Operation } from '../types'
+import { resolveChannelAvatarDataUrl } from '../utils/channel-avatar'
 
 const BASE = '/api/channels'
 
@@ -11,7 +12,7 @@ interface ChannelApiResponse extends Record<string, unknown> {
 }
 
 function mapServerChannelToClient(raw: ChannelApiResponse): Channel {
-  return {
+  const channel: Channel = {
     id: raw.id as string,
     name: raw.name as string,
     type: (raw.type as Channel['type']) ?? 'personal',
@@ -23,14 +24,19 @@ function mapServerChannelToClient(raw: ChannelApiResponse): Channel {
     rtspFeed: (raw.rtspFeed as string) ?? 'rtsp://',
     unread: 0,
     liveState: (raw.liveState as Channel['liveState']) ?? 'LIVE',
-    captureMode: (raw.captureMode as Channel['captureMode']) ?? 'browser',
     cameraEnabled: (raw.cameraEnabled as boolean) ?? false,
-    localAgentBinding: raw.localAgentBinding as Channel['localAgentBinding'],
-    localAgentStatus: raw.localAgentStatus as Channel['localAgentStatus'],
+    captureMode: (raw.captureMode as Channel['captureMode']) ?? undefined,
+    localAgentBinding: (raw.localAgentBinding as Channel['localAgentBinding']) ?? undefined,
+    localAgentStatus: (raw.localAgentStatus as Channel['localAgentStatus']) ?? undefined,
     linkedChannelIds: (raw.linkedChannelIds as string[]) ?? undefined,
     members: (raw.members as string[]) ?? [],
     messages: (raw.messages ?? []).map(mapServerMessageToClient),
     operations: (raw.operations ?? []).map(mapServerOperationToClient),
+    lastFrameDataUrl: (raw.lastFrameDataUrl as string | undefined) ?? undefined,
+  }
+  return {
+    ...channel,
+    lastFrameDataUrl: resolveChannelAvatarDataUrl(channel),
   }
 }
 
@@ -40,6 +46,9 @@ function mapServerMessageToClient(raw: Message | Record<string, unknown>): Messa
     author: raw.author as Message['author'],
     text: raw.text as string,
     time: raw.time as string,
+    createdAtIso: (raw as Record<string, unknown>).createdAtIso as string | undefined,
+    syncStatus: ((raw as Record<string, unknown>).syncStatus as Message['syncStatus']) ?? 'confirmed',
+    replyToMessageId: (raw as Record<string, unknown>).replyToMessageId as string | undefined,
     alertLevel: (raw as Record<string, unknown>).alertLevel as Message['alertLevel'],
     score: (raw as Record<string, unknown>).score as number | undefined,
     frameDataUrl: (raw as Record<string, unknown>).frameDataUrl as string | undefined,
@@ -93,9 +102,6 @@ export async function createChannel(
       rtspFeed: channel.rtspFeed,
       liveState: channel.liveState,
       cameraEnabled: channel.cameraEnabled ?? false,
-      captureMode: channel.captureMode ?? 'browser',
-      localAgentBinding: channel.localAgentBinding,
-      localAgentStatus: channel.localAgentStatus,
       linkedChannelIds: channel.linkedChannelIds ?? [],
       members: channel.members,
     }),
@@ -123,12 +129,16 @@ export async function deleteChannelApi(channelId: string): Promise<void> {
 
 export async function saveMessage(
   channelId: string,
-  message: Omit<Message, 'id'>,
-): Promise<void> {
-  await httpRequest(`${BASE}/${channelId}/messages`, {
+  message: Message,
+): Promise<Message> {
+  const res = await httpRequest(`${BASE}/${channelId}/messages`, {
     method: 'POST',
     body: JSON.stringify(message),
   })
+  if (!res.ok) {
+    throw new Error('שמירת ההודעה נכשלה.')
+  }
+  return mapServerMessageToClient((await res.json()) as Record<string, unknown>)
 }
 
 export async function createOperationApi(

@@ -1,0 +1,20 @@
+{
+  "user": "slon",
+  "url": "http://127.0.0.1:4173",
+  "issues": [
+    "expected live-ops, got null"
+  ],
+  "screenshots": {
+    "home": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\impersonated-regular-user-qa\\regular-user-home.png"
+  },
+  "state": {
+    "activeSurface": null,
+    "hasChatListItem": true,
+    "inboxTitle": null,
+    "navItems": [
+      "Ghost Live",
+      "Command Center"
+    ],
+    "bodyText": "Quick command\nCtrl+K\nGhost Live\nCommand Center\nLIVE\n1\nCHANNELS\n2\nOPS\n0\nHEALTH\n50%\nאב\nאלכס בו\nTEST\nOPS::queue depth=0 lag=2.4s\nWATCH::heartbeat sensor=node-7 ok\nNET::latency p50=42ms p99=180ms\nFORENSICS::trace span=root sample=1.0\nHEALTH::api availability=99.97% window=24h\nWATCH::camera=alpha fps=24 codec=h264\nSCAN::zone-bravo signature=clean\nHEALTH::worker pool=8/8 idle=6\nNET::websocket peers=1 reconnect=0\nFORENSICS::evidence chain=verified count=12\nWATCH::pattern_match result=clear\nHEALTH::clock_drift=12ms ntp=synced\nערוצים\nקבץ\nמ\nבית\n1329 דק׳\nפעיל\n\n,\n\nמ\nLocal Agent QA\n0 דק׳\nלא זמין\n\nUSB camera test\n\nערוץ\nLocal Agent QA\n\nQA lab\n\nבחר קצב דגימה\nכל 2 שנ׳\nכל 4 שנ׳\nכל 8 שנ׳\nסכם את 10 הדקות האחרונות\nבדוק אם יש חסימה בכניסה\nהפוך את הבדיקה הזו למבצע\nשלח\n\nפרטי ערוץ\n\nקפל\nLocal Agent QA\nOFFLINE\n·\nלא זמין\n\nניהול הגדרות, מיקום, RTSP, זיכרון ומבצעים מתבצע דרך מרכז ערוצים.\n\nמרכז ערוצים\nפרטים\nקריאה בלבד\nשם\nLocal Agent QA\nמיקום\nQA lab\nהיקף צפייה\nUSB camera test\nRTSP\nrtsp://\nחברים\nOperator\nמבצעים\n0/0\n\nאין מבצעים מוגדרים לערוץ זה.\n\nVERSION\nv0.8.3\nBUILD\n2026.03\nGEO\n34.7843°N 32.0853°E\nSYSTEM\nOK\nTIME\n13:41:00\nLIVE\nעזרה\nפרטיות\nתנאים"
+  }
+}

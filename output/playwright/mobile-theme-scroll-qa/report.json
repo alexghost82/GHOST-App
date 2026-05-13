@@ -1,0 +1,591 @@
+{
+  "clientUrl": "http://127.0.0.1:4174",
+  "operator": {
+    "light": {
+      "alerts": {
+        "screenshotPath": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\mobile-theme-scroll-qa\\operator-alerts-light.png",
+        "found": true,
+        "selector": ".operator-mobile-screen",
+        "scrollTopBefore": 0,
+        "scrollTopAfter": 0,
+        "clientHeight": 690,
+        "scrollHeight": 690,
+        "canScroll": false,
+        "shell": {
+          "selector": ".app-shell",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "rgb(244, 248, 252)",
+          "backgroundImage": "radial-gradient(circle at 18% 14%, rgba(255, 244, 214, 0.42), rgba(0, 0, 0, 0) 20%), radial-gradient(circle at 82% 16%, rgba(219, 236, 255, 0.46), rgba(0, 0, 0, 0) 22%), linear-gradient(rgba(248, 251, 254, 0.98), rgba(239, 245, 250, 0.98)), none",
+          "borderColor": "rgb(24, 34, 41)",
+          "top": 0,
+          "height": 844
+        },
+        "topbar": {
+          "selector": ".topbar",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "color(srgb 0.984314 0.992157 1 / 0.865882)",
+          "backgroundImage": "none",
+          "borderColor": "rgb(24, 34, 41) rgb(24, 34, 41) rgba(214, 227, 239, 0.72)",
+          "top": 0,
+          "height": 73
+        },
+        "mobileNav": {
+          "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0), rgba(249, 252, 255, 0.98) 32%), radial-gradient(circle at 50% 100%, rgba(15, 118, 110, 0.1), rgba(0, 0, 0, 0) 64%)",
+          "borderColor": "rgba(220, 230, 240, 0.92) rgb(24, 34, 41) rgb(24, 34, 41)",
+          "top": 763,
+          "height": 81
+        },
+        "alertsCenter": {
+          "selector": ".alerts-center",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "rgba(253, 254, 255, 0.82)",
+          "backgroundImage": "none",
+          "borderColor": "rgba(214, 227, 239, 0.72)",
+          "top": 190,
+          "height": 225
+        },
+        "sectionCard": null,
+        "bodyText": "אב\n\nהתראות\n\nהתראות קריטיות\n\nסקור, אשר או עבור ישירות לערוץ שנפגע.\n\nהתראות\n\nהתראות קריטיות\n0 פתוחות\n0 אושרו\n0 הושתקו\n\nתקין\n\nכרגע אין התראות קריטיות במערכת.\n\nגוסט לייב\nערוצים\nהתראות\nחשבון"
+      },
+      "channelsList": {
+        "screenshotPath": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\mobile-theme-scroll-qa\\operator-channels-list-light.png",
+        "found": true,
+        "selector": ".channels-hub-mobile",
+        "scrollTopBefore": 0,
+        "scrollTopAfter": 0,
+        "clientHeight": 690,
+        "scrollHeight": 690,
+        "canScroll": false,
+        "shell": {
+          "selector": ".app-shell",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "rgb(244, 248, 252)",
+          "backgroundImage": "radial-gradient(circle at 18% 14%, rgba(255, 244, 214, 0.42), rgba(0, 0, 0, 0) 20%), radial-gradient(circle at 82% 16%, rgba(219, 236, 255, 0.46), rgba(0, 0, 0, 0) 22%), linear-gradient(rgba(248, 251, 254, 0.98), rgba(239, 245, 250, 0.98)), none",
+          "borderColor": "rgb(24, 34, 41)",
+          "top": 0,
+          "height": 844
+        },
+        "topbar": {
+          "selector": ".topbar",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "color(srgb 0.984314 0.992157 1 / 0.865882)",
+          "backgroundImage": "none",
+          "borderColor": "rgb(24, 34, 41) rgb(24, 34, 41) rgba(214, 227, 239, 0.72)",
+          "top": 0,
+          "height": 73
+        },
+        "mobileNav": {
+          "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0), rgba(249, 252, 255, 0.98) 32%), radial-gradient(circle at 50% 100%, rgba(15, 118, 110, 0.1), rgba(0, 0, 0, 0) 64%)",
+          "borderColor": "rgba(220, 230, 240, 0.92) rgb(24, 34, 41) rgb(24, 34, 41)",
+          "top": 763,
+          "height": 81
+        },
+        "alertsCenter": null,
+        "sectionCard": {
+          "selector": ".mobile-surface-card, .sa-card",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "color(srgb 0.992157 0.996078 1 / 0.717961)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)), none",
+          "borderColor": "rgba(214, 227, 239, 0.72)",
+          "top": 224,
+          "height": 108
+        },
+        "bodyText": "אב\n+ ערוץ\n\nמרכז פיקוד\n\nערוצים\n\nבחר ערוץ כדי לנהל הגדרות ומבצעים, או צור ערוץ חדש.\n\nחיפוש ערוצים\nמאגר ערוצים\n\n1 ערוצים זמינים\n\nבית\nפעיל\nגוסט לייב\nערוצים\nהתראות\nחשבון"
+      },
+      "channelDetails": {
+        "screenshotPath": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\mobile-theme-scroll-qa\\operator-channel-details-light.png",
+        "found": true,
+        "selector": ".channels-hub-mobile",
+        "scrollTopBefore": 0,
+        "scrollTopAfter": 394,
+        "clientHeight": 690,
+        "scrollHeight": 1084,
+        "canScroll": true,
+        "shell": {
+          "selector": ".app-shell",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "rgb(244, 248, 252)",
+          "backgroundImage": "radial-gradient(circle at 18% 14%, rgba(255, 244, 214, 0.42), rgba(0, 0, 0, 0) 20%), radial-gradient(circle at 82% 16%, rgba(219, 236, 255, 0.46), rgba(0, 0, 0, 0) 22%), linear-gradient(rgba(248, 251, 254, 0.98), rgba(239, 245, 250, 0.98)), none",
+          "borderColor": "rgb(24, 34, 41)",
+          "top": 0,
+          "height": 844
+        },
+        "topbar": {
+          "selector": ".topbar",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "color(srgb 0.984314 0.992157 1 / 0.865882)",
+          "backgroundImage": "none",
+          "borderColor": "rgb(24, 34, 41) rgb(24, 34, 41) rgba(214, 227, 239, 0.72)",
+          "top": 0,
+          "height": 73
+        },
+        "mobileNav": {
+          "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0), rgba(249, 252, 255, 0.98) 32%), radial-gradient(circle at 50% 100%, rgba(15, 118, 110, 0.1), rgba(0, 0, 0, 0) 64%)",
+          "borderColor": "rgba(220, 230, 240, 0.92) rgb(24, 34, 41) rgb(24, 34, 41)",
+          "top": 763,
+          "height": 81
+        },
+        "alertsCenter": null,
+        "sectionCard": {
+          "selector": ".mobile-surface-card, .sa-card",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "color(srgb 0.992157 0.996078 1 / 0.717961)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)), none",
+          "borderColor": "rgba(214, 227, 239, 0.72)",
+          "top": -164,
+          "height": 709
+        },
+        "bodyText": "אב\nערוצים\nמבצעים\n\nמרכז פיקוד\n\nבית\n\nפעיל · כרמיאל\n\nהגדרות ערוץ\n\nהשדות המרכזיים לעריכה עבור הערוץ שנבחר.\n\nשם הערוץ\nמיקום\nהיקף ניטור\nתיאור מבצעי\nאינטרוול זיכרון (שניות)\nכתובת RTSP\nחברים ושיוכים\nחברי הערוץ\nבית\nמחק ערוץ\nגוסט לייב\nערוצים\nהתראות\nחשבון"
+      }
+    },
+    "dark": {
+      "alerts": {
+        "screenshotPath": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\mobile-theme-scroll-qa\\operator-alerts-dark.png",
+        "found": true,
+        "selector": ".operator-mobile-screen",
+        "scrollTopBefore": 0,
+        "scrollTopAfter": 0,
+        "clientHeight": 690,
+        "scrollHeight": 690,
+        "canScroll": false,
+        "shell": {
+          "selector": ".app-shell",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "rgb(9, 9, 11)",
+          "backgroundImage": "radial-gradient(circle at 50% -20%, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0) 40%), linear-gradient(rgba(8, 8, 9, 0.98), rgba(16, 16, 18, 0.98)), none",
+          "borderColor": "rgb(242, 245, 248)",
+          "top": 0,
+          "height": 844
+        },
+        "topbar": {
+          "selector": ".topbar",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "color(srgb 0.419608 0.443137 0.486275 / 0.192)",
+          "backgroundImage": "none",
+          "borderColor": "rgb(242, 245, 248) rgb(242, 245, 248) rgba(255, 255, 255, 0.14)",
+          "top": 0,
+          "height": 73
+        },
+        "mobileNav": {
+          "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0), color(srgb 0.0627451 0.0823529 0.105882 / 0.96) 34%), radial-gradient(circle at 50% 100%, color(srgb 0.0588235 0.462745 0.431373 / 0.12), rgba(0, 0, 0, 0) 64%)",
+          "borderColor": "color(srgb 0.152941 0.192157 0.235294 / 0.84) rgb(242, 245, 248) rgb(242, 245, 248)",
+          "top": 763,
+          "height": 81
+        },
+        "alertsCenter": {
+          "selector": ".alerts-center",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "color(srgb 0.328781 0.351186 0.388715 / 0.268078)",
+          "backgroundImage": "none",
+          "borderColor": "rgba(255, 255, 255, 0.14)",
+          "top": 190,
+          "height": 225
+        },
+        "sectionCard": null,
+        "bodyText": "אב\n\nהתראות\n\nהתראות קריטיות\n\nסקור, אשר או עבור ישירות לערוץ שנפגע.\n\nהתראות\n\nהתראות קריטיות\n0 פתוחות\n0 אושרו\n0 הושתקו\n\nתקין\n\nכרגע אין התראות קריטיות במערכת.\n\nגוסט לייב\nערוצים\nהתראות\nחשבון"
+      },
+      "channelsList": {
+        "screenshotPath": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\mobile-theme-scroll-qa\\operator-channels-list-dark.png",
+        "found": true,
+        "selector": ".channels-hub-mobile",
+        "scrollTopBefore": 0,
+        "scrollTopAfter": 0,
+        "clientHeight": 690,
+        "scrollHeight": 690,
+        "canScroll": false,
+        "shell": {
+          "selector": ".app-shell",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "rgb(9, 9, 11)",
+          "backgroundImage": "radial-gradient(circle at 50% -20%, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0) 40%), linear-gradient(rgba(8, 8, 9, 0.98), rgba(16, 16, 18, 0.98)), none",
+          "borderColor": "rgb(242, 245, 248)",
+          "top": 0,
+          "height": 844
+        },
+        "topbar": {
+          "selector": ".topbar",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "color(srgb 0.419608 0.443137 0.486275 / 0.192)",
+          "backgroundImage": "none",
+          "borderColor": "rgb(242, 245, 248) rgb(242, 245, 248) rgba(255, 255, 255, 0.14)",
+          "top": 0,
+          "height": 73
+        },
+        "mobileNav": {
+          "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0), color(srgb 0.0627451 0.0823529 0.105882 / 0.96) 34%), radial-gradient(circle at 50% 100%, color(srgb 0.0588235 0.462745 0.431373 / 0.12), rgba(0, 0, 0, 0) 64%)",
+          "borderColor": "color(srgb 0.152941 0.192157 0.235294 / 0.84) rgb(242, 245, 248) rgb(242, 245, 248)",
+          "top": 763,
+          "height": 81
+        },
+        "alertsCenter": null,
+        "sectionCard": {
+          "selector": ".mobile-surface-card, .sa-card",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "color(srgb 0.34902 0.372549 0.411765 / 0.220078)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)), none",
+          "borderColor": "rgba(255, 255, 255, 0.14)",
+          "top": 224,
+          "height": 108
+        },
+        "bodyText": "אב\n+ ערוץ\n\nמרכז פיקוד\n\nערוצים\n\nבחר ערוץ כדי לנהל הגדרות ומבצעים, או צור ערוץ חדש.\n\nחיפוש ערוצים\nמאגר ערוצים\n\n1 ערוצים זמינים\n\nבית\nפעיל\nגוסט לייב\nערוצים\nהתראות\nחשבון"
+      },
+      "channelDetails": {
+        "screenshotPath": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\mobile-theme-scroll-qa\\operator-channel-details-dark.png",
+        "found": true,
+        "selector": ".channels-hub-mobile",
+        "scrollTopBefore": 0,
+        "scrollTopAfter": 394,
+        "clientHeight": 690,
+        "scrollHeight": 1084,
+        "canScroll": true,
+        "shell": {
+          "selector": ".app-shell",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "rgb(9, 9, 11)",
+          "backgroundImage": "radial-gradient(circle at 50% -20%, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0) 40%), linear-gradient(rgba(8, 8, 9, 0.98), rgba(16, 16, 18, 0.98)), none",
+          "borderColor": "rgb(242, 245, 248)",
+          "top": 0,
+          "height": 844
+        },
+        "topbar": {
+          "selector": ".topbar",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "color(srgb 0.419608 0.443137 0.486275 / 0.192)",
+          "backgroundImage": "none",
+          "borderColor": "rgb(242, 245, 248) rgb(242, 245, 248) rgba(255, 255, 255, 0.14)",
+          "top": 0,
+          "height": 73
+        },
+        "mobileNav": {
+          "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0), color(srgb 0.0627451 0.0823529 0.105882 / 0.96) 34%), radial-gradient(circle at 50% 100%, color(srgb 0.0588235 0.462745 0.431373 / 0.12), rgba(0, 0, 0, 0) 64%)",
+          "borderColor": "color(srgb 0.152941 0.192157 0.235294 / 0.84) rgb(242, 245, 248) rgb(242, 245, 248)",
+          "top": 763,
+          "height": 81
+        },
+        "alertsCenter": null,
+        "sectionCard": {
+          "selector": ".mobile-surface-card, .sa-card",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "color(srgb 0.34902 0.372549 0.411765 / 0.220078)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)), none",
+          "borderColor": "rgba(255, 255, 255, 0.14)",
+          "top": -164,
+          "height": 709
+        },
+        "bodyText": "אב\nערוצים\nמבצעים\n\nמרכז פיקוד\n\nבית\n\nפעיל · כרמיאל\n\nהגדרות ערוץ\n\nהשדות המרכזיים לעריכה עבור הערוץ שנבחר.\n\nשם הערוץ\nמיקום\nהיקף ניטור\nתיאור מבצעי\nאינטרוול זיכרון (שניות)\nכתובת RTSP\nחברים ושיוכים\nחברי הערוץ\nבית\nמחק ערוץ\nגוסט לייב\nערוצים\nהתראות\nחשבון"
+      }
+    }
+  },
+  "superAdmin": {
+    "light": {
+      "overview": {
+        "screenshotPath": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\mobile-theme-scroll-qa\\super-admin-overview-light.png",
+        "found": true,
+        "selector": ".sa-mobile-shell",
+        "scrollTopBefore": 0,
+        "scrollTopAfter": 632,
+        "clientHeight": 681,
+        "scrollHeight": 1313,
+        "canScroll": true,
+        "shell": {
+          "selector": ".app-shell",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "rgb(244, 248, 252)",
+          "backgroundImage": "radial-gradient(circle at 18% 14%, rgba(255, 244, 214, 0.42), rgba(0, 0, 0, 0) 20%), radial-gradient(circle at 82% 16%, rgba(219, 236, 255, 0.46), rgba(0, 0, 0, 0) 22%), linear-gradient(rgba(248, 251, 254, 0.98), rgba(239, 245, 250, 0.98)), none",
+          "borderColor": "rgb(24, 34, 41)",
+          "top": 0,
+          "height": 844
+        },
+        "topbar": {
+          "selector": ".topbar",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "color(srgb 0.984314 0.992157 1 / 0.865882)",
+          "backgroundImage": "none",
+          "borderColor": "rgb(24, 34, 41) rgb(24, 34, 41) rgba(214, 227, 239, 0.72)",
+          "top": 0,
+          "height": 73
+        },
+        "mobileNav": {
+          "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0), rgba(249, 252, 255, 0.98) 32%), radial-gradient(circle at 50% 100%, rgba(15, 118, 110, 0.1), rgba(0, 0, 0, 0) 64%)",
+          "borderColor": "rgba(220, 230, 240, 0.92) rgb(24, 34, 41) rgb(24, 34, 41)",
+          "top": 754,
+          "height": 90
+        },
+        "alertsCenter": null,
+        "sectionCard": {
+          "selector": ".mobile-surface-card, .sa-card",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "color(srgb 0.992157 0.996078 1 / 0.717961)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)), none",
+          "borderColor": "rgba(214, 227, 239, 0.72)",
+          "top": -442,
+          "height": 223
+        },
+        "bodyText": "עא\n\nסופר אדמין\n\nסקירה\n\nעריכת הארגון, מגבלות ותקרות, ויצירת ארגון חדש.\n\nפרטי ארגון\nשם ארגון\nסטטוס\nפעיל\nמושהה\nמגבלות ותקרות\nמספר ערוצים\nהודעות לערוץ בחודש\nחיוב חודשי\nתקרת עלות סוכנים\nתקרת עלות בינה מלאכותית\nתקרת עלות ממשק\nנתוני שימוש חיים\nערוצים\n1\nמבצעים\n0\nהודעות יוצאות\n1\nהודעות נכנסות\n0\nעלות בינה מלאכותית\n$0.00\nעלות ממשק\n$0.00\nשמור שינויים בארגוןמחיקה לוגית לארגון\nסקירה\nארגונים\n4\nמשתמשים\n2\nתקלות\nעוד"
+      },
+      "more": {
+        "screenshotPath": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\mobile-theme-scroll-qa\\super-admin-more-light.png",
+        "found": true,
+        "selector": ".sa-mobile-shell",
+        "scrollTopBefore": 0,
+        "scrollTopAfter": 0,
+        "clientHeight": 681,
+        "scrollHeight": 681,
+        "canScroll": false,
+        "shell": {
+          "selector": ".app-shell",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "rgb(244, 248, 252)",
+          "backgroundImage": "radial-gradient(circle at 18% 14%, rgba(255, 244, 214, 0.42), rgba(0, 0, 0, 0) 20%), radial-gradient(circle at 82% 16%, rgba(219, 236, 255, 0.46), rgba(0, 0, 0, 0) 22%), linear-gradient(rgba(248, 251, 254, 0.98), rgba(239, 245, 250, 0.98)), none",
+          "borderColor": "rgb(24, 34, 41)",
+          "top": 0,
+          "height": 844
+        },
+        "topbar": {
+          "selector": ".topbar",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "color(srgb 0.984314 0.992157 1 / 0.865882)",
+          "backgroundImage": "none",
+          "borderColor": "rgb(24, 34, 41) rgb(24, 34, 41) rgba(214, 227, 239, 0.72)",
+          "top": 0,
+          "height": 73
+        },
+        "mobileNav": {
+          "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0), rgba(249, 252, 255, 0.98) 32%), radial-gradient(circle at 50% 100%, rgba(15, 118, 110, 0.1), rgba(0, 0, 0, 0) 64%)",
+          "borderColor": "rgba(220, 230, 240, 0.92) rgb(24, 34, 41) rgb(24, 34, 41)",
+          "top": 754,
+          "height": 90
+        },
+        "alertsCenter": null,
+        "sectionCard": {
+          "selector": ".mobile-surface-card, .sa-card",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "color(srgb 0.992157 0.996078 1 / 0.717961)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)), none",
+          "borderColor": "rgba(214, 227, 239, 0.72)",
+          "top": 210,
+          "height": 225
+        },
+        "bodyText": "עא\n\nסופר אדמין\n\nעוד זרימות ניהול\n\nשימוש, חיוב, סנכרון בינה מלאכותית ואירועים חיים בתצוגה דחוסה לנייד.\n\nחיוב וסנכרון בינה מלאכותית\n\nסטטוסים מרכזיים בלבד בתצוגת נייד.\n\nארגון לחיוב\nמטה גוסט\nסנכרון בינה מלאכותית\nממתין\nפתח חיוב\nפתח שימוש\nיומן שימוש אחרון\n\nאין כרגע רשומות שימוש אחרונות עבור הארגון שנבחר.\n\nאירועים בזמן אמת\n\nכרגע אין אירועים חיים.\n\nסקירה\nארגונים\n4\nמשתמשים\n2\nתקלות\nעוד"
+      },
+      "issues": {
+        "screenshotPath": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\mobile-theme-scroll-qa\\super-admin-issues-light.png",
+        "found": true,
+        "selector": ".sa-mobile-shell",
+        "scrollTopBefore": 0,
+        "scrollTopAfter": 0,
+        "clientHeight": 681,
+        "scrollHeight": 681,
+        "canScroll": false,
+        "shell": {
+          "selector": ".app-shell",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "rgb(244, 248, 252)",
+          "backgroundImage": "radial-gradient(circle at 18% 14%, rgba(255, 244, 214, 0.42), rgba(0, 0, 0, 0) 20%), radial-gradient(circle at 82% 16%, rgba(219, 236, 255, 0.46), rgba(0, 0, 0, 0) 22%), linear-gradient(rgba(248, 251, 254, 0.98), rgba(239, 245, 250, 0.98)), none",
+          "borderColor": "rgb(24, 34, 41)",
+          "top": 0,
+          "height": 844
+        },
+        "topbar": {
+          "selector": ".topbar",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "color(srgb 0.984314 0.992157 1 / 0.865882)",
+          "backgroundImage": "none",
+          "borderColor": "rgb(24, 34, 41) rgb(24, 34, 41) rgba(214, 227, 239, 0.72)",
+          "top": 0,
+          "height": 73
+        },
+        "mobileNav": {
+          "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0), rgba(249, 252, 255, 0.98) 32%), radial-gradient(circle at 50% 100%, rgba(15, 118, 110, 0.1), rgba(0, 0, 0, 0) 64%)",
+          "borderColor": "rgba(220, 230, 240, 0.92) rgb(24, 34, 41) rgb(24, 34, 41)",
+          "top": 754,
+          "height": 90
+        },
+        "alertsCenter": null,
+        "sectionCard": {
+          "selector": ".mobile-surface-card, .sa-card",
+          "color": "rgb(24, 34, 41)",
+          "backgroundColor": "color(srgb 0.992157 0.996078 1 / 0.717961)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)), none",
+          "borderColor": "rgba(214, 227, 239, 0.72)",
+          "top": 190,
+          "height": 69
+        },
+        "bodyText": "עא\n\nסופר אדמין\n\nתקלות\n\nמעקב אחרי תקלות פתוחות, בטיפול ופתורות.\n\nתקלות ובאגים בארגון\nסקירה\nארגונים\n4\nמשתמשים\n2\nתקלות\nעוד"
+      }
+    },
+    "dark": {
+      "overview": {
+        "screenshotPath": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\mobile-theme-scroll-qa\\super-admin-overview-dark.png",
+        "found": true,
+        "selector": ".sa-mobile-shell",
+        "scrollTopBefore": 0,
+        "scrollTopAfter": 632,
+        "clientHeight": 681,
+        "scrollHeight": 1313,
+        "canScroll": true,
+        "shell": {
+          "selector": ".app-shell",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "rgb(9, 9, 11)",
+          "backgroundImage": "radial-gradient(circle at 50% -20%, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0) 40%), linear-gradient(rgba(8, 8, 9, 0.98), rgba(16, 16, 18, 0.98)), none",
+          "borderColor": "rgb(242, 245, 248)",
+          "top": 0,
+          "height": 844
+        },
+        "topbar": {
+          "selector": ".topbar",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "rgba(8, 8, 9, 0.8)",
+          "backgroundImage": "none",
+          "borderColor": "rgb(242, 245, 248) rgb(242, 245, 248) rgba(255, 255, 255, 0.08)",
+          "top": 0,
+          "height": 73
+        },
+        "mobileNav": {
+          "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0), color(srgb 0.0627451 0.0823529 0.105882 / 0.96) 34%), radial-gradient(circle at 50% 100%, color(srgb 0.0588235 0.462745 0.431373 / 0.12), rgba(0, 0, 0, 0) 64%)",
+          "borderColor": "color(srgb 0.152941 0.192157 0.235294 / 0.84) rgb(242, 245, 248) rgb(242, 245, 248)",
+          "top": 754,
+          "height": 90
+        },
+        "alertsCenter": null,
+        "sectionCard": {
+          "selector": ".mobile-surface-card, .sa-card",
+          "color": "rgba(255, 255, 255, 0.92)",
+          "backgroundColor": "rgba(255, 255, 255, 0.04)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)), none",
+          "borderColor": "rgba(255, 255, 255, 0.06)",
+          "top": -442,
+          "height": 223
+        },
+        "bodyText": "עא\n\nסופר אדמין\n\nסקירה\n\nעריכת הארגון, מגבלות ותקרות, ויצירת ארגון חדש.\n\nפרטי ארגון\nשם ארגון\nסטטוס\nפעיל\nמושהה\nמגבלות ותקרות\nמספר ערוצים\nהודעות לערוץ בחודש\nחיוב חודשי\nתקרת עלות סוכנים\nתקרת עלות בינה מלאכותית\nתקרת עלות ממשק\nנתוני שימוש חיים\nערוצים\n1\nמבצעים\n0\nהודעות יוצאות\n1\nהודעות נכנסות\n0\nעלות בינה מלאכותית\n$0.00\nעלות ממשק\n$0.00\nשמור שינויים בארגוןמחיקה לוגית לארגון\nסקירה\nארגונים\n4\nמשתמשים\n2\nתקלות\nעוד"
+      },
+      "more": {
+        "screenshotPath": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\mobile-theme-scroll-qa\\super-admin-more-dark.png",
+        "found": true,
+        "selector": ".sa-mobile-shell",
+        "scrollTopBefore": 0,
+        "scrollTopAfter": 0,
+        "clientHeight": 681,
+        "scrollHeight": 681,
+        "canScroll": false,
+        "shell": {
+          "selector": ".app-shell",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "rgb(9, 9, 11)",
+          "backgroundImage": "radial-gradient(circle at 50% -20%, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0) 40%), linear-gradient(rgba(8, 8, 9, 0.98), rgba(16, 16, 18, 0.98)), none",
+          "borderColor": "rgb(242, 245, 248)",
+          "top": 0,
+          "height": 844
+        },
+        "topbar": {
+          "selector": ".topbar",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "rgba(8, 8, 9, 0.8)",
+          "backgroundImage": "none",
+          "borderColor": "rgb(242, 245, 248) rgb(242, 245, 248) rgba(255, 255, 255, 0.08)",
+          "top": 0,
+          "height": 73
+        },
+        "mobileNav": {
+          "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0), color(srgb 0.0627451 0.0823529 0.105882 / 0.96) 34%), radial-gradient(circle at 50% 100%, color(srgb 0.0588235 0.462745 0.431373 / 0.12), rgba(0, 0, 0, 0) 64%)",
+          "borderColor": "color(srgb 0.152941 0.192157 0.235294 / 0.84) rgb(242, 245, 248) rgb(242, 245, 248)",
+          "top": 754,
+          "height": 90
+        },
+        "alertsCenter": null,
+        "sectionCard": {
+          "selector": ".mobile-surface-card, .sa-card",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "color(srgb 0.34902 0.372549 0.411765 / 0.220078)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)), none",
+          "borderColor": "rgba(255, 255, 255, 0.14)",
+          "top": 210,
+          "height": 225
+        },
+        "bodyText": "עא\n\nסופר אדמין\n\nעוד זרימות ניהול\n\nשימוש, חיוב, סנכרון בינה מלאכותית ואירועים חיים בתצוגה דחוסה לנייד.\n\nחיוב וסנכרון בינה מלאכותית\n\nסטטוסים מרכזיים בלבד בתצוגת נייד.\n\nארגון לחיוב\nמטה גוסט\nסנכרון בינה מלאכותית\nממתין\nפתח חיוב\nפתח שימוש\nיומן שימוש אחרון\n\nאין כרגע רשומות שימוש אחרונות עבור הארגון שנבחר.\n\nאירועים בזמן אמת\n\nכרגע אין אירועים חיים.\n\nסקירה\nארגונים\n4\nמשתמשים\n2\nתקלות\nעוד"
+      },
+      "issues": {
+        "screenshotPath": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\mobile-theme-scroll-qa\\super-admin-issues-dark.png",
+        "found": true,
+        "selector": ".sa-mobile-shell",
+        "scrollTopBefore": 0,
+        "scrollTopAfter": 0,
+        "clientHeight": 681,
+        "scrollHeight": 681,
+        "canScroll": false,
+        "shell": {
+          "selector": ".app-shell",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "rgb(9, 9, 11)",
+          "backgroundImage": "radial-gradient(circle at 50% -20%, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0) 40%), linear-gradient(rgba(8, 8, 9, 0.98), rgba(16, 16, 18, 0.98)), none",
+          "borderColor": "rgb(242, 245, 248)",
+          "top": 0,
+          "height": 844
+        },
+        "topbar": {
+          "selector": ".topbar",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "rgba(8, 8, 9, 0.8)",
+          "backgroundImage": "none",
+          "borderColor": "rgb(242, 245, 248) rgb(242, 245, 248) rgba(255, 255, 255, 0.08)",
+          "top": 0,
+          "height": 73
+        },
+        "mobileNav": {
+          "selector": ".operator-mobile-primary-nav, .sa-mobile-primary-nav",
+          "color": "rgb(242, 245, 248)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0), color(srgb 0.0627451 0.0823529 0.105882 / 0.96) 34%), radial-gradient(circle at 50% 100%, color(srgb 0.0588235 0.462745 0.431373 / 0.12), rgba(0, 0, 0, 0) 64%)",
+          "borderColor": "color(srgb 0.152941 0.192157 0.235294 / 0.84) rgb(242, 245, 248) rgb(242, 245, 248)",
+          "top": 754,
+          "height": 90
+        },
+        "alertsCenter": null,
+        "sectionCard": {
+          "selector": ".mobile-surface-card, .sa-card",
+          "color": "rgba(255, 255, 255, 0.92)",
+          "backgroundColor": "rgba(255, 255, 255, 0.04)",
+          "backgroundImage": "linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)), none",
+          "borderColor": "rgba(255, 255, 255, 0.06)",
+          "top": 190,
+          "height": 69
+        },
+        "bodyText": "עא\n\nסופר אדמין\n\nתקלות\n\nמעקב אחרי תקלות פתוחות, בטיפול ופתורות.\n\nתקלות ובאגים בארגון\nסקירה\nארגונים\n4\nמשתמשים\n2\nתקלות\nעוד"
+      }
+    }
+  }
+}

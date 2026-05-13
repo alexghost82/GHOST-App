@@ -338,6 +338,121 @@
       overflow-wrap: anywhere;
     }
 
+    .source-toggle {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .source-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.78);
+      padding: 14px;
+      color: var(--text);
+      display: grid;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .source-card input {
+      width: auto;
+      min-height: 0;
+      margin: 0;
+    }
+
+    .source-card.active {
+      border-color: #0a0a0a;
+      box-shadow: 0 0 0 3px rgba(10, 10, 10, 0.06);
+    }
+
+    .source-card-title {
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .source-card-note {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .camera-panel {
+      display: grid;
+      gap: 14px;
+    }
+
+    .camera-panel[hidden],
+    .discovery-modal[hidden] {
+      display: none !important;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .discovery-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      background: rgba(10, 10, 10, 0.38);
+      padding: 20px;
+    }
+
+    .discovery-dialog {
+      width: min(920px, 100%);
+      max-height: min(680px, calc(100vh - 40px));
+      overflow: auto;
+      border-radius: 22px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 68px rgba(11, 20, 26, 0.22);
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .discovery-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .discovery-title {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .discovery-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .discovery-row {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      background: var(--surface-alt);
+    }
+
+    .discovery-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
     .actions {
       display: flex;
       gap: 12px;
@@ -1003,10 +1118,49 @@
             </div>
 
             <div class="form-grid">
-              <label>
-                <span id="cameraLabel"></span>
-                <select id="cameraSelect"></select>
-              </label>
+              <div>
+                <span id="sourceLabel"></span>
+                <div class="source-toggle" id="sourceToggle">
+                  <label class="source-card active" data-source-card="usb">
+                    <input type="radio" name="cameraSource" value="usb" checked>
+                    <span class="source-card-title" id="sourceUsbTitle"></span>
+                    <span class="source-card-note" id="sourceUsbNote"></span>
+                  </label>
+                  <label class="source-card" data-source-card="rtsp">
+                    <input type="radio" name="cameraSource" value="rtsp">
+                    <span class="source-card-title" id="sourceRtspTitle"></span>
+                    <span class="source-card-note" id="sourceRtspNote"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="camera-panel" id="usbCameraPanel">
+                <label>
+                  <span id="cameraLabel"></span>
+                  <select id="cameraSelect"></select>
+                </label>
+              </div>
+
+              <div class="camera-panel" id="rtspCameraPanel" hidden>
+                <div class="field-row">
+                  <label>
+                    <span id="rtspHostLabel"></span>
+                    <input id="rtspHost" autocomplete="off" placeholder="10.0.0.8">
+                  </label>
+                  <label>
+                    <span id="rtspUserLabel"></span>
+                    <input id="rtspUsername" autocomplete="username" placeholder="admin">
+                  </label>
+                  <label>
+                    <span id="rtspPasswordLabel"></span>
+                    <input id="rtspPassword" type="password" autocomplete="current-password">
+                  </label>
+                </div>
+                <div class="actions">
+                  <button id="discoverCamerasBtn" class="button-secondary" type="button"></button>
+                  <button id="testRtspBtn" class="button-secondary" type="button"></button>
+                </div>
+              </div>
 
               <div class="fixed-note" id="cameraNote"></div>
             </div>
@@ -1030,6 +1184,19 @@
           </aside>
         </div>
       </section>
+
+      <div id="discoveryModal" class="discovery-modal" hidden>
+        <div class="discovery-dialog" role="dialog" aria-modal="true" aria-labelledby="discoveryTitle">
+          <div class="discovery-head">
+            <div>
+              <h3 id="discoveryTitle" class="discovery-title"></h3>
+              <p id="discoveryText" class="section-text"></p>
+            </div>
+            <button id="closeDiscoveryBtn" class="button-secondary" type="button"></button>
+          </div>
+          <div id="discoveryList" class="discovery-list"></div>
+        </div>
+      </div>
 
       <section id="viewDashboard" class="view" hidden>
         <div class="dashboard-shell">
@@ -1158,7 +1325,7 @@
         connectStepTitle: 'What happens next',
         connectStepOne: 'Connect this client to the organization.',
         connectStepTwo: 'Choose which personal channel this computer will serve.',
-        connectStepThree: 'Bind one local USB camera and keep the worker online.',
+        connectStepThree: 'Bind one local USB, RTSP, or Hikvision SDK camera and keep the worker online.',
         channelKicker: 'Binding',
         channelTitle: 'Choose a channel',
         channelText: 'Select the personal channel that should use this local camera client.',
@@ -1170,17 +1337,29 @@
         channelMetaBody: 'Choose one channel and continue to camera selection.',
         cameraKicker: 'Binding',
         cameraTitle: 'Choose a camera',
-        cameraText: 'Select one local USB camera and save the binding for this channel.',
+        cameraText: 'Choose USB or RTSP. Hikvision RTSP cameras are saved and captured through Hikvision SDK.',
+        sourceLabel: 'Camera source',
+        sourceUsbTitle: 'USB',
+        sourceUsbNote: 'Use a DirectShow camera connected to this computer.',
+        sourceRtspTitle: 'RTSP',
+        sourceRtspNote: 'Enter IP, user, and password. Hikvision cameras use SDK automatically.',
         cameraLabel: 'USB camera',
+        rtspHostLabel: 'Camera IP',
+        rtspUserLabel: 'User',
+        rtspPasswordLabel: 'Password',
         cameraNoteReady: 'Choose a camera and save the binding.',
         cameraNoteLoading: 'Refreshing local USB cameras...',
+        cameraNoteRtsp: 'RTSP URL is generated automatically as rtsp://user:password@ip:554/Streaming/Channels/101.',
+        cameraNoteHikvision: 'Selected camera is Hikvision. Hikvision SDK is required for testing, saving, and capture.',
         cameraHintTitle: 'Camera access',
-        cameraHintBody: 'The worker can only capture from one camera at a time. Close other apps if the device is busy.',
+        cameraHintBody: 'The worker captures the single bound camera. USB uses DirectShow; RTSP/Hikvision uses the saved camera profile.',
         cameraSafetyTitle: 'Binding rule',
-        cameraSafetyBody: 'One running client serves exactly one channel and one USB camera.',
+        cameraSafetyBody: 'One running client serves exactly one channel and one camera.',
         backBtn: 'Back',
         nextBtn: 'Continue',
         refreshBtn: 'Refresh cameras',
+        discoverBtn: 'Search cameras on network',
+        testCameraBtn: 'Test camera',
         saveBtn: 'Save binding',
         saveBusy: 'Saving...',
         dashboardKicker: 'Operations',
@@ -1210,6 +1389,15 @@
         rulesEmpty: 'No rules are configured for this channel yet.',
         noChannels: 'No personal channels available',
         noCameras: 'No USB cameras detected',
+        discoveryTitle: 'Network camera search',
+        discoveryText: 'SADP-style discovery prefers Hikvision SDK results and supplements them with RTSP/network probes.',
+        discoveryEmpty: 'No network cameras found.',
+        discoveryLoading: 'Searching the local network...',
+        useCameraBtn: 'Use camera',
+        closeBtn: 'Close',
+        testCameraLoading: 'Testing camera capture...',
+        testCameraReady: 'Camera test succeeded.',
+        rtspNeedFields: 'Enter camera IP, user, and password first.',
         connectNeedOrg: 'Enter the organization name first.',
         chooseChannel: 'Choose a channel first.',
         chooseCamera: 'Choose a camera first.',
@@ -1566,9 +1754,15 @@
       language: localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'ru',
       view: 'connect',
       connectSession: null,
+      deviceContext: null,
+      provisioning: null,
       channels: [],
       cameras: [],
-      busy: { connect: false, cameras: false, save: false, rebind: false },
+      savedCameras: [],
+      discoveredCameras: [],
+      selectedDiscovery: null,
+      cameraSource: 'usb',
+      busy: { connect: false, cameras: false, save: false, rebind: false, discovery: false, test: false },
       pollId: null,
       requestSeq: 0,
       dashboardRequestSeq: 0,
@@ -1583,6 +1777,17 @@
       deviceName: document.getElementById('deviceName'),
       channelSelect: document.getElementById('channelSelect'),
       cameraSelect: document.getElementById('cameraSelect'),
+      sourceToggle: document.getElementById('sourceToggle'),
+      usbCameraPanel: document.getElementById('usbCameraPanel'),
+      rtspCameraPanel: document.getElementById('rtspCameraPanel'),
+      rtspHost: document.getElementById('rtspHost'),
+      rtspUsername: document.getElementById('rtspUsername'),
+      rtspPassword: document.getElementById('rtspPassword'),
+      discoverCamerasBtn: document.getElementById('discoverCamerasBtn'),
+      testRtspBtn: document.getElementById('testRtspBtn'),
+      discoveryModal: document.getElementById('discoveryModal'),
+      discoveryList: document.getElementById('discoveryList'),
+      closeDiscoveryBtn: document.getElementById('closeDiscoveryBtn'),
       channelNote: document.getElementById('channelNote'),
       cameraNote: document.getElementById('cameraNote'),
       connectBtn: document.getElementById('connectBtn'),
@@ -1669,7 +1874,75 @@
 
     function labelSource(value) {
       const normalized = String(value || '').toLowerCase()
+      if (normalized === 'usb-dshow') return 'USB'
+      if (normalized === 'rtsp') return 'RTSP'
+      if (normalized === 'hikvision-sdk') return 'Hikvision SDK'
       return i18n[state.language][`source_${normalized}`] || i18n.en[`source_${normalized}`] || String(value || tr('notAvailable'))
+    }
+
+    function normalizeHost(value) {
+      const trimmed = String(value || '').trim()
+      if (!trimmed) return ''
+      if (/^rtsp:\/\//i.test(trimmed)) {
+        try {
+          return new URL(trimmed).hostname
+        } catch {
+          return trimmed
+        }
+      }
+      return trimmed.replace(/^https?:\/\//i, '').split('/')[0].split(':')[0]
+    }
+
+    function isSelectedDiscoveryHikvision() {
+      const camera = state.selectedDiscovery
+      if (!camera) return false
+      return camera.sourceType === 'hikvision-sdk'
+        || camera.discoveryType === 'hikvision-sdk'
+        || /hikvision/i.test(camera.manufacturer || '')
+    }
+
+    function setCameraSource(source) {
+      state.cameraSource = source === 'rtsp' ? 'rtsp' : 'usb'
+      refs.usbCameraPanel.hidden = state.cameraSource !== 'usb'
+      refs.rtspCameraPanel.hidden = state.cameraSource !== 'rtsp'
+      document.querySelectorAll('[data-source-card]').forEach((card) => {
+        card.classList.toggle('active', card.dataset.sourceCard === state.cameraSource)
+      })
+      document.querySelectorAll('input[name="cameraSource"]').forEach((input) => {
+        input.checked = input.value === state.cameraSource
+      })
+      applyCameraNote()
+    }
+
+    function applyCameraNote() {
+      if (state.busy.cameras) {
+        refs.cameraNote.textContent = tr('cameraNoteLoading')
+        return
+      }
+      if (state.cameraSource === 'rtsp') {
+        refs.cameraNote.textContent = isSelectedDiscoveryHikvision() ? tr('cameraNoteHikvision') : tr('cameraNoteRtsp')
+        return
+      }
+      refs.cameraNote.textContent = tr('cameraNoteReady')
+    }
+
+    function buildRtspSourcePayload() {
+      const host = normalizeHost(refs.rtspHost.value)
+      const username = refs.rtspUsername.value.trim()
+      const password = refs.rtspPassword.value
+      if (!host || !username || !password) {
+        throw new Error(tr('rtspNeedFields'))
+      }
+      return {
+        type: 'rtsp',
+        host,
+        username,
+        password,
+        discoveryType: state.selectedDiscovery?.discoveryType,
+        sourceType: state.selectedDiscovery?.sourceType,
+        manufacturer: state.selectedDiscovery?.manufacturer,
+        suggestedSource: state.selectedDiscovery?.suggestedSource,
+      }
     }
 
     function toneForState(value) {
@@ -1722,8 +1995,24 @@
         option.textContent = item.label
         if (item.selected) option.selected = true
         if (item.channelName) option.dataset.channelName = item.channelName
+        if (item.dataset) {
+          Object.entries(item.dataset).forEach(([key, value]) => {
+            if (value != null) option.dataset[key] = value
+          })
+        }
         select.appendChild(option)
       })
+    }
+
+    function selectOptionValue(select, value) {
+      if (!select) return
+      const normalized = String(value || '')
+      Array.from(select.options).forEach((option) => {
+        option.selected = option.value === normalized
+      })
+      if (normalized) {
+        select.value = normalized
+      }
     }
 
     function applyLanguage() {
@@ -1759,11 +2048,21 @@
       document.getElementById('cameraKicker').textContent = tr('cameraKicker')
       document.getElementById('cameraTitle').textContent = tr('cameraTitle')
       document.getElementById('cameraText').textContent = tr('cameraText')
+      document.getElementById('sourceLabel').textContent = tr('sourceLabel')
+      document.getElementById('sourceUsbTitle').textContent = tr('sourceUsbTitle')
+      document.getElementById('sourceUsbNote').textContent = tr('sourceUsbNote')
+      document.getElementById('sourceRtspTitle').textContent = tr('sourceRtspTitle')
+      document.getElementById('sourceRtspNote').textContent = tr('sourceRtspNote')
       document.getElementById('cameraLabel').textContent = tr('cameraLabel')
+      document.getElementById('rtspHostLabel').textContent = tr('rtspHostLabel')
+      document.getElementById('rtspUserLabel').textContent = tr('rtspUserLabel')
+      document.getElementById('rtspPasswordLabel').textContent = tr('rtspPasswordLabel')
       document.getElementById('cameraHintTitle').textContent = tr('cameraHintTitle')
       document.getElementById('cameraHintBody').textContent = tr('cameraHintBody')
       document.getElementById('cameraSafetyTitle').textContent = tr('cameraSafetyTitle')
       document.getElementById('cameraSafetyBody').textContent = tr('cameraSafetyBody')
+      document.getElementById('discoveryTitle').textContent = tr('discoveryTitle')
+      document.getElementById('discoveryText').textContent = tr('discoveryText')
 
       document.getElementById('dashboardKicker').textContent = tr('dashboardKicker')
       document.getElementById('dashboardTitle').textContent = tr('dashboardTitle')
@@ -1786,11 +2085,14 @@
       refs.toCameraBtn.textContent = tr('nextBtn')
       refs.backToChannelBtn.textContent = tr('backBtn')
       refs.refreshCamerasBtn.textContent = tr('refreshBtn')
+      refs.discoverCamerasBtn.textContent = state.busy.discovery ? tr('discoveryLoading') : tr('discoverBtn')
+      refs.testRtspBtn.textContent = state.busy.test ? tr('testCameraLoading') : tr('testCameraBtn')
+      refs.closeDiscoveryBtn.textContent = tr('closeBtn')
       refs.saveBtn.textContent = state.busy.save ? tr('saveBusy') : tr('saveBtn')
       refs.rebindBtn.textContent = tr('rebindBtn')
       refs.unbindBtn.textContent = tr('unbindBtn')
       refs.channelNote.textContent = tr('channelNote')
-      refs.cameraNote.textContent = state.busy.cameras ? tr('cameraNoteLoading') : tr('cameraNoteReady')
+      applyCameraNote()
 
       document.querySelectorAll('.lang-button').forEach((button) => {
         button.classList.toggle('active', button.dataset.lang === state.language)
@@ -1950,9 +2252,9 @@
 
       refs.identityTags.innerHTML = [
         makeTag(`${tr('bindingChannel')}: ${saved?.channelName || tr('notAvailable')}`, 'info'),
-        makeTag(`${tr('labelCamera')}: ${saved?.cameraName || tr('notAvailable')}`, 'info'),
+        makeTag(`${tr('labelCamera')}: ${channel?.localAgentBinding?.cameraLabel || saved?.cameraName || tr('notAvailable')}`, 'info'),
         makeTag(`${tr('labelDevice')}: ${saved?.deviceName || tr('notAvailable')}`, 'info'),
-        makeTag(`${tr('labelSource')}: ${labelSource(channel?.captureMode || 'local_agent')}`, 'info'),
+        makeTag(`${tr('labelSource')}: ${labelSource(channel?.localAgentBinding?.cameraSourceType || channel?.captureMode || 'local_agent')}`, 'info'),
       ].join('')
 
       refs.statusTags.innerHTML = [
@@ -2005,7 +2307,7 @@
       refs.bindingRows.innerHTML = [
         [tr('bindingOrg'), saved?.organizationName],
         [tr('bindingChannel'), saved?.channelName],
-        [tr('bindingCamera'), saved?.cameraName],
+        [tr('bindingCamera'), channel?.localAgentBinding?.cameraLabel || saved?.cameraName],
         [tr('bindingDevice'), saved?.deviceName],
         [tr('bindingDeviceId'), saved?.deviceId],
         [tr('bindingBoundAt'), formatDateTime(saved?.boundAtIso)],
@@ -2027,16 +2329,61 @@
 
     function fillChannels(channels, priorBinding) {
       state.channels = channels.filter((channel) => channel.type === 'personal')
+      const preferredChannelId = state.provisioning?.targetChannelId || priorBinding?.channelId
       renderSelect(
         refs.channelSelect,
         state.channels.map((channel) => ({
           value: channel.id,
           channelName: channel.name,
           label: `${channel.name} · ${labelSource(channel.captureMode || 'browser')}`,
-          selected: priorBinding?.channelId === channel.id,
+          selected: preferredChannelId === channel.id,
         })),
         tr('noChannels'),
       )
+    }
+
+    async function applyProvisioningSession(connectSession) {
+      state.connectSession = connectSession
+      state.provisioning = {
+        token: connectSession?.provisioning?.token || null,
+        targetChannelId: connectSession?.targetChannel?.id || null,
+      }
+      refs.orgName.value = connectSession.organizationName || refs.orgName.value
+      refs.deviceName.value = refs.deviceName.value.trim()
+        || state.deviceContext?.deviceName
+        || 'Office Gateway'
+      fillChannels(connectSession.channels || [], connectSession.priorBinding)
+      if (connectSession?.targetChannel?.id) {
+        selectOptionValue(refs.channelSelect, connectSession.targetChannel.id)
+      }
+      await loadCameras()
+      setCameraSource('usb')
+      setView('camera')
+      showStatus('Secure hand-off received. Confirm the camera and save the binding.', 'success')
+    }
+
+    async function consumeProvisioningToken(token) {
+      if (!token) return
+      state.busy.connect = true
+      applyLanguage()
+      showStatus('Syncing secure web hand-off...', 'info')
+      try {
+        const saved = await window.ghostAPI.loadConfig()
+        const connectSession = await window.ghostAPI.consumeProvisioningSession({
+          token,
+          apiBaseUrl: API_BASE_URL,
+          deviceName: refs.deviceName.value.trim() || saved?.deviceName || state.deviceContext?.deviceName || 'Office Gateway',
+          deviceId: saved?.deviceId,
+        })
+        await window.ghostAPI.clearPendingProvisioningToken()
+        await applyProvisioningSession(connectSession)
+      } catch (error) {
+        showStatus(error?.message || tr('statusError'), 'error')
+        setView('connect')
+      } finally {
+        state.busy.connect = false
+        applyLanguage()
+      }
     }
 
     async function loadCameras() {
@@ -2044,18 +2391,35 @@
       state.busy.cameras = true
       applyLanguage()
       try {
-        const cameras = await window.ghostAPI.getCameras()
+        const [usbCameras, savedCameras] = await Promise.all([
+          window.ghostAPI.getCameras(),
+          typeof window.ghostAPI.getSavedCameras === 'function' ? window.ghostAPI.getSavedCameras() : [],
+        ])
         if (requestId !== state.requestSeq) {
           return
         }
-        state.cameras = Array.isArray(cameras) ? cameras : []
+        const usbItems = (Array.isArray(usbCameras) ? usbCameras : []).map((camera, index) => ({
+          value: camera.name,
+          label: camera.label,
+          selected: index === 0,
+          dataset: { sourceType: 'usb-dshow' },
+        }))
+        state.savedCameras = (Array.isArray(savedCameras) ? savedCameras : [])
+          .filter((camera) => camera?.cameraId && camera?.source?.type !== 'usb-dshow')
+        const savedItems = state.savedCameras.map((camera) => ({
+          value: camera.cameraId,
+          label: `${camera.label} · ${labelSource(camera.source?.type)}`,
+          selected: usbItems.length === 0 && camera.cameraId === state.savedCameras[0]?.cameraId,
+          dataset: {
+            savedCameraId: camera.cameraId,
+            sourceType: camera.source?.type,
+            cameraLabel: camera.label,
+          },
+        }))
+        state.cameras = [...usbItems, ...savedItems]
         renderSelect(
           refs.cameraSelect,
-          state.cameras.map((camera, index) => ({
-            value: camera.name,
-            label: camera.label,
-            selected: index === 0,
-          })),
+          state.cameras,
           tr('noCameras'),
         )
       } finally {
@@ -2063,6 +2427,66 @@
           state.busy.cameras = false
           applyLanguage()
         }
+      }
+    }
+
+    function renderDiscoveryResults(cameras) {
+      const networkCameras = (Array.isArray(cameras) ? cameras : [])
+        .filter((camera) => camera.sourceType !== 'usb-dshow')
+      state.discoveredCameras = networkCameras
+
+      if (!networkCameras.length) {
+        refs.discoveryList.innerHTML = `<div class="fixed-note">${escapeHtml(tr('discoveryEmpty'))}</div>`
+        return
+      }
+
+      refs.discoveryList.innerHTML = networkCameras.map((camera, index) => {
+        const meta = [
+          camera.host,
+          camera.port ? `port ${camera.port}` : '',
+          camera.manufacturer || '',
+          camera.model || '',
+          camera.serial ? `serial ${camera.serial}` : '',
+          camera.macAddress ? `mac ${camera.macAddress}` : '',
+          labelSource(camera.sourceType),
+          camera.status,
+        ].filter(Boolean)
+        return `
+          <div class="discovery-row">
+            <div>
+              <strong>${escapeHtml(camera.label || camera.host || camera.id)}</strong>
+              <div class="discovery-meta">${meta.map((item) => `<span>${escapeHtml(item)}</span>`).join('')}</div>
+            </div>
+            <button class="button-secondary" type="button" data-use-discovery="${index}">${escapeHtml(tr('useCameraBtn'))}</button>
+          </div>
+        `
+      }).join('')
+
+      refs.discoveryList.querySelectorAll('[data-use-discovery]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const camera = state.discoveredCameras[Number(button.dataset.useDiscovery)]
+          if (!camera) return
+          state.selectedDiscovery = camera
+          setCameraSource('rtsp')
+          refs.rtspHost.value = camera.host || refs.rtspHost.value
+          refs.discoveryModal.hidden = true
+          applyCameraNote()
+          showStatus(
+            camera.sourceType === 'hikvision-sdk'
+              ? tr('cameraNoteHikvision')
+              : tr('cameraNoteRtsp'),
+            'info',
+          )
+        })
+      })
+    }
+
+    function buildRtspCameraBinding() {
+      const source = buildRtspSourcePayload()
+      const labelHost = normalizeHost(refs.rtspHost.value)
+      return {
+        label: state.selectedDiscovery?.label || `Camera ${labelHost}`,
+        source,
       }
     }
 
@@ -2179,6 +2603,7 @@
       showStatus(tr('refreshLoading'), 'info')
       try {
         await loadCameras()
+        setCameraSource('usb')
         setView('camera')
         showStatus(tr('refreshReady'), 'success')
       } catch (error) {
@@ -2201,6 +2626,58 @@
       }
     })
 
+    refs.sourceToggle.addEventListener('change', (event) => {
+      if (event.target?.name !== 'cameraSource') {
+        return
+      }
+      setCameraSource(event.target.value)
+    })
+
+    refs.rtspHost.addEventListener('input', () => {
+      state.selectedDiscovery = null
+      applyCameraNote()
+    })
+
+    refs.discoverCamerasBtn.addEventListener('click', async () => {
+      refs.discoveryModal.hidden = false
+      refs.discoveryList.innerHTML = `<div class="fixed-note">${escapeHtml(tr('discoveryLoading'))}</div>`
+      state.busy.discovery = true
+      applyLanguage()
+      try {
+        const results = await window.ghostAPI.discoverCameras()
+        renderDiscoveryResults(results)
+      } catch (error) {
+        refs.discoveryList.innerHTML = `<div class="fixed-note">${escapeHtml(error?.message || tr('statusError'))}</div>`
+      } finally {
+        state.busy.discovery = false
+        applyLanguage()
+      }
+    })
+
+    refs.closeDiscoveryBtn.addEventListener('click', () => {
+      refs.discoveryModal.hidden = true
+    })
+
+    refs.testRtspBtn.addEventListener('click', async () => {
+      state.busy.test = true
+      applyLanguage()
+      showStatus(tr('testCameraLoading'), 'info')
+      try {
+        const source = buildRtspSourcePayload()
+        const labelHost = normalizeHost(refs.rtspHost.value)
+        await window.ghostAPI.testCamera({
+          label: state.selectedDiscovery?.label || `Camera ${labelHost}`,
+          source,
+        })
+        showStatus(tr('testCameraReady'), 'success')
+      } catch (error) {
+        showStatus(error?.message || tr('statusError'), 'error')
+      } finally {
+        state.busy.test = false
+        applyLanguage()
+      }
+    })
+
     refs.saveBtn.addEventListener('click', async () => {
       if (!state.connectSession) {
         showStatus(tr('connectNeedOrg'), 'error')
@@ -2210,7 +2687,7 @@
         showStatus(tr('chooseChannel'), 'error')
         return
       }
-      if (!refs.cameraSelect.value) {
+      if (state.cameraSource === 'usb' && !refs.cameraSelect.value) {
         showStatus(tr('chooseCamera'), 'error')
         return
       }
@@ -2221,6 +2698,35 @@
 
       try {
         const selectedOption = refs.channelSelect.selectedOptions[0]
+        let selectedCameraOption = refs.cameraSelect.selectedOptions[0]
+        let selectedSavedCameraId = selectedCameraOption?.dataset.savedCameraId
+        let cameraName = selectedCameraOption?.dataset.cameraLabel || refs.cameraSelect.value
+
+        if (state.cameraSource === 'rtsp') {
+          const rtspCamera = buildRtspCameraBinding()
+          selectedSavedCameraId = undefined
+          cameraName = rtspCamera.label
+          selectedCameraOption = null
+          await window.ghostAPI.saveBinding({
+            organizationId: state.connectSession.organizationId,
+            organizationName: state.connectSession.organizationName,
+            apiBaseUrl: API_BASE_URL,
+            accessToken: state.connectSession.accessToken,
+            refreshToken: state.connectSession.refreshToken,
+            username: state.connectSession.profile.username,
+            deviceId: state.connectSession.deviceId,
+            deviceName: refs.deviceName.value.trim() || 'Office Gateway',
+            channelId: selectedOption.value,
+            channelName: selectedOption.dataset.channelName,
+            cameraName,
+            cameraSourcePayload: rtspCamera.source,
+            boundAtIso: new Date().toISOString(),
+          })
+          showStatus(tr('saveReady'), 'success')
+          await loadDashboardOrSetup()
+          return
+        }
+
         await window.ghostAPI.saveBinding({
           organizationId: state.connectSession.organizationId,
           organizationName: state.connectSession.organizationName,
@@ -2232,7 +2738,8 @@
           deviceName: refs.deviceName.value.trim() || 'Office Gateway',
           channelId: selectedOption.value,
           channelName: selectedOption.dataset.channelName,
-          cameraName: refs.cameraSelect.value,
+          cameraName,
+          selectedCameraId: selectedSavedCameraId,
           boundAtIso: new Date().toISOString(),
         })
         showStatus(tr('saveReady'), 'success')
@@ -2271,6 +2778,9 @@
       renderSelect(refs.cameraSelect, [], tr('noCameras'))
       setView('connect')
 
+       state.deviceContext = await window.ghostAPI.getDeviceContext()
+       refs.deviceName.value = state.deviceContext?.deviceName || refs.deviceName.value
+
       const saved = await window.ghostAPI.loadConfig()
       if (saved) {
         refs.orgName.value = saved.organizationName || ''
@@ -2294,6 +2804,19 @@
             void prepareRebindFlow()
           }
         })
+      }
+
+      if (typeof window.ghostAPI.onProvisioningToken === 'function') {
+        window.ghostAPI.onProvisioningToken((token) => {
+          if (token) {
+            void consumeProvisioningToken(token)
+          }
+        })
+      }
+
+      const pendingProvisioningToken = await window.ghostAPI.getPendingProvisioningToken()
+      if (pendingProvisioningToken) {
+        void consumeProvisioningToken(pendingProvisioningToken)
       }
     }
 

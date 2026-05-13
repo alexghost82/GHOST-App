@@ -3,30 +3,20 @@ export type MessageAuthor = 'user' | 'ghost' | 'system'
 export type ChannelType = 'personal' | 'group'
 
 export type LiveState = 'LIVE' | 'SYNC' | 'DEGRADED' | 'OFFLINE'
-export type CaptureMode = 'browser' | 'local_agent'
+export type ChannelCaptureMode = 'local_agent' | 'browser'
+export type LocalAgentCameraSourceType = 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
 export type LocalAgentConnectionState = 'connected' | 'degraded' | 'offline'
 
 export type OperationMode = 'alert' | 'report' | 'rating' | 'assessment'
-
-export interface LocalAgentBinding {
-  deviceId: string
-  deviceName: string
-  cameraName: string
-  channelId: string
-  boundAtIso: string
-}
-
-export interface LocalAgentStatus {
-  state: LocalAgentConnectionState
-  lastHeartbeatAtIso: string
-  lastError?: string
-}
 
 export interface Message {
   id: string
   author: MessageAuthor
   text: string
   time: string
+  createdAtIso?: string
+  syncStatus?: 'pending' | 'confirmed' | 'failed'
+  replyToMessageId?: string
   sources?: string[]
   /** סוג תגובת הסריקה: התראה בינארית, דו"ח, דירוג או הערכת מצב */
   alertLevel?: 'critical' | 'routine' | 'report' | 'rating' | 'assessment'
@@ -108,13 +98,38 @@ export interface Channel {
   rtspFeed: string
   unread: number
   liveState: LiveState
-  captureMode?: CaptureMode
   /** תמונת הפריים האחרונה שנלכדה מהמצלמה המקומית (Data URL). */
   lastFrameDataUrl?: string
+  /** מצב לכידה - סוכן מקומי או דפדפן */
+  captureMode?: ChannelCaptureMode
+  localAgentBinding?: {
+    deviceId: string
+    deviceName: string
+    cameraId: string
+    cameraLabel: string
+    cameraSourceType: LocalAgentCameraSourceType
+    cameraName?: string
+    channelId: string
+    boundAtIso: string
+  }
+  /** סטטוס סוכן מקומי */
+  localAgentStatus?: {
+    state: LocalAgentConnectionState
+    lastHeartbeatAtIso?: string
+    lastError?: string
+    cameras?: Array<{
+      cameraId: string
+      cameraLabel: string
+      sourceType: LocalAgentCameraSourceType
+      status: 'online' | 'degraded' | 'offline'
+      lastCaptureAtIso?: string
+      lastSuccessfulCaptureAtIso?: string
+      lastError?: string
+      latencyMs?: number
+    }>
+  }
   /** האם למצלמה יש הרשאה/גישה עבור הערוץ הנוכחי. */
   cameraEnabled?: boolean
-  localAgentBinding?: LocalAgentBinding
-  localAgentStatus?: LocalAgentStatus
   /** בצ׳אט קבוצתי: מזהי צ׳אטים קיימים שצורפו לקבוצה */
   linkedChannelIds?: string[]
   /** מצב פיצ'ר דגימת ציר-זמן והיסטוריית ניתוחי קולאז'. */
@@ -125,6 +140,7 @@ export interface Channel {
 }
 
 export type MobilePanel = 'inbox' | 'chat' | 'details'
+export type OperatorMobileSection = 'live' | 'channels' | 'alerts' | 'account'
 
 export interface OperationDraft {
   name: string

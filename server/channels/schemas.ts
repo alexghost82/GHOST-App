@@ -3,7 +3,10 @@ import { z } from 'zod'
 const LocalAgentBindingSchema = z.object({
   deviceId: z.string().min(1).max(120),
   deviceName: z.string().min(1).max(160),
-  cameraName: z.string().min(1).max(180),
+  cameraId: z.string().min(1).max(120),
+  cameraLabel: z.string().min(1).max(180),
+  cameraSourceType: z.enum(['usb-dshow', 'rtsp', 'hikvision-sdk']),
+  cameraName: z.string().min(1).max(180).optional(),
   channelId: z.string().min(1),
   boundAtIso: z.string().min(1),
 })
@@ -53,9 +56,11 @@ export const UpdateChannelSchema = z.object({
 })
 
 export const CreateMessageSchema = z.object({
+  id: z.string().min(1).optional(),
   author: z.enum(['user', 'ghost', 'system']),
   text: z.string().min(1),
   time: z.string().min(1),
+  replyToMessageId: z.string().min(1).optional(),
   alertLevel: z.enum(['critical', 'routine', 'report', 'rating', 'assessment']).optional(),
   score: z.number().optional(),
   frameDataUrl: z.string().optional(),

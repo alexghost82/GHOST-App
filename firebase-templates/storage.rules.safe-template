@@ -1,0 +1,9 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Safe default: deny all access until project-specific rules are defined.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-04-28T11:31:43.201Z",
+  "viewport": {
+    "width": 375,
+    "height": 812
+  },
+  "dropdownBox": {
+    "x": 12,
+    "y": 58,
+    "width": 324,
+    "height": 612.578125
+  },
+  "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\account-dropdown-mobile-recheck.png",
+  "bodyHeight": 812,
+  "scrollHeight": 812
+}

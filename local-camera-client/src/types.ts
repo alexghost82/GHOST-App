@@ -1,6 +1,38 @@
 export type OperationMode = 'alert' | 'report' | 'rating' | 'assessment'
 export type LiveState = 'LIVE' | 'SYNC' | 'DEGRADED' | 'OFFLINE'
 export type CaptureMode = 'browser' | 'local_agent'
+export type CameraSourceType = 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
+export type CaptureProfile = 'scan-low' | 'scan-standard' | 'chat-high' | 'preview'
+
+export interface UsbDshowCameraSource {
+  type: 'usb-dshow'
+  name: string
+}
+
+export interface RtspCameraSource {
+  type: 'rtsp'
+  url: string
+  transport?: 'tcp' | 'udp'
+  username?: string
+  passwordRef?: string
+  password?: string
+}
+
+export interface HikvisionSdkCameraSource {
+  type: 'hikvision-sdk'
+  host: string
+  port: number
+  username: string
+  passwordRef?: string
+  password?: string
+  channel: number
+  useHttps?: boolean
+}
+
+export type CameraSource =
+  | UsbDshowCameraSource
+  | RtspCameraSource
+  | HikvisionSdkCameraSource
 
 export interface CameraDevice {
   id: string
@@ -43,7 +75,10 @@ export interface Operation {
 export interface LocalAgentBinding {
   deviceId: string
   deviceName: string
-  cameraName: string
+  cameraId: string
+  cameraLabel: string
+  cameraSourceType: CameraSourceType
+  cameraName?: string
   channelId: string
   boundAtIso: string
 }
@@ -52,6 +87,50 @@ export interface LocalAgentStatus {
   state: 'connected' | 'degraded' | 'offline'
   lastHeartbeatAtIso: string
   lastError?: string
+  cameras?: LocalCameraHealth[]
+}
+
+export interface LocalCameraHealth {
+  cameraId: string
+  cameraLabel: string
+  sourceType: CameraSourceType
+  status: 'online' | 'degraded' | 'offline'
+  lastCaptureAtIso?: string
+  lastSuccessfulCaptureAtIso?: string
+  lastError?: string
+  latencyMs?: number
+}
+
+export interface CameraRuntimeStatus extends LocalCameraHealth {
+  label: string
+  lastSuccessAtIso?: string
+  lastLatencyMs?: number
+}
+
+export interface SavedCameraConfig {
+  cameraId: string
+  label: string
+  source: CameraSource
+  enabled?: boolean
+  createdAtIso: string
+  updatedAtIso: string
+}
+
+export interface DiscoveredCamera {
+  id: string
+  label: string
+  discoveryType: 'usb-dshow' | 'hikvision-sdk' | 'onvif' | 'network-scan' | 'manual'
+  sourceType: CameraSourceType
+  host?: string
+  port?: number
+  model?: string
+  serial?: string
+  manufacturer?: string
+  macAddress?: string
+  suggestedRtspUrls?: string[]
+  requiresCredentials?: boolean
+  suggestedSource?: Partial<CameraSource>
+  status: 'found' | 'requires-auth' | 'tested' | 'unreachable'
 }
 
 export interface Channel {
@@ -111,11 +190,23 @@ export interface LocalAgentConnectResponse {
   priorBinding?: LocalAgentBinding
 }
 
+export interface LocalAgentProvisioningSession {
+  token: string
+  consumedAtIso: string
+  expiresAtIso: string
+}
+
+export interface LocalAgentProvisioningConsumeResponse extends LocalAgentConnectResponse {
+  targetChannel: AgentChannelSummary
+  provisioning: LocalAgentProvisioningSession
+}
+
 export interface CaptureWorkItem {
   id: string
   organizationId: string
   channelId: string
   deviceId: string
+  cameraId: string
   profile: 'scan-low' | 'scan-standard' | 'chat-high'
   purpose: 'chat' | 'timeline' | 'preview'
   createdAtIso: string

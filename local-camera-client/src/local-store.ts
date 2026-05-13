@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import type { LocalAgentBinding, SavedCameraConfig } from './types.js'
+import { ensureAgentDataFileMigrated } from './data-path.js'
 
 export interface SavedAgentConfig {
   organizationId: string
@@ -10,17 +11,23 @@ export interface SavedAgentConfig {
   username: string
   deviceId: string
   deviceName: string
-  channelId: string
-  channelName: string
-  cameraName: string
-  boundAtIso: string
+  cameras: SavedCameraConfig[]
+  bindings: Array<{
+    channelId: string
+    cameraId: string
+  }>
+  channelId?: string
+  channelName?: string
+  cameraName?: string
+  boundAtIso?: string
+  defaultCameraId?: string
 }
 
 export const DEFAULT_API_BASE_URL = 'https://ghost-test-app-b906c.web.app'
 const CONFIG_FILENAME = 'ghost-agent.runtime.json'
 
 function configPath(): string {
-  return resolve(process.cwd(), CONFIG_FILENAME)
+  return ensureAgentDataFileMigrated(CONFIG_FILENAME)
 }
 
 export function loadLocalConfig(): SavedAgentConfig | null {
@@ -36,9 +43,7 @@ export function loadLocalConfig(): SavedAgentConfig | null {
       typeof parsed.apiBaseUrl !== 'string' ||
       typeof parsed.accessToken !== 'string' ||
       typeof parsed.refreshToken !== 'string' ||
-      typeof parsed.deviceId !== 'string' ||
-      typeof parsed.channelId !== 'string' ||
-      typeof parsed.cameraName !== 'string'
+      typeof parsed.deviceId !== 'string'
     ) {
       return null
     }
@@ -60,9 +65,100 @@ export function clearLocalConfig(): void {
   }
 }
 
-function normalizeSavedConfig(config: SavedAgentConfig): SavedAgentConfig {
+export function normalizeSavedConfig(config: SavedAgentConfig): SavedAgentConfig {
+  const legacyCameraName = config.cameraName?.trim()
+  const legacyChannelId = config.channelId?.trim()
+  const legacyChannelName = config.channelName?.trim()
+  const boundAtIso = config.boundAtIso ?? new Date().toISOString()
+  const cameras = Array.isArray(config.cameras) ? config.cameras.filter(Boolean).map(normalizeCameraConfig) : []
+  const bindings = Array.isArray(config.bindings) ? config.bindings.filter(Boolean) : []
+
+  if (cameras.length === 0 && legacyCameraName) {
+    const legacyCameraId = `legacy-${slugify(legacyCameraName)}`
+    cameras.push({
+      cameraId: legacyCameraId,
+      label: legacyCameraName,
+      source: {
+        type: 'usb-dshow',
+        name: legacyCameraName,
+      },
+      enabled: true,
+      createdAtIso: boundAtIso,
+      updatedAtIso: boundAtIso,
+    })
+
+    if (legacyChannelId) {
+      bindings.push({
+        channelId: legacyChannelId,
+        cameraId: legacyCameraId,
+      })
+    }
+  }
+
+  const activeBindings = bindings.slice(0, 1)
+  const defaultCameraId = activeBindings[0]?.cameraId
+    ?? config.defaultCameraId
+    ?? cameras[0]?.cameraId
+
   return {
     ...config,
     apiBaseUrl: DEFAULT_API_BASE_URL,
+    cameras,
+    bindings: activeBindings,
+    defaultCameraId,
+    channelId: legacyChannelId ?? activeBindings[0]?.channelId,
+    channelName: legacyChannelName,
+    cameraName: legacyCameraName ?? cameras[0]?.label,
   }
+}
+
+export function resolveBindingDetails(
+  saved: SavedAgentConfig,
+): Array<LocalAgentBinding & { channelName?: string }> {
+  const resolved: Array<LocalAgentBinding & { channelName?: string }> = []
+  for (const binding of saved.bindings) {
+    const camera = saved.cameras.find((item) => item.cameraId === binding.cameraId)
+    if (!camera) {
+      continue
+    }
+    resolved.push({
+      deviceId: saved.deviceId,
+      deviceName: saved.deviceName,
+      cameraId: camera.cameraId,
+      cameraLabel: camera.label,
+      cameraSourceType: camera.source.type,
+      cameraName: camera.source.type === 'usb-dshow' ? camera.source.name : undefined,
+      channelId: binding.channelId,
+      boundAtIso: saved.boundAtIso ?? camera.updatedAtIso,
+      channelName: binding.channelId === saved.channelId ? saved.channelName : undefined,
+    })
+  }
+  return resolved
+}
+
+function normalizeCameraConfig(camera: SavedCameraConfig): SavedCameraConfig {
+  const source = normalizeCameraSource(camera.source as SavedCameraConfig['source'])
+  return {
+    ...camera,
+    source,
+    enabled: camera.enabled ?? true,
+  }
+}
+
+function normalizeCameraSource(source: SavedCameraConfig['source']): SavedCameraConfig['source'] {
+  if ((source as { type?: string }).type === 'rtsp-ffmpeg') {
+    const legacy = source as unknown as { url: string; transport?: 'tcp' | 'udp'; username?: string; password?: string }
+    return {
+      type: 'rtsp',
+      url: legacy.url,
+      transport: legacy.transport,
+      username: legacy.username,
+      password: legacy.password,
+    }
+  }
+  return source
+}
+
+function slugify(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'camera'
 }

@@ -11,6 +11,26 @@ interface RefreshResponsePayload {
   error?: string
 }
 
+function resolveApiUrl(path: string): string {
+  if (!path.startsWith('/api/')) {
+    return path
+  }
+
+  const configuredBase = import.meta.env.VITE_API_BASE_URL?.trim()
+  if (configuredBase) {
+    return new URL(path, configuredBase.endsWith('/') ? configuredBase : `${configuredBase}/`).toString()
+  }
+
+  if (import.meta.env.DEV && typeof window !== 'undefined') {
+    const { hostname } = window.location
+    if (hostname === '127.0.0.1' || hostname === 'localhost') {
+      return `http://127.0.0.1:7722${path}`
+    }
+  }
+
+  return path
+}
+
 async function refreshAccessToken(): Promise<string | null> {
   const refreshToken = readRefreshToken()
   if (!refreshToken) {
@@ -34,6 +54,7 @@ async function refreshAccessToken(): Promise<string | null> {
  * מבצע קריאת HTTP סטנדרטית עם חיבור אופציונלי לטוקן התחברות.
  */
 export async function httpRequest(path: string, options: HttpRequestOptions = {}): Promise<Response> {
+  const requestUrl = resolveApiUrl(path)
   const headers = new Headers(options.headers)
   if (!headers.has('Content-Type') && options.body != null) {
     headers.set('Content-Type', 'application/json')
@@ -45,7 +66,7 @@ export async function httpRequest(path: string, options: HttpRequestOptions = {}
       headers.set('Authorization', `Bearer ${existingAccessToken}`)
     }
   }
-  const firstResponse = await fetch(path, {
+  const firstResponse = await fetch(requestUrl, {
     ...options,
     headers,
   })
@@ -61,7 +82,7 @@ export async function httpRequest(path: string, options: HttpRequestOptions = {}
     retryHeaders.set('Content-Type', 'application/json')
   }
   retryHeaders.set('Authorization', `Bearer ${refreshedAccessToken}`)
-  return fetch(path, {
+  return fetch(requestUrl, {
     ...options,
     headers: retryHeaders,
   })

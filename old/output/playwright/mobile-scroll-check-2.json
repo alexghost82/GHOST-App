@@ -1,0 +1,30 @@
+{
+  "loginInputStyles": {
+    "background": "rgb(232, 237, 243)",
+    "color": "rgb(17, 17, 17)",
+    "border": "rgb(196, 208, 220)"
+  },
+  "topbarRect": {
+    "x": 0,
+    "y": 0,
+    "width": 390,
+    "height": 218,
+    "top": 0,
+    "right": 390,
+    "bottom": 218,
+    "left": 0
+  },
+  "before": {
+    "y": 0,
+    "h": 1222,
+    "inner": 844,
+    "bodyOverflowY": "auto",
+    "rootOverflowY": "auto",
+    "shellOverflow": "visible"
+  },
+  "after": {
+    "y": 378,
+    "h": 1222,
+    "inner": 844
+  }
+}

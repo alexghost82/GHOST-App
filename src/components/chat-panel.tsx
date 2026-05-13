@@ -1,36 +1,37 @@
-import type { RefObject } from 'react'
-import { LIVE_STATE_META, QUICK_PROMPTS } from '../data/constants'
-import type { Channel } from '../types'
+import type { FormEvent, RefObject } from 'react'
+import type { Channel, TimelineSamplerState } from '../types'
+import { resolveChannelAvatarDataUrl } from '../utils/channel-avatar'
+import { getVisibleChannelMessages } from '../utils/chat-messages'
+import { LockIcon, SendIcon } from './chat-icons'
 import { MessageRow } from './message-row'
 import { StatusDot } from './status-dot'
+
+const ROUTINE_REALTIME_UPDATE_PHRASE = 'עדכון שגרתי בזמן אמת'
+
+interface NextScanInfo {
+  deadline: number
+  operationName: string
+  totalCycleMs: number
+}
 
 interface ChatPanelProps {
   selectedChannel: Channel
   isSending: boolean
   messageDraft: string
   messageStreamRef: RefObject<HTMLDivElement | null>
+  activeOpsCount: number
+  nextScanInfo: NextScanInfo | null
+  timelineSamplerState: TimelineSamplerState
   onDismissFrame: (messageId: string) => void
   onMessageDraftChange: (value: string) => void
-  onMessageSubmit: (event: React.FormEvent<HTMLFormElement>) => void
+  onMessageSubmit: (event: FormEvent<HTMLFormElement>) => void
+  onStartTimelineSampling: (intervalSeconds: 2 | 4 | 8) => void
+  onStopTimelineSampling: () => void
   onShowInbox: () => void
   onShowDetails: () => void
-  onShowOps: () => void
   onSuggestionClick: (prompt: string) => void
-}
-
-function getCaptureLabel(channel: Channel): string {
-  if (channel.captureMode === 'local_agent') {
-    switch (channel.localAgentStatus?.state) {
-      case 'connected':
-        return 'Local Agent Connected'
-      case 'degraded':
-        return 'Local Agent Limited'
-      default:
-        return 'Waiting For Local Agent'
-    }
-  }
-
-  return 'Browser Camera Active'
+  onMessageStreamScroll: () => void
+  mobileLayout?: boolean
 }
 
 export function ChatPanel({
@@ -43,117 +44,102 @@ export function ChatPanel({
   onMessageSubmit,
   onShowInbox,
   onShowDetails,
-  onShowOps,
-  onSuggestionClick,
+  onMessageStreamScroll,
+  mobileLayout = false,
 }: ChatPanelProps) {
-  const statusLabel = LIVE_STATE_META[selectedChannel.liveState]?.label ?? 'Unavailable'
-  const captureLabel = getCaptureLabel(selectedChannel)
-  const enabledOperationsCount = selectedChannel.operations.filter((operation) => operation.enabled).length
-  const latestMessage = selectedChannel.messages.at(-1)
+  const visibleMessages = getVisibleChannelMessages(selectedChannel).filter(
+    (message) => !(message.author === 'system' && message.text.includes(ROUTINE_REALTIME_UPDATE_PHRASE)),
+  )
+  const isEmpty = visibleMessages.length === 0
+  const presenceLabel = selectedChannel.liveState === 'LIVE' ? 'פעיל כעת' : 'במעקב'
+  const lastSeenLabel = visibleMessages.at(-1)?.time ?? '--:--'
+  const avatarDataUrl = resolveChannelAvatarDataUrl(selectedChannel)
 
   return (
-    <section className="panel chat-panel chat-panel-wa">
-      <div className="chat-header">
-        <div className="chat-header-actions mobile-only">
-          <button className="ghost-button" onClick={onShowInbox} type="button">
-            Chats
-          </button>
-        </div>
+    <section className={`panel chat-panel${mobileLayout ? ' chat-panel-mobile-design' : ''}${isEmpty ? ' chat-panel-empty' : ''}`}>
+      {mobileLayout ? null : (
+        <header className="chat-header">
+          <div className="chat-header-main">
+            <button className="ghost-button mobile-only" onClick={onShowInbox} type="button">
+              שיחות
+            </button>
 
-        <div className="chat-title-block">
-          <button
-            aria-label="×¤×ª×™×—×ª ×¤×¨×˜×™ ×”×¢×¨×•×¥"
-            className="title-cluster"
-            onClick={onShowDetails}
-            type="button"
-          >
-            {selectedChannel.lastFrameDataUrl ? (
-              <img
-                className="channel-badge channel-badge-image"
-                src={selectedChannel.lastFrameDataUrl}
-                alt={`Latest frame from ${selectedChannel.name}`}
-              />
-            ) : (
-              <div className="channel-badge">{selectedChannel.type === 'group' ? 'Group' : 'Channel'}</div>
-            )}
-            <div className="title-cluster-text">
-              <h2>{selectedChannel.name}</h2>
-              <p className="route">{selectedChannel.location}</p>
-            </div>
-          </button>
+            <button aria-label="פתח פרטי ערוץ" className="title-cluster" onClick={onShowDetails} type="button">
+              {avatarDataUrl ? (
+                <img
+                  className="chat-avatar chat-avatar-image"
+                  src={avatarDataUrl}
+                  alt={selectedChannel.name}
+                />
+              ) : (
+                <div className="chat-avatar">
+                  {selectedChannel.type === 'group' ? 'ק' : selectedChannel.name.slice(0, 1).toUpperCase()}
+                </div>
+              )}
 
-          <div className="live-status-band">
-            <div className="live-status">
-              <StatusDot liveState={selectedChannel.liveState} className="live-dot" />
-              <span>
-                {statusLabel} / {captureLabel}
-              </span>
-            </div>
-            <div className="chat-header-pills" aria-label="channel context">
-              <span className="chat-header-pill">OPS {enabledOperationsCount}</span>
-              <span className="chat-header-pill">MEM {selectedChannel.memoryInterval}s</span>
-              <span className="chat-header-pill">TEAM {selectedChannel.members.length}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="chat-header-utility">
-          <button className="ghost-button chat-ops-trigger" onClick={onShowOps} type="button">
-            Ops
-          </button>
-          <div className="chat-header-actions desktop-only">
-            <button className="ghost-button" onClick={onShowDetails} type="button">
-              Details
+              <div className="title-cluster-text">
+                <h2>{selectedChannel.name}</h2>
+                <p className="route">
+                  <StatusDot liveState={selectedChannel.liveState} className="channel-status-dot" />
+                  <span>{presenceLabel}</span>
+                  <span className="header-meta-separator">·</span>
+                  <span>{lastSeenLabel}</span>
+                </p>
+              </div>
             </button>
           </div>
-        </div>
-      </div>
 
-      <div className="chat-context-strip" aria-label="chat summary">
-        <article className="chat-context-card">
-          <span className="chat-context-label">WATCH</span>
-          <strong>{selectedChannel.watchScope}</strong>
-        </article>
-        <article className="chat-context-card">
-          <span className="chat-context-label">LAST UPDATE</span>
-          <strong>{latestMessage?.time ?? '--:--'}</strong>
-        </article>
-        <article className="chat-context-card">
-          <span className="chat-context-label">MODE</span>
-          <strong>{selectedChannel.type === 'group' ? 'GROUP' : 'DIRECT'}</strong>
-        </article>
-      </div>
+          <div className="chat-header-utility">
+            <button aria-label="פרטי ערוץ" className="messenger-icon-button" onClick={onShowDetails} type="button">
+              <span aria-hidden>⋮</span>
+            </button>
+          </div>
+        </header>
+      )}
 
-      <div className="message-stream" ref={messageStreamRef}>
-        {selectedChannel.messages.length > 0 ? (
-          selectedChannel.messages.map((message) => (
+      <div className="message-stream" onScroll={onMessageStreamScroll} ref={messageStreamRef}>
+        {isEmpty ? (
+          <div className="chat-empty-state">
+            <div className="chat-empty-hero" aria-hidden>
+              <span className="chat-empty-hero-ring chat-empty-hero-ring-outer" />
+              <span className="chat-empty-hero-ring chat-empty-hero-ring-inner" />
+              <span className="chat-empty-hero-bubble">
+                <ChatBubbleGlyph />
+              </span>
+              <span className="chat-empty-hero-spark chat-empty-hero-spark-primary">✦</span>
+              <span className="chat-empty-hero-spark chat-empty-hero-spark-secondary">✦</span>
+              <span className="chat-empty-hero-spark chat-empty-hero-spark-tertiary">✦</span>
+            </div>
+            <span className="chat-empty-kicker">
+              <span>סיכום מוצפן</span>
+              <LockIcon />
+            </span>
+            <h3>אין עדיין הודעות</h3>
+            <p>התחל את השיחה או בקש ניתוח מצלמה חדש מהערוץ הזה.</p>
+          </div>
+        ) : (
+          visibleMessages.map((message) => (
             <MessageRow key={message.id} message={message} onDismissFrame={onDismissFrame} />
           ))
-        ) : (
-          <div className="chat-empty-state">
-            <span className="chat-empty-kicker">READY</span>
-            <h3>{selectedChannel.name}</h3>
-            <p>{selectedChannel.description || selectedChannel.watchScope}</p>
-          </div>
         )}
       </div>
 
-      <form className="composer" onSubmit={onMessageSubmit}>
-        <div className="composer-suggestions">
-          {QUICK_PROMPTS.map((prompt) => (
-            <button key={prompt} className="chip-button" onClick={() => onSuggestionClick(prompt)} type="button">
-              {prompt}
-            </button>
-          ))}
-        </div>
-
+      <form className={`composer${mobileLayout ? ' composer-mobile-shell' : ''}`} onSubmit={onMessageSubmit}>
         <div className="composer-shell">
-          <button className="ghost-button composer-utility mobile-only" onClick={onShowDetails} type="button">
-            Channel
-          </button>
+          {mobileLayout ? (
+            <button aria-label="שלח הודעה" className="composer-mobile-accent-button composer-mobile-send-orb" disabled={isSending || !messageDraft.trim()} type="submit">
+              {isSending ? <span aria-hidden>…</span> : <SendIcon />}
+            </button>
+          ) : null}
+
           <div className="composer-input-shell">
-            <span className="composer-input-label">PROMPT</span>
+            {mobileLayout ? null : (
+              <label className="composer-input-label" htmlFor="live-ops-composer">
+                הודעה
+              </label>
+            )}
             <textarea
+              id="live-ops-composer"
               rows={1}
               value={messageDraft}
               onChange={(event) => onMessageDraftChange(event.target.value)}
@@ -163,21 +149,37 @@ export function ChatPanel({
                   event.currentTarget.form?.requestSubmit()
                 }
               }}
-              placeholder="Ask a question or request an operational scan..."
+              placeholder={mobileLayout ? 'הקלד הודעה...' : 'הקלד הודעה'}
             />
           </div>
-          <button className="primary-button composer-send-button" disabled={isSending || !messageDraft.trim()} type="submit">
-            {isSending ? 'Sending...' : 'Send'}
-          </button>
-        </div>
 
-        <div className="composer-actions">
-          <span className="composer-hint">Enter to send · Shift+Enter for a new line</span>
-          <button className="ghost-button" onClick={onShowOps} type="button">
-            Live Ops
-          </button>
+          {mobileLayout ? null : (
+            <button
+              aria-label={isSending ? 'שולח הודעה' : 'שלח הודעה'}
+              className="composer-send-button"
+              disabled={isSending || !messageDraft.trim()}
+              type="submit"
+            >
+              <span aria-hidden>{isSending ? '…' : '➤'}</span>
+            </button>
+          )}
         </div>
       </form>
     </section>
+  )
+}
+
+function ChatBubbleGlyph() {
+  return (
+    <svg aria-hidden="true" fill="none" height="28" viewBox="0 0 24 24" width="28">
+      <path
+        d="M6 18.7 3.5 21l.9-3.2A8.4 8.4 0 1 1 20.5 12c0 4.6-3.7 8.4-8.4 8.4H6Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.9"
+      />
+      <path d="M8.2 12h.01M12 12h.01M15.8 12h.01" stroke="currentColor" strokeLinecap="round" strokeWidth="2.2" />
+    </svg>
   )
 }

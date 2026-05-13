@@ -1,0 +1,20 @@
+{
+  "light": {
+    "screenshot": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-channels-qa/operator-channels-light.png",
+    "report": {
+      "bodyText": "SS\n+ ערוץ\n\nמרכז פיקוד\n\nערוצים\n\nבחר ערוץ כדי לנהל הגדרות ומבצעים, או צור ערוץ חדש.\n\nחיפוש ערוצים\nמאגר ערוצים\n\n2 ערוצים זמינים\n\nמשרד\nפעיל\nBrowser QA Empty Channel\nפעיל\nגוסט\nלייב\nערוצים\nהתראות\nחשבון\nפרטיות\nעזרה\nשעה\n17:30:17\nמערכת\nOK\nבילד\n2026.03\nגרסה\nv0.8.3",
+      "hasChannelsHub": true,
+      "hasSearch": true,
+      "hasRows": 2
+    }
+  },
+  "dark": {
+    "screenshot": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-channels-qa/operator-channels-dark.png",
+    "report": {
+      "bodyText": "SS\n+ ערוץ\n\nמרכז פיקוד\n\nערוצים\n\nבחר ערוץ כדי לנהל הגדרות ומבצעים, או צור ערוץ חדש.\n\nחיפוש ערוצים\nמאגר ערוצים\n\n2 ערוצים זמינים\n\nמשרד\nפעיל\nBrowser QA Empty Channel\nפעיל\nגוסט\nלייב\nערוצים\nהתראות\nחשבון\nפרטיות\nעזרה\nשעה\n17:30:21\nמערכת\nOK\nבילד\n2026.03\nגרסה\nv0.8.3",
+      "hasChannelsHub": true,
+      "hasSearch": true,
+      "hasRows": 2
+    }
+  }
+}

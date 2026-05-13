@@ -1,7 +1,7 @@
 import type { Channel } from '../types'
 import { httpRequest } from './http-client'
 
-const API_TIMEOUT_MS = 20000
+const API_TIMEOUT_MS = 45000
 
 interface VisionReply {
   text: string
@@ -10,6 +10,38 @@ interface VisionReply {
 
 interface VisionErrorPayload {
   error?: string
+}
+
+const HISTORY_RECALL_PATTERNS = [
+  /\brecall\b/i,
+  /\bremember\b/i,
+  /\bremind\b/i,
+  /\bsummar(?:ize|ise)\b/i,
+  /\bhistory\b/i,
+  /\bearlier\b/i,
+  /\bprevious\b/i,
+  /вспомни/i,
+  /напомни/i,
+  /что было раньше/i,
+  /суммируй/i,
+  /истори/i,
+  /תזכיר/i,
+  /תזכר/i,
+  /תזכור/i,
+  /תזכורת/i,
+  /תסכם/i,
+  /סכם/i,
+  /היסטורי/i,
+  /מה היה קודם/i,
+  /מה היה לפני/i,
+] as const
+
+export function shouldAllowHistoryRecall(prompt: string): boolean {
+  const normalizedPrompt = prompt.trim()
+  if (!normalizedPrompt) {
+    return false
+  }
+  return HISTORY_RECALL_PATTERNS.some((pattern) => pattern.test(normalizedPrompt))
 }
 
 async function parseJsonIfPossible<T>(response: Response): Promise<T | null> {
@@ -33,6 +65,7 @@ export async function requestVisionReply(
   userPrompt: string,
   frameDataUrl: string,
   analysisContext?: string,
+  viewerName?: string,
 ): Promise<VisionReply> {
   const controller = new AbortController()
   const timeoutId = window.setTimeout(() => controller.abort(), API_TIMEOUT_MS)
@@ -53,6 +86,8 @@ export async function requestVisionReply(
         prompt: userPrompt,
         frameDataUrl,
         analysisContext,
+        viewerName,
+        allowHistoryRecall: shouldAllowHistoryRecall(userPrompt),
       }),
     })
 

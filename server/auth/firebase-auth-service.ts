@@ -1,11 +1,14 @@
 import { hashPassword } from '../security/crypto-utils'
 import { adminAuth } from '../lib/firebase-admin'
-import { hasFirebaseProjectConfig } from '../lib/firebase-env'
+import { hasFirebaseProjectConfig, resolveFirebaseProjectId } from '../lib/firebase-env'
 import { USER_ROLES } from '../admin/types'
 import type { IAdminRepository } from '../db/repository-types'
 
 const FIREBASE_AUTH_DOMAIN = 'https://identitytoolkit.googleapis.com/v1'
 const INTERNAL_EMAIL_SUFFIX = '@ghost.internal'
+const KNOWN_FIREBASE_WEB_API_KEYS: Record<string, string> = {
+  'ghost-test-app-b906c': 'AIzaSyBuF9AcPj7W4iRhVuQAuyW00026i4NlhKs',
+}
 
 function isFirebaseAuthEnabled(): boolean {
   return hasFirebaseProjectConfig()
@@ -19,8 +22,17 @@ function buildInternalEmail(username: string): string {
   return `${normalizeUsername(username)}${INTERNAL_EMAIL_SUFFIX}`
 }
 
-function readFirebaseWebApiKey(): string {
-  const apiKey = process.env.GHOST_FIREBASE_WEB_API_KEY?.trim() || process.env.FIREBASE_WEB_API_KEY?.trim()
+function resolveProjectDefaultFirebaseWebApiKey(): string | undefined {
+  const projectId = resolveFirebaseProjectId()
+  return projectId ? KNOWN_FIREBASE_WEB_API_KEYS[projectId] : undefined
+}
+
+export function readFirebaseWebApiKey(): string {
+  const apiKey =
+    process.env.GHOST_FIREBASE_WEB_API_KEY?.trim() ||
+    process.env.FIREBASE_WEB_API_KEY?.trim() ||
+    process.env.VITE_FIREBASE_API_KEY?.trim() ||
+    resolveProjectDefaultFirebaseWebApiKey()
   if (!apiKey) {
     throw new Error('GHOST_FIREBASE_WEB_API_KEY לא הוגדר.')
   }

@@ -1,0 +1,6 @@
+{
+  "theme": "light",
+  "topbarHeight": 100,
+  "rootOverflow": "hidden",
+  "shellOverflow": "hidden"
+}

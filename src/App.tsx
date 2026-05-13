@@ -1,26 +1,28 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { FormEvent, TouchEvent } from 'react'
+import type { CSSProperties, FormEvent, ReactNode, TouchEvent } from 'react'
 import './App.css'
+import './styles/live-ops-chat.css'
+import type { AccountMenuItem } from './components/account-menu'
 import { AppFooter } from './components/app-footer'
-import { AlertsWorkspace } from './components/alerts-workspace'
 import { ChatPanel } from './components/chat-panel'
+import { CriticalAlertsCenter } from './components/critical-alerts-center'
 import { DetailsPanel } from './components/details-panel'
 import { FlashAlertOverlay } from './components/flash-alert-overlay'
 import { GroupNameModal } from './components/group-name-modal'
 import { InboxPanel } from './components/inbox-panel'
-import { OverviewScreen } from './components/overview-screen'
-import { OpsDrawer } from './components/ops-drawer'
 import { ChannelsHub } from './components/channels-hub'
+import { MobileSectionHeader, MobileSurfaceCard, MobileTabBar } from './components/mobile-shell'
+import { BellOutlineIcon, HomeLiveIcon, PhoneChatIcon, RadioWavesIcon, UserIcon, UsersIcon } from './components/chat-icons'
 import { SurfaceDialog } from './components/surface-dialog'
 import { Topbar } from './components/topbar'
-import type { AccountMenuItem } from './components/account-menu'
-import type { TopbarPrimaryNav } from './components/topbar'
+import type { TopbarNavItem } from './components/topbar'
 import {
   DEFAULT_NEW_CHANNEL_DRAFT,
   DEFAULT_OPERATION_DRAFT,
   INBOX_PAGE_SIZE,
   LIVE_STATE_META,
   MAX_TIMELINE_HISTORY_ITEMS,
+  NEAR_BOTTOM_THRESHOLD_PX,
 } from './data/constants'
 import {
   fetchChannels as fetchChannelsFromServer,
@@ -40,6 +42,7 @@ import type {
   Operation,
   OperationDraft,
   OperationMode,
+  OperatorMobileSection,
   TimelineAnalysis,
   TimelineSamplerState,
 } from './types'
@@ -47,7 +50,7 @@ import { useOperationScheduler } from './hooks/use-operation-scheduler'
 import type { OperationFiredPayload } from './hooks/use-operation-scheduler'
 import { useTimelineSampler } from './hooks/use-timeline-sampler'
 import { captureLatestCameraFrame, releaseCameraResources } from './services/camera-frame'
-import { requestLocalAgentCapture } from './services/local-agent-capture'
+import { captureChannelFrame } from './services/channel-capture'
 import { requestOperationScan } from './services/operation-scan'
 import { parseSchedule } from './services/schedule-parser'
 import { requestVisionReply } from './services/vision-chat'
@@ -59,6 +62,9 @@ import { buildCriticalAlerts, hasPendingCriticalAlertsInChannel } from './utils/
 import { consumeChannelAlertPopupSlot } from './utils/alert-popup-rate-limit'
 import { memberNamesFromLinkedChannelIds } from './utils/group-channel'
 import { getCurrentTime, getMinutesSinceTimeLabel } from './utils/time'
+import { createLocalAgentProvisioningSession } from './services/local-agent-provisioning'
+import { getLastVisibleChannelMessage, getVisibleChannelMessages } from './utils/chat-messages'
+import { mergeServerMessagesWithPending, sortMessagesChronologically } from './utils/channel-history'
 
 function buildDefaultTimelineState(): TimelineSamplerState {
   return {
@@ -80,8 +86,31 @@ function formatTimelineHistoryContext(analysisHistory: TimelineAnalysis[]): stri
 }
 
 const CHANNEL_ALERT_POPUP_COOLDOWN_MS = 20_000
-type AppSurface = 'Overview' | 'Live Ops' | 'Channels' | 'Alerts'
-type UtilityPanel = 'command' | 'alerts' | 'support' | 'shortcuts'
+
+interface GhostLiveIntelLine {
+  text: string
+  top: string
+  left: string
+  cycleSec: number
+  delaySec: number
+  fontSizePx: number
+  maxWidth: string
+}
+
+const GHOSTLIVE_INTEL_LINES: GhostLiveIntelLine[] = [
+  { text: 'OPS::queue depth=0 lag=2.4s', top: '8%', left: '3%', cycleSec: 7.6, delaySec: -1.2, fontSizePx: 10, maxWidth: '28ch' },
+  { text: 'WATCH::heartbeat sensor=node-7 ok', top: '14%', left: '82%', cycleSec: 8.8, delaySec: -3.1, fontSizePx: 10, maxWidth: '32ch' },
+  { text: 'NET::latency p50=42ms p99=180ms', top: '22%', left: '6%', cycleSec: 7.1, delaySec: -2.4, fontSizePx: 11, maxWidth: '31ch' },
+  { text: 'FORENSICS::trace span=root sample=1.0', top: '28%', left: '78%', cycleSec: 8.4, delaySec: -4.6, fontSizePx: 10, maxWidth: '36ch' },
+  { text: 'HEALTH::api availability=99.97% window=24h', top: '38%', left: '4%', cycleSec: 7.9, delaySec: -1.7, fontSizePx: 10, maxWidth: '42ch' },
+  { text: 'WATCH::camera=alpha fps=24 codec=h264', top: '46%', left: '81%', cycleSec: 9.2, delaySec: -5.2, fontSizePx: 10, maxWidth: '36ch' },
+  { text: 'SCAN::zone-bravo signature=clean', top: '56%', left: '5%', cycleSec: 8.1, delaySec: -2.8, fontSizePx: 11, maxWidth: '32ch' },
+  { text: 'HEALTH::worker pool=8/8 idle=6', top: '64%', left: '79%', cycleSec: 8.7, delaySec: -6.4, fontSizePx: 10, maxWidth: '30ch' },
+  { text: 'NET::websocket peers=1 reconnect=0', top: '72%', left: '7%', cycleSec: 7.3, delaySec: -3.7, fontSizePx: 10, maxWidth: '34ch' },
+  { text: 'FORENSICS::evidence chain=verified count=12', top: '78%', left: '77%', cycleSec: 6.8, delaySec: -1.1, fontSizePx: 10, maxWidth: '42ch' },
+  { text: 'WATCH::pattern_match result=clear', top: '86%', left: '9%', cycleSec: 9.5, delaySec: -4.3, fontSizePx: 11, maxWidth: '32ch' },
+  { text: 'HEALTH::clock_drift=12ms ntp=synced', top: '92%', left: '75%', cycleSec: 7.4, delaySec: -2.2, fontSizePx: 10, maxWidth: '34ch' },
+]
 
 /**
  * בונה ניסוח אישי ודחוף להתראה קריטית על בסיס תוכן הסריקה בפועל.
@@ -141,30 +170,205 @@ function trackMessage(
 }
 
 interface AppProps {
-  currentUserRole: 'system_manager' | 'regular_user' | 'super_admin'
+  currentUserRole: 'system_manager' | 'regular_user'
   fullName: string
   organizationName: string
-  initialSurface?: AppSurface
-  themeMode?: 'dark' | 'light'
-  onToggleTheme?: () => void
-  onOpenAdmin?: () => void
   onLogout: () => void
+  onToggleTheme: () => void
+  themeMode: 'light' | 'dark'
 }
 
-function App({ currentUserRole, fullName, organizationName, initialSurface = 'Overview', themeMode = 'dark', onToggleTheme, onOpenAdmin, onLogout }: AppProps) {
+type OperatorAccountDialog = 'profile' | 'team' | 'audit' | null
+
+interface QuickAction {
+  id: string
+  title: string
+  description: string
+  keywords: string
+  run: () => void
+}
+
+function formatRoleLabel(role: AppProps['currentUserRole']): string {
+  if (role === 'system_manager') {
+    return 'מנהל מערכת'
+  }
+  return 'משתמש רגיל'
+}
+
+function formatAuthorLabel(author: Message['author']): string {
+  if (author === 'user') {
+    return 'אתה'
+  }
+  if (author === 'system') {
+    return 'GHOST'
+  }
+  return 'GHOST'
+}
+
+function resolveOperatorDisplayName(fullName: string): string {
+  const profile = readAuthProfile()
+  const profileName = [profile?.firstName, profile?.lastName].filter(Boolean).join(' ').trim()
+  const normalizedFullName = fullName.trim()
+  return profileName || profile?.username?.trim() || normalizedFullName || 'Operator'
+}
+
+const PENDING_MESSAGES_STORAGE_KEY = 'ghost_pending_channel_messages'
+
+function readPendingMessagesByChannel(): Record<string, Message[]> {
+  if (typeof window === 'undefined') {
+    return {}
+  }
+  try {
+    const raw = window.localStorage.getItem(PENDING_MESSAGES_STORAGE_KEY)
+    if (!raw) {
+      return {}
+    }
+    return JSON.parse(raw) as Record<string, Message[]>
+  } catch {
+    return {}
+  }
+}
+
+function writePendingMessagesByChannel(messagesByChannel: Record<string, Message[]>): void {
+  if (typeof window === 'undefined') {
+    return
+  }
+  try {
+    window.localStorage.setItem(PENDING_MESSAGES_STORAGE_KEY, JSON.stringify(messagesByChannel))
+  } catch {
+    return
+  }
+}
+
+function queuePendingMessage(channelId: string, message: Message): void {
+  const current = readPendingMessagesByChannel()
+  const existing = current[channelId] ?? []
+  if (existing.some((entry) => entry.id === message.id)) {
+    return
+  }
+  writePendingMessagesByChannel({
+    ...current,
+    [channelId]: [...existing, message],
+  })
+}
+
+function updatePendingMessage(channelId: string, messageId: string, updater: (message: Message) => Message): void {
+  const current = readPendingMessagesByChannel()
+  const existing = current[channelId] ?? []
+  let changed = false
+  const nextMessages = existing.map((entry) => {
+    if (entry.id !== messageId) {
+      return entry
+    }
+    changed = true
+    return updater(entry)
+  })
+  if (!changed) {
+    return
+  }
+  writePendingMessagesByChannel({
+    ...current,
+    [channelId]: nextMessages,
+  })
+}
+
+function clearPendingMessage(channelId: string, messageId: string): void {
+  const current = readPendingMessagesByChannel()
+  const existing = current[channelId] ?? []
+  const nextMessages = existing.filter((entry) => entry.id !== messageId)
+  if (nextMessages.length === existing.length) {
+    return
+  }
+  if (nextMessages.length === 0) {
+    const { [channelId]: _removed, ...rest } = current
+    writePendingMessagesByChannel(rest)
+    return
+  }
+  writePendingMessagesByChannel({
+    ...current,
+    [channelId]: nextMessages,
+  })
+}
+
+function reconcilePendingMessagesByServer(serverChannels: Channel[]): void {
+  const pendingMessagesByChannel = readPendingMessagesByChannel()
+  const nextPendingByChannel: Record<string, Message[]> = {}
+
+  for (const channel of serverChannels) {
+    const pendingMessages = pendingMessagesByChannel[channel.id] ?? []
+    if (pendingMessages.length === 0) {
+      continue
+    }
+    const serverIds = new Set(channel.messages.map((message) => message.id))
+    const remainingMessages = pendingMessages.filter((message) => !serverIds.has(message.id))
+    if (remainingMessages.length > 0) {
+      nextPendingByChannel[channel.id] = remainingMessages
+    }
+  }
+
+  writePendingMessagesByChannel(nextPendingByChannel)
+}
+
+function mergeServerChannelsWithLocalState(serverChannels: Channel[], currentChannels: Channel[]): Channel[] {
+  const currentById = new Map(currentChannels.map((channel) => [channel.id, channel]))
+  const pendingMessagesByChannel = readPendingMessagesByChannel()
+
+  return serverChannels.map((serverChannel) => {
+    const currentChannel = currentById.get(serverChannel.id)
+    const pendingMessages = pendingMessagesByChannel[serverChannel.id] ?? []
+    if (!currentChannel) {
+      return {
+        ...serverChannel,
+        messages: mergeServerMessagesWithPending(serverChannel.messages, pendingMessages),
+        timelineState: buildDefaultTimelineState(),
+      }
+    }
+
+    return {
+      ...serverChannel,
+      unread: currentChannel.unread,
+      messages: mergeServerMessagesWithPending(serverChannel.messages, pendingMessages, currentChannel.messages),
+      timelineState: currentChannel.timelineState ?? buildDefaultTimelineState(),
+      lastFrameDataUrl: currentChannel.lastFrameDataUrl ?? serverChannel.lastFrameDataUrl,
+    }
+  })
+}
+
+function buildGhostRecoveryReply(operatorName: string, error: unknown): string {
+  const rawMessage = error instanceof Error ? error.message : String(error)
+  const normalized = rawMessage.toLowerCase()
+
+  if (normalized.includes('quota') || normalized.includes('billing') || normalized.includes('429')) {
+    return `${operatorName}, איני יכול כרגע להשלים ניתוח חזותי כי קצבת ה-AI של המפתח שהוגדר למערכת נגמרה. ההודעה שלך נשמרה, וכדי להחזיר תשובות מלאות צריך לחדש quota או לעדכן מפתח פעיל.`
+  }
+
+  if (normalized.includes('time') || normalized.includes('timeout') || normalized.includes('המתנה')) {
+    return `${operatorName}, ההודעה שלך נשמרה אבל ניתוח התמונה התעכב מעבר לזמן ההמתנה. נסה שוב בעוד זמן קצר.`
+  }
+
+  return `${operatorName}, ההודעה שלך נשמרה אבל כרגע איני יכול להשלים את ניתוח התמונה בערוץ הזה. נסה שוב בעוד זמן קצר.`
+}
+
+void buildGhostRecoveryReply
+
+function App({ currentUserRole, fullName, onLogout, onToggleTheme, organizationName, themeMode }: AppProps) {
   const canAccessCommandCenter =
-    currentUserRole === 'system_manager' || currentUserRole === 'regular_user' || currentUserRole === 'super_admin'
-  const operatorDisplayName = fullName.trim().split(/\s+/)[0] || fullName
+    currentUserRole === 'system_manager' || currentUserRole === 'regular_user'
+  const operatorDisplayName = resolveOperatorDisplayName(fullName)
   const [channels, setChannels] = useState<Channel[]>([])
   const [selectedChannelId, setSelectedChannelId] = useState<string>('')
   const [isLoadingChannels, setIsLoadingChannels] = useState(true)
+  const [isMobileLayout, setIsMobileLayout] = useState(false)
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>('chat')
+  const [operatorMobileSection, setOperatorMobileSection] = useState<OperatorMobileSection>('live')
+  const [channelsHubMobileInitialView, setChannelsHubMobileInitialView] = useState<'list' | 'channel-details' | 'operations' | 'create-operation'>('list')
+  const [channelsHubMobileInitialViewToken, setChannelsHubMobileInitialViewToken] = useState(0)
   const [isDetailsCollapsed, setIsDetailsCollapsed] = useState(true)
-  const [isOpsDrawerOpen, setIsOpsDrawerOpen] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [liveOpsFilter, setLiveOpsFilter] = useState<'all' | 'live' | 'attention' | 'groups' | 'offline'>('all')
+  const [inboxSearchFocusToken, setInboxSearchFocusToken] = useState(0)
   const [visibleChannelsCount, setVisibleChannelsCount] = useState(INBOX_PAGE_SIZE)
+  const [isNearBottom, setIsNearBottom] = useState(true)
   const [messageDraft, setMessageDraft] = useState('')
   const [operationDraft, setOperationDraft] = useState(DEFAULT_OPERATION_DRAFT)
   const [newChannelDraft, setNewChannelDraft] = useState(DEFAULT_NEW_CHANNEL_DRAFT)
@@ -175,16 +379,21 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
   const [pendingGroupChannelIds, setPendingGroupChannelIds] = useState<string[]>([])
   const [groupNameDraft, setGroupNameDraft] = useState('')
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [activeSurface, setActiveSurface] = useState<AppSurface>(initialSurface)
+  const [activeTopbarNav, setActiveTopbarNav] = useState<TopbarNavItem>('Ghost Live')
   const [flashAlert, setFlashAlert] = useState<{ channelName: string; operationName: string; summary: string } | null>(null)
   const [alertingChannelIds, setAlertingChannelIds] = useState<Set<string>>(new Set())
-  const [activeUtilityPanel, setActiveUtilityPanel] = useState<UtilityPanel | null>(null)
+  const [isAlertsCenterOpen, setIsAlertsCenterOpen] = useState(false)
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false)
   const [issueTitle, setIssueTitle] = useState('')
   const [issueDescription, setIssueDescription] = useState('')
   const [issueSeverity, setIssueSeverity] = useState<'low' | 'medium' | 'high' | 'critical'>('medium')
   const [issueSubmitError, setIssueSubmitError] = useState('')
   const [issueSubmitSuccess, setIssueSubmitSuccess] = useState('')
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false)
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false)
+  const [isSupportOpen, setIsSupportOpen] = useState(false)
+  const [commandQuery, setCommandQuery] = useState('')
+  const [activeAccountDialog, setActiveAccountDialog] = useState<OperatorAccountDialog>(null)
   const [criticalAlertStatusByMessageId, setCriticalAlertStatusByMessageId] = useState<Record<string, CriticalAlertStatus>>({})
   const lastFlashAlertByChannelRef = useRef<Map<string, number>>(new Map())
   const messageStreamRef = useRef<HTMLDivElement>(null)
@@ -192,83 +401,110 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
   const touchStartYRef = useRef<number | null>(null)
   const touchTargetIsInteractiveRef = useRef(false)
 
-  const applyServerChannels = useCallback((serverChannels: Channel[]) => {
-    setChannels(serverChannels)
-    setSelectedChannelId((currentId) => {
-      if (currentId && serverChannels.some((channel) => channel.id === currentId)) {
-        return currentId
+  useEffect(() => {
+    let cancelled = false
+    let isFirstLoad = true
+
+    async function refreshChannels(showLoading = false) {
+      if (showLoading) {
+        setIsLoadingChannels(true)
       }
-      return serverChannels[0]?.id ?? ''
-    })
-    if (serverChannels.length === 0) {
-      setActiveSurface('Channels')
-      setShowNewChannelForm(true)
+
+      try {
+        const serverChannels = await fetchChannelsFromServer()
+        if (cancelled) {
+          return
+        }
+
+        reconcilePendingMessagesByServer(serverChannels)
+        setChannels((currentChannels) => mergeServerChannelsWithLocalState(serverChannels, currentChannels))
+        setSelectedChannelId((currentChannelId) => {
+          if (serverChannels.some((channel) => channel.id === currentChannelId)) {
+            return currentChannelId
+          }
+          return serverChannels[0]?.id ?? ''
+        })
+
+        if (isFirstLoad && serverChannels.length === 0) {
+          setActiveTopbarNav('Command Center')
+          setShowNewChannelForm(true)
+        }
+      } catch {
+        return
+      } finally {
+        isFirstLoad = false
+        if (!cancelled && showLoading) {
+          setIsLoadingChannels(false)
+        }
+      }
+    }
+
+    void refreshChannels(true)
+    const pollTimer = window.setInterval(() => {
+      void refreshChannels(false)
+    }, 15_000)
+
+    return () => {
+      cancelled = true
+      window.clearInterval(pollTimer)
     }
   }, [])
 
   useEffect(() => {
-    let cancelled = false
-    setIsLoadingChannels(true)
-    fetchChannelsFromServer()
-      .then((serverChannels) => {
-        if (cancelled) return
-        applyServerChannels(serverChannels)
-      })
-      .catch(() => undefined)
-      .finally(() => { if (!cancelled) setIsLoadingChannels(false) })
-    return () => { cancelled = true }
-  }, [applyServerChannels])
+    if (typeof window === 'undefined') {
+      return undefined
+    }
 
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      fetchChannelsFromServer()
-        .then((serverChannels) => applyServerChannels(serverChannels))
-        .catch(() => undefined)
-    }, 15_000)
-    return () => window.clearInterval(timer)
-  }, [applyServerChannels])
+    const mediaQuery = window.matchMedia('(max-width: 980px)')
+    const applyMatch = (matches: boolean) => setIsMobileLayout(matches)
+    applyMatch(mediaQuery.matches)
+
+    const handleChange = (event: MediaQueryListEvent) => applyMatch(event.matches)
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [])
 
   useEffect(() => {
     const viewParam = new URLSearchParams(window.location.search).get('view')
-    if (viewParam === 'live') {
-      setActiveSurface('Live Ops')
-      return
-    }
     if (viewParam === 'channels' && canAccessCommandCenter) {
-      setActiveSurface('Channels')
-      return
-    }
-    if (viewParam === 'alerts') {
-      setActiveSurface('Alerts')
+      setActiveTopbarNav('Command Center')
     }
   }, [canAccessCommandCenter])
 
   useEffect(() => {
     const url = new URL(window.location.href)
-    if (activeSurface === 'Channels') {
+    if (activeTopbarNav === 'Command Center') {
       url.searchParams.set('view', 'channels')
-    } else if (activeSurface === 'Live Ops') {
-      url.searchParams.set('view', 'live')
-    } else if (activeSurface === 'Alerts') {
-      url.searchParams.set('view', 'alerts')
     } else {
       url.searchParams.delete('view')
     }
     window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`)
-  }, [activeSurface])
-
-  useEffect(() => {
-    setActiveSurface(initialSurface)
-  }, [initialSurface])
+  }, [activeTopbarNav])
 
   useEffect(() => {
     if (canAccessCommandCenter) {
       return
     }
-    if (activeSurface === 'Channels') {
-      setActiveSurface('Live Ops')
+    if (activeTopbarNav === 'Command Center') {
+      setActiveTopbarNav('Ghost Live')
     }
-  }, [activeSurface, canAccessCommandCenter])
+  }, [activeTopbarNav, canAccessCommandCenter])
+
+  useEffect(() => {
+    function handleQuickCommandShortcut(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setCommandQuery('')
+        setIsShortcutsOpen(false)
+        setIsSupportOpen(false)
+        setActiveAccountDialog(null)
+        setIsCommandPaletteOpen(true)
+      }
+    }
+
+    window.addEventListener('keydown', handleQuickCommandShortcut)
+    return () => window.removeEventListener('keydown', handleQuickCommandShortcut)
+  }, [])
 
   /**
    * סט מזהי ערוצים שצורפו לקבוצה כלשהי — אסור שיופיעו ברשימה הראשית.
@@ -278,7 +514,7 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
     const ids = new Set<string>()
     channels.forEach((ch) => ch.linkedChannelIds?.forEach((id) => ids.add(id)))
     return ids
-  }, [channels])
+  }, [channels, operatorDisplayName])
 
   const sortedFilteredChannels = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
@@ -295,24 +531,7 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
 
         const messagesText = channel.messages.map((m) => m.text).join(' ')
         const haystack = `${channel.name} ${channel.location} ${channel.watchScope} ${channel.members.join(' ')} ${messagesText}`.toLowerCase()
-        const matchesQuery = haystack.includes(query)
-        if (!matchesQuery) {
-          return false
-        }
-
-        if (liveOpsFilter === 'live') {
-          return channel.liveState === 'LIVE'
-        }
-        if (liveOpsFilter === 'attention') {
-          return channel.liveState === 'DEGRADED' || channel.unread > 0
-        }
-        if (liveOpsFilter === 'groups') {
-          return channel.type === 'group'
-        }
-        if (liveOpsFilter === 'offline') {
-          return channel.liveState === 'OFFLINE'
-        }
-        return true
+        return haystack.includes(query)
       })
       .sort((a, b) => {
         if (b.unread !== a.unread) {
@@ -323,11 +542,11 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
         if (aPriority !== bPriority) {
           return aPriority - bPriority
         }
-        const aLast = getMinutesSinceTimeLabel(a.messages.at(-1)?.time ?? '00:00')
-        const bLast = getMinutesSinceTimeLabel(b.messages.at(-1)?.time ?? '00:00')
+        const aLast = getMinutesSinceTimeLabel(getLastVisibleChannelMessage(a)?.time ?? '00:00')
+        const bLast = getMinutesSinceTimeLabel(getLastVisibleChannelMessage(b)?.time ?? '00:00')
         return aLast - bLast
       })
-  }, [channels, searchQuery, linkedChannelIdSet, liveOpsFilter])
+  }, [channels, searchQuery, linkedChannelIdSet])
 
   /**
    * ערוצים זמינים לצירוף בטופס קבוצה — רק personal שעדיין לא שייכים לקבוצה.
@@ -340,7 +559,7 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
   const EMPTY_CHANNEL: Channel = useMemo(() => ({
     id: '', name: '', type: 'personal', subtitle: '', location: '',
     watchScope: '', description: '', memoryInterval: 30, rtspFeed: '',
-    unread: 0, liveState: 'OFFLINE', captureMode: 'browser', members: [], messages: [], operations: [],
+    unread: 0, liveState: 'OFFLINE', members: [], messages: [], operations: [],
   }), [])
 
   const selectedChannel: Channel = useMemo(
@@ -350,42 +569,12 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
 
   useEffect(() => () => releaseCameraResources(), [])
 
-  const captureFrameForChannel = useCallback(
-    async (
-      channel: Channel,
-      profile: 'scan-low' | 'scan-standard' | 'chat-high',
-      purpose: 'chat' | 'timeline' | 'preview',
-    ): Promise<string> => {
-      if (channel.captureMode === 'local_agent') {
-        if (channel.localAgentStatus?.state !== 'connected') {
-          throw new Error('This channel is waiting for its bound local client. Reconnect that client and try again.')
-        }
-        const frameDataUrl = await requestLocalAgentCapture(channel, { profile, purpose })
-        updateChannelById(channel.id, (currentChannel) => ({
-          ...currentChannel,
-          cameraEnabled: true,
-          lastFrameDataUrl: frameDataUrl,
-        }))
-        return frameDataUrl
-      }
-
-      const frameDataUrl = await captureLatestCameraFrame(profile)
-      updateChannelById(channel.id, (currentChannel) => ({
-        ...currentChannel,
-        cameraEnabled: true,
-        lastFrameDataUrl: frameDataUrl,
-      }))
-      return frameDataUrl
-    },
-    [],
-  )
-
   useEffect(() => {
     const stream = messageStreamRef.current
-    if (stream) {
+    if (stream && isNearBottom) {
       stream.scrollTo({ top: stream.scrollHeight, behavior: 'smooth' })
     }
-  }, [selectedChannel.messages.length, selectedChannelId])
+  }, [selectedChannel.messages.length, selectedChannelId, isNearBottom])
 
   const totalOperations = useMemo(
     () => channels.reduce((count, channel) => count + channel.operations.filter((operation) => operation.enabled).length, 0),
@@ -401,30 +590,157 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
     () => buildCriticalAlerts(channels, criticalAlertStatusByMessageId),
     [channels, criticalAlertStatusByMessageId],
   )
-  const navItems = useMemo(
+  const operatorMembers = useMemo(() => {
+    const members = new Set<string>()
+    channels.forEach((channel) => {
+      channel.members.forEach((member) => {
+        const normalized = member.trim()
+        if (normalized) {
+          members.add(normalized)
+        }
+      })
+    })
+    return Array.from(members).sort((left, right) => left.localeCompare(right))
+  }, [channels])
+  const operatorRecentActivity = useMemo(() => {
+    return [...channels]
+      .flatMap((channel) =>
+        getVisibleChannelMessages(channel).slice(-3).map((message) => ({
+          id: `${channel.id}_${message.id}`,
+          channelName: channel.name,
+          author: message.author,
+          text: message.text,
+          time: message.time,
+        })),
+      )
+      .slice(-8)
+      .reverse()
+  }, [channels])
+
+  function closeTopbarOverlays() {
+    setIsCommandPaletteOpen(false)
+    setIsShortcutsOpen(false)
+    setIsSupportOpen(false)
+  }
+
+  function openCommandPalette() {
+    setCommandQuery('')
+    setIsShortcutsOpen(false)
+    setIsSupportOpen(false)
+    setActiveAccountDialog(null)
+    setIsCommandPaletteOpen(true)
+  }
+
+  function openIssueReport() {
+    closeTopbarOverlays()
+    setActiveAccountDialog(null)
+    setIsIssueModalOpen(true)
+  }
+
+  const operatorAccountMenuItems = useMemo<AccountMenuItem[]>(
     () => [
-      { id: 'Overview', label: 'סקירה' },
-      { id: 'Live Ops', label: 'פעילות חיה' },
-      { id: 'Channels', label: 'ערוצים', disabled: !canAccessCommandCenter },
-      { id: 'Alerts', label: 'התראות' },
+      { id: 'profile', label: 'פרופיל אישי', icon: '◈', section: 'main' },
+      { id: 'team', label: 'צוות וחברים', icon: '⊞', section: 'main' },
+      { id: 'notifications', label: 'התראות', icon: '◉', section: 'main' },
+      { id: 'audit', label: 'יומן פעילות', icon: '≡', section: 'dev' },
+      { id: 'logout', label: 'יציאה מהמערכת', icon: '⏻', section: 'danger', tone: 'danger' },
     ],
-    [canAccessCommandCenter],
+    [],
   )
-  const topbarAccountItems = useMemo<AccountMenuItem[]>(() => {
-    const baseItems: AccountMenuItem[] = [
-      { id: 'channels', label: 'ערוצים', icon: '▤' },
-      { id: 'alerts', label: 'התראות', icon: '◉' },
-      { id: 'help', label: 'עזרה ותמיכה', icon: '?' },
-    ]
 
-    if (currentUserRole === 'super_admin') {
-      baseItems.splice(2, 0, { id: 'admin', label: 'ניהול', icon: '⌂' })
+  function handleAccountAction(itemId: string) {
+    closeTopbarOverlays()
+    if (itemId === 'notifications') {
+      setIsAlertsCenterOpen(true)
+      return
     }
+    if (itemId === 'logout') {
+      onLogout()
+      return
+    }
+    if (itemId === 'profile' || itemId === 'team' || itemId === 'audit') {
+      setActiveAccountDialog(itemId)
+    }
+  }
 
-    baseItems.push({ id: 'logout', label: 'יציאה מהמערכת', icon: '⏻', danger: true })
-    return baseItems
-  }, [currentUserRole])
-  const activePrimaryNav: TopbarPrimaryNav = activeSurface === 'Live Ops' ? 'ghost-live' : 'command-center'
+  const operatorQuickActions = useMemo<QuickAction[]>(
+    () => [
+      {
+        id: 'ghost-live',
+        title: 'גוסט לייב',
+        description: 'פתח את סביבת הניטור החיה.',
+        keywords: 'ghost live workspace chat monitor',
+        run: () => {
+          closeTopbarOverlays()
+          if (isMobileLayout) {
+            setOperatorMobileSection('live')
+          }
+          setActiveTopbarNav('Ghost Live')
+        },
+      },
+      {
+        id: 'command-center',
+        title: 'מרכז פיקוד',
+        description: 'פתח ניהול ערוצים ומבצעים.',
+        keywords: 'command center channels operations settings',
+        run: () => {
+          closeTopbarOverlays()
+          if (isMobileLayout) {
+            setOperatorMobileSection('live')
+          }
+          setActiveTopbarNav('Command Center')
+        },
+      },
+      {
+        id: 'alerts',
+        title: 'התראות קריטיות',
+        description: 'סקור התראות קריטיות שלא טופלו.',
+        keywords: 'alerts notifications critical',
+        run: () => {
+          closeTopbarOverlays()
+          if (isMobileLayout) {
+            setOperatorMobileSection('alerts')
+            return
+          }
+          setIsAlertsCenterOpen(true)
+        },
+      },
+      {
+        id: 'issue-report',
+        title: 'דווח על תקלה',
+        description: 'שלח דיווח תקלה להנהלת Ghost.',
+        keywords: 'support help issue bug report',
+        run: () => {
+          openIssueReport()
+        },
+      },
+      {
+        id: 'channel-details',
+        title: 'פתח פרטי ערוץ',
+        description: `בדוק את ההגדרות והמבצעים של ${selectedChannel.name || 'הערוץ הנבחר'}.`,
+        keywords: 'details selected channel sidebar settings',
+        run: () => {
+          closeTopbarOverlays()
+          if (isMobileLayout) {
+            setOperatorMobileSection('live')
+          }
+          setIsDetailsCollapsed(false)
+          setMobilePanel('details')
+        },
+      },
+    ],
+    [isMobileLayout, selectedChannel.name],
+  )
+
+  const filteredOperatorQuickActions = useMemo(() => {
+    const normalizedQuery = commandQuery.trim().toLowerCase()
+    if (!normalizedQuery) {
+      return operatorQuickActions
+    }
+    return operatorQuickActions.filter((action) =>
+      `${action.title} ${action.description} ${action.keywords}`.toLowerCase().includes(normalizedQuery),
+    )
+  }, [commandQuery, operatorQuickActions])
 
   function updateSelectedChannel<K extends keyof Channel>(field: K, value: Channel[K]) {
     setChannels((currentChannels) =>
@@ -441,7 +757,7 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
   function selectChannel(channelId: string) {
     setSelectedChannelId(channelId)
     setMobilePanel('chat')
-    setIsOpsDrawerOpen(false)
+    setIsNearBottom(true)
     setAlertingChannelIds((prev) => {
       if (!prev.has(channelId)) {
         return prev
@@ -450,6 +766,30 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
       next.delete(channelId)
       return next
     })
+  }
+
+  function focusInboxSearch() {
+    setActiveTopbarNav('Ghost Live')
+    setMobilePanel('inbox')
+    setInboxSearchFocusToken((currentValue) => currentValue + 1)
+  }
+
+  function openSelectedChannelDetails() {
+    setActiveTopbarNav('Ghost Live')
+    setIsDetailsCollapsed(false)
+    setMobilePanel('details')
+  }
+
+  function handleInboxCreateChat() {
+    if (canAccessCommandCenter) {
+      setActiveTopbarNav('Command Center')
+      return
+    }
+    focusInboxSearch()
+  }
+
+  function handleInboxMoreOptions() {
+    openCommandPalette()
   }
 
   function clearChannelAlertingIfResolved(
@@ -482,6 +822,61 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
     )
   }
 
+  function appendLocalMessage(channelId: string, message: Message): void {
+    updateChannelById(channelId, (channel) => {
+      const withoutDuplicate = channel.messages.filter((entry) => entry.id !== message.id)
+      const withoutSupersededReply =
+        channel.type === 'personal' && message.author === 'ghost' && message.replyToMessageId
+          ? withoutDuplicate.filter(
+              (entry) =>
+                !(
+                  entry.author === 'ghost' &&
+                  entry.replyToMessageId === message.replyToMessageId &&
+                  entry.id !== message.id
+                ),
+            )
+          : withoutDuplicate
+
+      return {
+        ...channel,
+        unread: 0,
+        messages: sortMessagesChronologically([...withoutSupersededReply, message]),
+      }
+    })
+  }
+
+  function markLocalMessageStatus(
+    channelId: string,
+    messageId: string,
+    syncStatus: NonNullable<Message['syncStatus']>,
+  ): void {
+    updateChannelById(channelId, (channel) => ({
+      ...channel,
+      messages: channel.messages.map((message) =>
+        message.id === messageId ? { ...message, syncStatus } : message,
+      ),
+    }))
+  }
+
+  function persistChannelMessage(channelId: string, message: Message): void {
+    queuePendingMessage(channelId, message)
+    saveMessage(channelId, message)
+      .then((savedMessage) => {
+        clearPendingMessage(channelId, message.id)
+        appendLocalMessage(channelId, {
+          ...savedMessage,
+          syncStatus: 'confirmed',
+        })
+      })
+      .catch(() => {
+        updatePendingMessage(channelId, message.id, (entry) => ({
+          ...entry,
+          syncStatus: 'failed',
+        }))
+        markLocalMessageStatus(channelId, message.id, 'failed')
+      })
+  }
+
   function buildScanMessage(
     mode: OperationMode,
     operationName: string,
@@ -493,7 +888,7 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
     channelLocation?: string,
   ): Message {
     const time = getCurrentTime()
-    const base = { id: crypto.randomUUID(), author: 'system' as const, time }
+    const base = { id: crypto.randomUUID(), author: 'system' as const, time, createdAtIso: new Date().toISOString() }
     const shouldAttachFrameToMessage = mode === 'alert' && Boolean(critical) && Boolean(frameDataUrl)
 
     switch (mode) {
@@ -581,19 +976,10 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
   const { nextRunAt } = useOperationScheduler({ channels, onOperationFired: handleOperationFired })
   const { samplerStates, startSampling, stopSampling, getSamplerState } = useTimelineSampler({
     channels,
-    captureFrameForChannel: (channel) => captureFrameForChannel(channel, 'scan-standard', 'timeline'),
-    onCaptureError: ({ channelId, error }) => {
+    onFrameCaptured: ({ channelId, frameDataUrl }) => {
       updateChannelById(channelId, (channel) => ({
         ...channel,
-        messages: [
-          ...channel.messages,
-          {
-            id: crypto.randomUUID(),
-            author: 'system',
-            text: error,
-            time: getCurrentTime(),
-          },
-        ],
+        lastFrameDataUrl: frameDataUrl,
       }))
     },
     onAnalysisComplete: ({ channelId, analysis }) => {
@@ -612,6 +998,7 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
               author: 'system',
               text: `ניתוח ציר-זמן הושלם (${analysis.frameCount} פריימים): ${analysis.summary}`,
               time: getCurrentTime(),
+              createdAtIso: new Date().toISOString(),
               alertLevel: 'routine',
             },
           ],
@@ -654,6 +1041,7 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
    */
   async function handleGroupMessageReplies(
     groupChannel: Channel,
+    userMessageId: string,
     userPrompt: string,
     frameDataUrl: string,
     analysisContext?: string,
@@ -664,19 +1052,19 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
       .filter((ch): ch is Channel => ch !== undefined)
 
     if (linkedChannels.length === 0) {
-      const reply = await requestVisionReply(groupChannel, userPrompt, frameDataUrl, analysisContext)
+      const reply = await requestVisionReply(groupChannel, userPrompt, frameDataUrl, analysisContext, operatorDisplayName)
       const ghostMessage: Message = {
         id: crypto.randomUUID(),
-        author: 'ghost',
+        author: 'system',
         text: reply.text,
         time: getCurrentTime(),
+        createdAtIso: new Date().toISOString(),
+        replyToMessageId: userMessageId,
         sources: reply.sources,
+        syncStatus: 'pending',
       }
-      updateChannelById(groupChannel.id, (channel) => ({
-        ...channel,
-        messages: [...channel.messages, ghostMessage],
-      }))
-      saveMessage(groupChannel.id, ghostMessage).catch(() => undefined)
+      appendLocalMessage(groupChannel.id, ghostMessage)
+      persistChannelMessage(groupChannel.id, ghostMessage)
       trackMessage(groupChannel.id, 'incoming', 'ghost')
       return
     }
@@ -688,38 +1076,37 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
           userPrompt,
           frameDataUrl,
           analysisContext,
+          operatorDisplayName,
         )
         return {
           channelName: linkedChannel.name,
           text: reply.text,
-          success: true,
+          sources: reply.sources,
         }
       } catch (error) {
-        return {
-          channelName: linkedChannel.name,
-          text: `שגיאה בקבלת תשובה: ${error instanceof Error ? error.message : 'שגיאה לא ידועה'}`,
-          success: false,
-        }
+        console.error(`Failed to generate group reply for ${linkedChannel.name}`, error)
+        return null
       }
     })
 
-    const replies = await Promise.all(replyPromises)
+    const replies: Array<{ channelName: string; text: string; sources?: string[] }> = (
+      await Promise.all(replyPromises)
+    ).flatMap((reply) => (reply ? [reply] : []))
 
     const ghostMessages: Message[] = replies.map((reply) => ({
       id: crypto.randomUUID(),
       author: 'ghost' as const,
       text: reply.text,
       time: getCurrentTime(),
-      sources: [reply.channelName],
-    }))
-
-    updateChannelById(groupChannel.id, (channel) => ({
-      ...channel,
-      messages: [...channel.messages, ...ghostMessages],
+      createdAtIso: new Date().toISOString(),
+      replyToMessageId: userMessageId,
+      sources: reply.sources?.length ? reply.sources : [reply.channelName],
+      syncStatus: 'pending',
     }))
 
     for (const msg of ghostMessages) {
-      saveMessage(groupChannel.id, msg).catch(() => undefined)
+      appendLocalMessage(groupChannel.id, msg)
+      persistChannelMessage(groupChannel.id, msg)
       trackMessage(groupChannel.id, 'incoming', 'ghost')
     }
   }
@@ -746,20 +1133,35 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
       author: 'user',
       text: trimmedMessage,
       time: timestamp,
+      createdAtIso: new Date().toISOString(),
+      syncStatus: 'pending',
     }
 
     setMessageDraft('')
     setMobilePanel('chat')
-    updateChannelById(selectedChannel.id, (channel) => ({
-      ...channel,
-      unread: 0,
-      messages: [...channel.messages, userMessage],
-    }))
-    saveMessage(selectedChannel.id, userMessage).catch(() => undefined)
+    setIsNearBottom(true)
+    appendLocalMessage(selectedChannel.id, userMessage)
+    persistChannelMessage(selectedChannel.id, userMessage)
     trackMessage(selectedChannel.id, 'outgoing', 'user')
 
     try {
-      const latestFrameDataUrl = await captureFrameForChannel(selectedChannel, 'chat-high', 'chat')
+      let latestFrameDataUrl = selectedChannel.lastFrameDataUrl
+      try {
+        latestFrameDataUrl = await captureChannelFrame(selectedChannel, {
+          profile: 'chat-high',
+          purpose: 'chat',
+        })
+      } catch (captureError) {
+        if (!latestFrameDataUrl) {
+          throw captureError
+        }
+        console.warn('Chat capture fell back to cached frame', captureError)
+      }
+      updateChannelById(selectedChannel.id, (channel) => ({
+        ...channel,
+        cameraEnabled: true,
+        lastFrameDataUrl: latestFrameDataUrl,
+      }))
 
       const analysisHistory = selectedChannel.timelineState?.analysisHistory ?? []
       const analysisContext = analysisHistory.length > 0 ? formatTimelineHistoryContext(analysisHistory) : undefined
@@ -770,23 +1172,22 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
         selectedChannel.linkedChannelIds.length > 0
 
       if (isGroup) {
-        await handleGroupMessageReplies(selectedChannel, trimmedMessage, latestFrameDataUrl, analysisContext)
+        await handleGroupMessageReplies(selectedChannel, userMessage.id, trimmedMessage, latestFrameDataUrl, analysisContext)
       } else {
-        const reply = await requestVisionReply(selectedChannel, trimmedMessage, latestFrameDataUrl, analysisContext)
+        const reply = await requestVisionReply(selectedChannel, trimmedMessage, latestFrameDataUrl, analysisContext, operatorDisplayName)
         const ghostMessage: Message = {
           id: crypto.randomUUID(),
           author: 'ghost',
           text: reply.text,
           time: getCurrentTime(),
+          createdAtIso: new Date().toISOString(),
+          replyToMessageId: userMessage.id,
           sources: reply.sources,
+          syncStatus: 'pending',
         }
 
-        updateChannelById(selectedChannel.id, (channel) => ({
-          ...channel,
-          unread: 0,
-          messages: [...channel.messages, ghostMessage],
-        }))
-        saveMessage(selectedChannel.id, ghostMessage).catch(() => undefined)
+        appendLocalMessage(selectedChannel.id, ghostMessage)
+        persistChannelMessage(selectedChannel.id, ghostMessage)
         trackMessage(selectedChannel.id, 'incoming', 'ghost')
       }
 
@@ -817,28 +1218,28 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
           if (scanMessages.length > 0) {
             updateChannelById(selectedChannel.id, (channel) => ({
               ...channel,
-              messages: [...channel.messages, ...scanMessages],
+              messages: sortMessagesChronologically([...channel.messages, ...scanMessages]),
             }))
             for (const msg of scanMessages) {
-              saveMessage(selectedChannel.id, msg).catch(() => undefined)
+              persistChannelMessage(selectedChannel.id, {
+                ...msg,
+                syncStatus: 'pending',
+              })
             }
             trackMessage(selectedChannel.id, 'incoming', 'operation', scanMessages.length)
           }
         } catch (scanError) {
           const scanErrText =
             scanError instanceof Error ? scanError.message : 'שגיאה לא צפויה בסריקת מבצעים.'
-          updateChannelById(selectedChannel.id, (channel) => ({
-            ...channel,
-            messages: [
-              ...channel.messages,
-              {
-                id: crypto.randomUUID(),
-                author: 'system',
-                text: `לא הושלמה סריקת המבצעים המופעלים: ${scanErrText}`,
-                time: getCurrentTime(),
-              },
-            ],
-          }))
+          const scanFailureMessage: Message = {
+            id: crypto.randomUUID(),
+            author: 'system',
+            text: `לא הושלמה סריקת המבצעים המופעלים: ${scanErrText}`,
+            time: getCurrentTime(),
+            createdAtIso: new Date().toISOString(),
+          }
+          appendLocalMessage(selectedChannel.id, scanFailureMessage)
+          trackMessage(selectedChannel.id, 'incoming', 'system')
         }
       }
     } catch (error) {
@@ -851,14 +1252,16 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
         author: 'system',
         text: `שגיאה בניתוח תמונה: ${errorText}`,
         time: getCurrentTime(),
+        createdAtIso: new Date().toISOString(),
       }
+      appendLocalMessage(selectedChannel.id, systemMessage)
+      trackMessage(selectedChannel.id, 'incoming', 'system')
 
       updateChannelById(selectedChannel.id, (channel) => ({
         ...channel,
         cameraEnabled: false,
-        messages: [...channel.messages, systemMessage],
       }))
-      trackMessage(selectedChannel.id, 'incoming', 'system')
+      console.error('Vision reply flow failed', error)
     } finally {
       setIsSending(false)
     }
@@ -958,9 +1361,7 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
       memoryInterval,
       rtspFeed: newChannelDraft.rtspFeed.trim() || 'rtsp://',
       unread: 0,
-      liveState: newChannelDraft.type === 'group' ? 'SYNC' : 'OFFLINE',
-      captureMode: 'browser',
-      cameraEnabled: false,
+      liveState: newChannelDraft.type === 'group' ? 'SYNC' : 'LIVE',
       linkedChannelIds:
         newChannelDraft.type === 'group' && linkedIds.length > 0 ? linkedIds : undefined,
       members,
@@ -970,10 +1371,20 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
           author: 'system',
           text: systemIntro,
           time: getCurrentTime(),
+          createdAtIso: new Date().toISOString(),
         },
       ],
       operations: [],
       timelineState: buildDefaultTimelineState(),
+    }
+
+    let initialFrameDataUrl: string | undefined
+    let cameraEnabled = false
+    try {
+      initialFrameDataUrl = await captureLatestCameraFrame('scan-standard')
+      cameraEnabled = true
+    } catch {
+      cameraEnabled = false
     }
 
     setShowNewChannelForm(false)
@@ -983,9 +1394,14 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
     setMobilePanel('chat')
 
     try {
-      const serverChannel = await createChannelApi(nextChannel)
+      const serverChannel = await createChannelApi({
+        ...nextChannel,
+        cameraEnabled,
+      })
       const withLocalData: Channel = {
         ...serverChannel,
+        cameraEnabled,
+        lastFrameDataUrl: initialFrameDataUrl,
         messages: nextChannel.messages,
         operations: [],
         timelineState: buildDefaultTimelineState(),
@@ -996,7 +1412,7 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
         saveMessage(serverChannel.id, msg).catch(() => undefined)
       }
     } catch {
-      const fallback: Channel = { ...nextChannel }
+      const fallback: Channel = { ...nextChannel, cameraEnabled, lastFrameDataUrl: initialFrameDataUrl }
       setChannels((currentChannels) => [fallback, ...currentChannels])
       setSelectedChannelId(nextChannel.id)
     }
@@ -1243,6 +1659,7 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
           author: 'system',
           text: `נוצרה קבוצה «${groupName.trim()}» עם ${members.length} ערוצים: ${members.join(' · ')}.`,
           time: getCurrentTime(),
+          createdAtIso: new Date().toISOString(),
         },
       ],
       operations: [],
@@ -1305,6 +1722,16 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
       clearChannelAlertingIfResolved(channelId, nextMap)
       return nextMap
     })
+  }
+
+  function handleMessageStreamScroll() {
+    const stream = messageStreamRef.current
+    if (!stream) {
+      return
+    }
+
+    const distanceFromBottom = stream.scrollHeight - stream.scrollTop - stream.clientHeight
+    setIsNearBottom(distanceFromBottom <= NEAR_BOTTOM_THRESHOLD_PX)
   }
 
   function isMobileViewport(): boolean {
@@ -1422,37 +1849,52 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
     })
   }
 
-  function handleBottomNavChange(panel: MobilePanel) {
-    if (activeSurface !== 'Live Ops') {
-      setActiveSurface('Live Ops')
+  function handleLiveOpsPanelChange(panel: MobilePanel) {
+    setOperatorMobileSection('live')
+    if (activeTopbarNav !== 'Ghost Live') {
+      setActiveTopbarNav('Ghost Live')
     }
+    setIsDetailsCollapsed(panel !== 'details')
     setMobilePanel(panel)
   }
 
-  function handleTopbarNavChange(nextNav: TopbarPrimaryNav) {
-    if (nextNav === 'ghost-live') {
-      setActiveSurface('Live Ops')
-      return
-    }
-    setActiveSurface('Overview')
+  function handleBottomNavChange(panel: MobilePanel) {
+    handleLiveOpsPanelChange(panel)
   }
 
-  function handleTopbarAccountAction(actionId: string) {
-    if (actionId === 'channels' && canAccessCommandCenter) {
-      setActiveSurface('Channels')
+  function handleOperatorMobileSectionChange(section: OperatorMobileSection) {
+    closeTopbarOverlays()
+    setOperatorMobileSection(section)
+
+    if (section === 'live' && activeTopbarNav !== 'Ghost Live') {
+      setActiveTopbarNav('Ghost Live')
+    }
+
+    if (section === 'channels' && canAccessCommandCenter) {
+      setActiveTopbarNav('Command Center')
+    }
+  }
+
+  function openMobileChannelsHub(view: 'list' | 'channel-details' | 'operations' | 'create-operation') {
+    setChannelsHubMobileInitialView(view)
+    setChannelsHubMobileInitialViewToken((current) => current + 1)
+    setOperatorMobileSection('channels')
+    if (canAccessCommandCenter) {
+      setActiveTopbarNav('Command Center')
+    }
+  }
+
+  function handleTopbarNavChange(nextNav: TopbarNavItem) {
+    if (nextNav === 'Command Center' && !canAccessCommandCenter) {
       return
     }
-    if (actionId === 'alerts') {
-      setActiveSurface('Alerts')
-      return
+    if (nextNav === 'Ghost Live') {
+      setOperatorMobileSection('live')
     }
-    if (actionId === 'help') {
-      setActiveUtilityPanel('support')
-      return
+    if (nextNav === 'Command Center') {
+      setOperatorMobileSection('channels')
     }
-    if (actionId === 'admin' && onOpenAdmin) {
-      onOpenAdmin()
-    }
+    setActiveTopbarNav(nextNav)
   }
 
   async function handleIssueSubmit(event: FormEvent<HTMLFormElement>) {
@@ -1478,87 +1920,261 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
     }
   }
 
-  const surfaceTitle =
-    activeSurface === 'Overview'
-      ? 'סקירה תפעולית'
-      : activeSurface === 'Live Ops'
-        ? selectedChannel.name || 'פעילות חיה'
-        : activeSurface === 'Channels'
-          ? 'ניהול ערוצים'
-          : 'טריאז׳ אירועים'
-  const surfaceSubtitle =
-    activeSurface === 'Overview'
-      ? 'מה דורש תשומת לב עכשיו'
-      : activeSurface === 'Live Ops'
-        ? selectedChannel.location || 'סביבת ניטור חיה'
-        : activeSurface === 'Channels'
-          ? 'הגדרות, חוקים ומקורות'
-          : 'סקירת ראיות ופתרון אירועים'
-  const activeSurfaceClass = activeSurface.toLowerCase().replace(/\s+/g, '-')
-  if (isLoadingChannels) {
+  async function handleLaunchLocalAgentSetup(channelId: string) {
+    const session = await createLocalAgentProvisioningSession(channelId)
+    window.location.href = session.launchUrl
+  }
+
+  const operatorMobileNavItems = [
+    { id: 'live', label: 'גוסט\nלייב', icon: <HomeLiveIcon />, tone: 'mint' },
+    { id: 'channels', label: 'ערוצים', icon: <UsersIcon />, tone: 'sky' },
+    { id: 'alerts', label: 'התראות', icon: <BellOutlineIcon />, badge: totalUnreadAlerts > 0 ? totalUnreadAlerts : undefined, tone: 'amber' },
+    { id: 'account', label: 'חשבון', icon: <UserIcon />, tone: 'violet' },
+  ] satisfies Array<{ id: OperatorMobileSection; label: string; badge?: number; icon: ReactNode; tone: 'mint' | 'sky' | 'amber' | 'violet' }>
+
+  const liveOpsMobilePanelItems = [
+    { id: 'inbox', label: 'שיחות', icon: <PhoneChatIcon /> },
+    { id: 'chat', label: 'צ׳אט', icon: <RadioWavesIcon /> },
+    { id: 'details', label: 'ערוץ', icon: <UsersIcon /> },
+  ] satisfies Array<{ id: MobilePanel; label: string; icon: ReactNode }>
+
+  function renderOperatorMobileAlertsScreen() {
     return (
-      <div className="app-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <p style={{ color: '#9ca3af', fontSize: 14 }}>טוען ערוצים...</p>
-      </div>
+      <main className="operator-mobile-screen operator-mobile-reference-screen operator-mobile-alerts-screen">
+        <MobileSectionHeader
+          eyebrow="התראות"
+          title="התראות קריטיות"
+          description="סקור, אשר או עבור ישירות לערוץ שנפגע."
+        />
+        <CriticalAlertsCenter
+          alerts={criticalAlerts}
+          embedded
+          onApprove={(alert) => handleApproveCriticalAlert(alert.messageId, alert.channelId)}
+          onClose={() => undefined}
+          onDelete={(alert) => handleDeleteCriticalAlert(alert.messageId, alert.channelId)}
+          onIgnore={(alert) => handleIgnoreCriticalAlert(alert.messageId, alert.channelId)}
+          onSelectChannel={(channelId) => {
+            selectChannel(channelId)
+            setOperatorMobileSection('live')
+            setMobilePanel('chat')
+          }}
+        />
+      </main>
     )
   }
 
-
-  return (
-    <div className={`app-shell surface-${activeSurfaceClass}`} data-mobile-panel={mobilePanel}>
-      <Topbar
-        activePrimaryNav={activePrimaryNav}
-        accountItems={topbarAccountItems}
-        fullName={fullName}
-        organizationName={organizationName}
-        role={currentUserRole}
-        themeMode={themeMode}
-        onToggleTheme={onToggleTheme}
-        channelsCount={channels.length}
-        onAccountAction={handleTopbarAccountAction}
-        onLogoAction={() => {
-          if (currentUserRole === 'super_admin' && onOpenAdmin) {
-            onOpenAdmin()
-            return
-          }
-          setActiveSurface('Overview')
-        }}
-        onOpenAlerts={() => setActiveUtilityPanel('alerts')}
-        onOpenHelp={() => setActiveUtilityPanel('support')}
-        onOpenQuickActions={() => setActiveUtilityPanel('shortcuts')}
-        onOpenQuickCommand={() => setActiveUtilityPanel('command')}
-        onPrimaryNavChange={handleTopbarNavChange}
-        onLogout={onLogout}
-        subtitle={surfaceSubtitle}
-        title={surfaceTitle}
-        totalLiveFeeds={totalLiveFeeds}
-        totalOperations={totalOperations}
-        totalUnreadAlerts={totalUnreadAlerts}
-      />
-
-      {activeSurface === 'Overview' ? (
-        <OverviewScreen
-          channels={channels}
-          criticalAlerts={criticalAlerts}
-          onOpenAlerts={() => setActiveSurface('Alerts')}
-          onOpenChannels={() => setActiveSurface('Channels')}
-          onOpenLiveOps={(channelId) => {
-            if (channelId) {
-              selectChannel(channelId)
-            }
-            setActiveSurface('Live Ops')
-          }}
-          onReportIssue={() => setIsIssueModalOpen(true)}
-          totalLiveFeeds={totalLiveFeeds}
-          totalOperations={totalOperations}
+  function renderOperatorMobileAccountScreen() {
+    return (
+      <main className="operator-mobile-screen operator-mobile-account operator-mobile-reference-screen">
+        <MobileSectionHeader
+          eyebrow="חשבון"
+          title={fullName}
+          description="פרטי סשן, פעולות מהירות ותמונת מצב של הצוות."
         />
-      ) : null}
 
-      {activeSurface === 'Channels' ? (
+        <div className="operator-mobile-stack">
+          <MobileSurfaceCard title="סשן" eyebrow="מחובר">
+            <div className="operator-mobile-kpis">
+              <div><span>ארגון</span><strong>{organizationName || 'גוסט'}</strong></div>
+              <div><span>תפקיד</span><strong>{formatRoleLabel(currentUserRole)}</strong></div>
+              <div><span>ערוצים</span><strong>{channels.length}</strong></div>
+              <div><span>פידים חיים</span><strong>{totalLiveFeeds}</strong></div>
+            </div>
+          </MobileSurfaceCard>
+
+          <MobileSurfaceCard title="פעולות מהירות" description="הפעולות החשובות שנשארות נגישות גם בנייד.">
+            <div className="operator-mobile-action-list">
+              {operatorQuickActions.map((action) => (
+                <button key={action.id} className="topbar-action-card" onClick={action.run} type="button">
+                  <strong>{action.title}</strong>
+                  <span>{action.description}</span>
+                </button>
+              ))}
+            </div>
+          </MobileSurfaceCard>
+
+          <MobileSurfaceCard title="מפעילים וחברים">
+            <div className="topbar-chip-list">
+              {operatorMembers.length > 0
+                ? operatorMembers.map((member) => <span key={member} className="topbar-chip">{member}</span>)
+                : <p>כרגע אין חברים פעילים להצגה.</p>}
+            </div>
+          </MobileSurfaceCard>
+
+          <MobileSurfaceCard title="פעילות אחרונה">
+            <div className="topbar-audit-list">
+              {operatorRecentActivity.slice(0, 8).map((entry) => (
+                <article key={entry.id} className="topbar-audit-item">
+                  <div className="topbar-audit-head">
+                    <strong>{entry.channelName}</strong>
+                    <span>{entry.time}</span>
+                  </div>
+                  <p>{formatAuthorLabel(entry.author)}: {entry.text}</p>
+                </article>
+              ))}
+            </div>
+          </MobileSurfaceCard>
+        </div>
+      </main>
+    )
+  }
+
+  function renderLiveOpsWorkspace() {
+    return (
+      <main
+        className={`workspace ${isDetailsCollapsed ? 'details-collapsed' : ''}`}
+        onTouchEnd={handleWorkspaceTouchEnd}
+        onTouchStart={handleWorkspaceTouchStart}
+      >
+        <div aria-hidden className="ghostlive-terminal-bg">
+          <span className="ghostlive-terminal-glow" />
+          <span className="ghostlive-terminal-scanlines" />
+          {GHOSTLIVE_INTEL_LINES.map((line) => {
+            const style = {
+              '--line-top': line.top,
+              '--line-left': line.left,
+              '--line-cycle': `${line.cycleSec}s`,
+              '--line-delay': `${line.delaySec}s`,
+              '--line-size': `${line.fontSizePx}px`,
+              '--line-chars': line.text.length,
+              '--line-max': line.maxWidth,
+            } as CSSProperties
+            return (
+              <span key={`${line.text}_${line.top}_${line.left}`} className="ghostlive-code-blip" style={style}>
+                <span className="ghostlive-code-typed">{line.text}</span>
+              </span>
+            )
+          })}
+        </div>
+        <header className="workspace-header">
+          <div>
+            <p className="eyebrow">גוסט לייב</p>
+            <h2>ניטור חי</h2>
+          </div>
+          <div className="workspace-stats">
+            <span>{totalLiveFeeds} LIVE</span>
+            <span>{channels.length} ערוצים</span>
+            <span>{totalOperations} מבצעים</span>
+            <span>{totalUnreadAlerts > 0 ? `${totalUnreadAlerts} התראות` : 'תקין'}</span>
+            <button className="ghost-button" type="button" onClick={() => setIsIssueModalOpen(true)}>
+              דווח תקלה
+            </button>
+          </div>
+        </header>
+
+        {isMobileLayout ? (
+          <MobileTabBar
+            activeId={mobilePanel}
+            ariaLabel="לשוניות מובייל גוסט לייב"
+            className="live-ops-mobile-tabs mobile-only"
+            items={liveOpsMobilePanelItems}
+            onChange={(id) => handleLiveOpsPanelChange(id as MobilePanel)}
+            variant="segment"
+          />
+        ) : null}
+
+        <div className="workspace-panels">
+          <InboxPanel
+            channels={sortedFilteredChannels}
+            focusSearchToken={inboxSearchFocusToken}
+            groupSelectionIds={groupSelectionIds}
+            hasMoreChannels={hasMoreChannels}
+            isGroupingMode={isGroupingMode}
+            onCreateNewChat={handleInboxCreateChat}
+            onCreateGroupFromSelection={createGroupFromSelection}
+            onLoadMoreChannels={() => setVisibleChannelsCount((currentCount) => currentCount + INBOX_PAGE_SIZE)}
+            onOpenInboxMenu={handleInboxMoreOptions}
+            onSearchQueryChange={(value) => { setSearchQuery(value); setVisibleChannelsCount(INBOX_PAGE_SIZE) }}
+            onSelectChannel={selectChannel}
+            onToggleGroupSelection={toggleGroupSelection}
+            onToggleGroupingMode={() => {
+              setIsGroupingMode((currentState) => {
+                const nextState = !currentState
+                if (!nextState) {
+                  setGroupSelectionIds([])
+                }
+                return nextState
+              })
+            }}
+            alertingChannelIds={alertingChannelIds}
+            searchQuery={searchQuery}
+            selectedChannelId={selectedChannel.id}
+            visibleCount={visibleChannelsCount}
+          />
+
+          <ChatPanel
+            activeOpsCount={selectedChannelActiveOps}
+            isSending={isSending}
+            messageDraft={messageDraft}
+            messageStreamRef={messageStreamRef}
+            nextScanInfo={nextScanInfo}
+            onDismissFrame={handleDismissFrame}
+            onMessageDraftChange={setMessageDraft}
+            onMessageStreamScroll={handleMessageStreamScroll}
+            onMessageSubmit={handleMessageSubmit}
+            onShowDetails={openSelectedChannelDetails}
+            onShowInbox={() => setMobilePanel('inbox')}
+            onStartTimelineSampling={handleStartTimelineSampling}
+            onStopTimelineSampling={handleStopTimelineSampling}
+            onSuggestionClick={setMessageDraft}
+            selectedChannel={selectedChannel}
+            mobileLayout={isMobileLayout}
+            timelineSamplerState={selectedTimelineSamplerState}
+          />
+
+          {!isDetailsCollapsed ? (
+            <div
+              aria-hidden
+              className="details-drawer-backdrop desktop-only"
+              onClick={() => setIsDetailsCollapsed(true)}
+            />
+          ) : null}
+
+          <DetailsPanel
+            key={selectedChannel.id}
+            isDetailsCollapsed={isDetailsCollapsed}
+            onCollapseDetails={() => setIsDetailsCollapsed(true)}
+            onExpandDetails={() => setIsDetailsCollapsed(false)}
+            onOpenChannelsHub={() => {
+              if (canAccessCommandCenter) {
+                openMobileChannelsHub(isMobileLayout ? 'channel-details' : 'list')
+              }
+            }}
+            onOpenChannelOperationsHub={() => {
+              if (canAccessCommandCenter) {
+                openMobileChannelsHub('operations')
+              }
+            }}
+            onSetMobilePanelChat={() => setMobilePanel('chat')}
+            onToggleOperation={toggleOperation}
+            selectedChannel={selectedChannel}
+          />
+        </div>
+      </main>
+    )
+  }
+
+  function renderOperatorSurface() {
+    if (isMobileLayout) {
+      if (operatorMobileSection === 'alerts') {
+        return renderOperatorMobileAlertsScreen()
+      }
+
+      if (operatorMobileSection === 'account') {
+        return renderOperatorMobileAccountScreen()
+      }
+    }
+
+    if (activeTopbarNav === 'Command Center') {
+      return (
         <ChannelsHub
           availableChannelsForLink={availableForGrouping}
           channels={channels}
           linkedChannelIdSet={linkedChannelIdSet}
+          mobileInitialView={channelsHubMobileInitialView}
+          mobileInitialViewToken={channelsHubMobileInitialViewToken}
+          mobileMode={isMobileLayout}
+          onLaunchLocalAgentSetup={handleLaunchLocalAgentSetup}
           newChannelDraft={newChannelDraft}
           onDeleteOperation={deleteOperationFromSelectedChannel}
           onNewChannelDraftChange={updateNewChannelDraftField}
@@ -1577,43 +2193,308 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
           selectedChannelId={selectedChannel.id}
           showNewChannelForm={showNewChannelForm}
         />
-      ) : null}
+      )
+    }
 
-      {activeSurface === 'Live Ops' ? (
+    return renderLiveOpsWorkspace()
+  }
+
+  if (isLoadingChannels) {
+    return (
+      <div className="app-shell surface-live-ops" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <p style={{ color: '#9ca3af', fontSize: 14 }}>טוען ערוצים...</p>
+      </div>
+    )
+  }
+  if (isMobileLayout) {
+    return (
+      <div
+        className={`app-shell operator-mobile-app-shell ${operatorMobileSection === 'live' ? 'surface-live-ops operator-mobile-live-shell' : ''}`}
+        data-mobile-section={operatorMobileSection}
+        data-mobile-panel={mobilePanel}
+      >
+        <div className="app-surface">
+          <Topbar
+            accountMenuItems={operatorAccountMenuItems}
+            fullName={fullName}
+            organizationName={organizationName}
+            role={currentUserRole}
+            activeNav={activeTopbarNav}
+            canAccessCommandCenter={canAccessCommandCenter}
+            channelsCount={channels.length}
+            onAccountAction={handleAccountAction}
+            onBrandClick={() => {
+              setOperatorMobileSection('live')
+              setActiveTopbarNav('Ghost Live')
+            }}
+            onCommandTrigger={openCommandPalette}
+            onOpenNotificationsCenter={() => handleOperatorMobileSectionChange('alerts')}
+            onOpenShortcuts={() => {
+              setIsCommandPaletteOpen(false)
+              setIsSupportOpen(false)
+              setActiveAccountDialog(null)
+              setIsShortcutsOpen(true)
+            }}
+            onOpenSupport={() => handleOperatorMobileSectionChange('account')}
+            onNavChange={handleTopbarNavChange}
+            onToggleTheme={onToggleTheme}
+            totalLiveFeeds={totalLiveFeeds}
+            totalOperations={totalOperations}
+            totalUnreadAlerts={totalUnreadAlerts}
+            themeMode={themeMode}
+            mobileLiveDesign
+          />
+
+          {renderOperatorSurface()}
+        </div>
+
+        <MobileTabBar
+          activeId={operatorMobileSection}
+          ariaLabel="Operator mobile navigation"
+          className="operator-mobile-primary-nav mobile-only"
+          items={operatorMobileNavItems}
+          onChange={(id) => handleOperatorMobileSectionChange(id as OperatorMobileSection)}
+          variant="floating"
+        />
+
+        <AppFooter variant="compact-mobile" />
+
+        {isCommandPaletteOpen ? (
+          <SurfaceDialog
+            eyebrow="פקודה מהירה"
+            title="קיצורי מפעיל"
+            description="מעבר ישיר לזרימת עבודה אמיתית במובייל."
+            onClose={() => setIsCommandPaletteOpen(false)}
+            width="medium"
+          >
+            <div className="topbar-dialog-stack">
+              <input
+                autoFocus
+                className="topbar-search-input"
+                onChange={(event) => setCommandQuery(event.target.value)}
+                placeholder="חפש פעולות, התראות, ערוצים, תמיכה..."
+                value={commandQuery}
+              />
+              <div className="topbar-action-list">
+                {filteredOperatorQuickActions.map((action) => (
+                  <button key={action.id} className="topbar-action-card" onClick={action.run} type="button">
+                    <strong>{action.title}</strong>
+                    <span>{action.description}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </SurfaceDialog>
+        ) : null}
+
+        {isShortcutsOpen ? (
+          <SurfaceDialog
+            eyebrow="קיצורים"
+            title="קיצורי מפעיל"
+            description="כניסות מהירות לפעולות קיימות במערכת."
+            onClose={() => setIsShortcutsOpen(false)}
+            width="medium"
+          >
+            <div className="topbar-shortcuts-grid">
+              {operatorQuickActions.map((action) => (
+                <button key={action.id} className="topbar-shortcut-tile" onClick={action.run} type="button">
+                  <strong>{action.title}</strong>
+                  <span>{action.description}</span>
+                </button>
+              ))}
+            </div>
+          </SurfaceDialog>
+        ) : null}
+
+        {isDeleteModalOpen ? (
+          <div aria-modal className="brand-modal-overlay" role="dialog">
+            <div className="brand-modal">
+              <p className="eyebrow">מחיקה</p>
+              <h3>למחוק את הערוץ הזה לצמיתות?</h3>
+              <p className="brand-modal-copy">
+                הערוץ <strong>{selectedChannel.name}</strong> יימחק יחד עם היסטוריית ההודעות שלו.
+                לא ניתן לשחזר פעולה זו.
+              </p>
+              <div className="brand-modal-actions">
+                <button className="ghost-button" onClick={() => setIsDeleteModalOpen(false)} type="button">
+                  ביטול
+                </button>
+                <button className="danger-button" onClick={confirmDeleteSelectedChannel} type="button">
+                  מחק לצמיתות
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {isIssueModalOpen ? (
+          <div aria-modal className="brand-modal-overlay" role="dialog">
+            <div className="brand-modal">
+              <p className="eyebrow">דיווח תקלה</p>
+              <h3>שלח דיווח תקלה לצוות הניהול</h3>
+              <form onSubmit={handleIssueSubmit} style={{ display: 'grid', gap: 8 }}>
+                <input value={issueTitle} onChange={(event) => setIssueTitle(event.target.value)} placeholder="כותרת התקלה" />
+                <textarea
+                  value={issueDescription}
+                  onChange={(event) => setIssueDescription(event.target.value)}
+                  placeholder="תיאור מפורט"
+                  rows={5}
+                />
+                <select value={issueSeverity} onChange={(event) => setIssueSeverity(event.target.value as 'low' | 'medium' | 'high' | 'critical')}>
+                  <option value="low">נמוכה</option>
+                  <option value="medium">בינונית</option>
+                  <option value="high">גבוהה</option>
+                  <option value="critical">קריטית</option>
+                </select>
+                {issueSubmitError ? <p style={{ color: '#ef4444' }}>{issueSubmitError}</p> : null}
+                {issueSubmitSuccess ? <p style={{ color: '#22c55e' }}>{issueSubmitSuccess}</p> : null}
+                <div className="brand-modal-actions">
+                  <button className="ghost-button" type="button" onClick={() => setIsIssueModalOpen(false)}>
+                    סגור
+                  </button>
+                  <button className="primary-button" type="submit">
+                    שלח דיווח
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        ) : null}
+
+        {flashAlert ? (
+          <FlashAlertOverlay alert={flashAlert} onDismiss={() => setFlashAlert(null)} />
+        ) : null}
+      </div>
+    )
+  }
+
+  return (
+    <div className={`app-shell ${activeTopbarNav === 'Ghost Live' && operatorMobileSection === 'live' ? 'surface-live-ops' : ''}`} data-mobile-panel={mobilePanel}>
+      <div className="app-surface">
+      <Topbar
+        accountMenuItems={operatorAccountMenuItems}
+        fullName={fullName}
+        organizationName={organizationName}
+        role={currentUserRole}
+        activeNav={activeTopbarNav}
+        canAccessCommandCenter={canAccessCommandCenter}
+        channelsCount={channels.length}
+        onAccountAction={handleAccountAction}
+        onBrandClick={() => {
+          setOperatorMobileSection('live')
+          setActiveTopbarNav('Ghost Live')
+        }}
+        onCommandTrigger={openCommandPalette}
+        onOpenNotificationsCenter={() => {
+          if (isMobileLayout) {
+            handleOperatorMobileSectionChange('alerts')
+            return
+          }
+          setIsAlertsCenterOpen(true)
+        }}
+        onOpenShortcuts={() => {
+          setIsCommandPaletteOpen(false)
+          setIsSupportOpen(false)
+          setActiveAccountDialog(null)
+          setIsShortcutsOpen(true)
+        }}
+        onOpenSupport={() => {
+          if (isMobileLayout) {
+            handleOperatorMobileSectionChange('account')
+            return
+          }
+          setIsCommandPaletteOpen(false)
+          setIsShortcutsOpen(false)
+          setActiveAccountDialog(null)
+          setIsSupportOpen(true)
+        }}
+        onNavChange={handleTopbarNavChange}
+        onToggleTheme={onToggleTheme}
+        totalLiveFeeds={totalLiveFeeds}
+        totalOperations={totalOperations}
+        totalUnreadAlerts={totalUnreadAlerts}
+        themeMode={themeMode}
+      />
+
+      {activeTopbarNav === 'Command Center' ? (
+        <ChannelsHub
+          availableChannelsForLink={availableForGrouping}
+          channels={channels}
+          linkedChannelIdSet={linkedChannelIdSet}
+          mobileInitialView={channelsHubMobileInitialView}
+          mobileInitialViewToken={channelsHubMobileInitialViewToken}
+          newChannelDraft={newChannelDraft}
+          onLaunchLocalAgentSetup={handleLaunchLocalAgentSetup}
+          onDeleteOperation={deleteOperationFromSelectedChannel}
+          onNewChannelDraftChange={updateNewChannelDraftField}
+          onNewChannelSubmit={handleNewChannelSubmit}
+          onOperationDraftChange={updateOperationDraftField}
+          onOperationSubmit={handleOperationSubmit}
+          onRequestDeleteSelectedChannel={requestDeleteSelectedChannel}
+          onSelectChannel={selectChannel}
+          onToggleLinkedChannelId={toggleNewChannelDraftLinkedId}
+          onToggleNewChannelForm={() => setShowNewChannelForm((currentState) => !currentState)}
+          onToggleOperation={toggleOperation}
+          onUpdateOperationField={updateOperationFieldForSelectedChannel}
+          onUpdateSelectedChannel={updateSelectedChannel}
+          operationDraft={operationDraft}
+          selectedChannel={selectedChannel}
+          selectedChannelId={selectedChannel.id}
+          showNewChannelForm={showNewChannelForm}
+        />
+      ) : (
         <main
           className={`workspace ${isDetailsCollapsed ? 'details-collapsed' : ''}`}
           onTouchEnd={handleWorkspaceTouchEnd}
           onTouchStart={handleWorkspaceTouchStart}
         >
+          <div aria-hidden className="ghostlive-terminal-bg">
+            <span className="ghostlive-terminal-glow" />
+            <span className="ghostlive-terminal-scanlines" />
+            {GHOSTLIVE_INTEL_LINES.map((line) => {
+              const style = {
+                '--line-top': line.top,
+                '--line-left': line.left,
+                '--line-cycle': `${line.cycleSec}s`,
+                '--line-delay': `${line.delaySec}s`,
+                '--line-size': `${line.fontSizePx}px`,
+                '--line-chars': line.text.length,
+                '--line-max': line.maxWidth,
+              } as CSSProperties
+              return (
+                <span key={`${line.text}_${line.top}_${line.left}`} className="ghostlive-code-blip" style={style}>
+                  <span className="ghostlive-code-typed">{line.text}</span>
+                </span>
+              )
+            })}
+          </div>
           <header className="workspace-header">
             <div>
-              <p className="eyebrow">פעילות חיה</p>
-              <h2>סביבת ניטור</h2>
-              <p className="surface-screen-copy">
-                חפש ערוצים, סנן לפי מצב חי, בדוק הקשר והעבר עבודת הגדרה לערוצים.
-              </p>
+              <p className="eyebrow">גוסט לייב</p>
+              <h2>ניטור חי</h2>
             </div>
             <div className="workspace-stats">
-              <span>{totalLiveFeeds} חי</span>
+              <span>{totalLiveFeeds} LIVE</span>
               <span>{channels.length} ערוצים</span>
               <span>{totalOperations} מבצעים</span>
               <span>{totalUnreadAlerts > 0 ? `${totalUnreadAlerts} התראות` : 'תקין'}</span>
+              <button className="ghost-button" type="button" onClick={() => setIsIssueModalOpen(true)}>
+                דווח תקלה
+              </button>
             </div>
           </header>
 
           <div className="workspace-panels">
             <InboxPanel
               channels={sortedFilteredChannels}
-              activeFilter={liveOpsFilter}
+              focusSearchToken={inboxSearchFocusToken}
               groupSelectionIds={groupSelectionIds}
               hasMoreChannels={hasMoreChannels}
               isGroupingMode={isGroupingMode}
+              onCreateNewChat={handleInboxCreateChat}
               onCreateGroupFromSelection={createGroupFromSelection}
-              onFilterChange={(value) => {
-                setLiveOpsFilter(value)
-                setVisibleChannelsCount(INBOX_PAGE_SIZE)
-              }}
               onLoadMoreChannels={() => setVisibleChannelsCount((currentCount) => currentCount + INBOX_PAGE_SIZE)}
+              onOpenInboxMenu={handleInboxMoreOptions}
               onSearchQueryChange={(value) => { setSearchQuery(value); setVisibleChannelsCount(INBOX_PAGE_SIZE) }}
               onSelectChannel={selectChannel}
               onToggleGroupSelection={toggleGroupSelection}
@@ -1633,20 +2514,22 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
             />
 
             <ChatPanel
+              activeOpsCount={selectedChannelActiveOps}
               isSending={isSending}
               messageDraft={messageDraft}
               messageStreamRef={messageStreamRef}
+              nextScanInfo={nextScanInfo}
               onDismissFrame={handleDismissFrame}
               onMessageDraftChange={setMessageDraft}
+              onMessageStreamScroll={handleMessageStreamScroll}
               onMessageSubmit={handleMessageSubmit}
-              onShowDetails={() => {
-                setIsDetailsCollapsed(false)
-                setMobilePanel('details')
-              }}
+              onStartTimelineSampling={handleStartTimelineSampling}
+              onStopTimelineSampling={handleStopTimelineSampling}
+              onShowDetails={openSelectedChannelDetails}
               onShowInbox={() => setMobilePanel('inbox')}
-              onShowOps={() => setIsOpsDrawerOpen(true)}
               onSuggestionClick={setMessageDraft}
               selectedChannel={selectedChannel}
+              timelineSamplerState={selectedTimelineSamplerState}
             />
 
             {!isDetailsCollapsed ? (
@@ -1661,44 +2544,37 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
               key={selectedChannel.id}
               isDetailsCollapsed={isDetailsCollapsed}
               onCollapseDetails={() => setIsDetailsCollapsed(true)}
+              onExpandDetails={() => setIsDetailsCollapsed(false)}
               onOpenChannelsHub={() => {
                 if (canAccessCommandCenter) {
-                  setActiveSurface('Channels')
+                  if (isMobileLayout) {
+                    openMobileChannelsHub('channel-details')
+                    return
+                  }
+                  setActiveTopbarNav('Command Center')
+                }
+              }}
+              onOpenChannelOperationsHub={() => {
+                if (canAccessCommandCenter) {
+                  if (isMobileLayout) {
+                    openMobileChannelsHub('operations')
+                    return
+                  }
+                  setActiveTopbarNav('Command Center')
                 }
               }}
               onSetMobilePanelChat={() => setMobilePanel('chat')}
+              onToggleOperation={toggleOperation}
               selectedChannel={selectedChannel}
             />
           </div>
         </main>
-      ) : null}
+      )}
 
-      {activeSurface === 'Live Ops' && isOpsDrawerOpen ? (
-        <OpsDrawer
-          activeOpsCount={selectedChannelActiveOps}
-          nextScanInfo={nextScanInfo}
-          onClose={() => setIsOpsDrawerOpen(false)}
-          onStartTimelineSampling={handleStartTimelineSampling}
-          onStopTimelineSampling={handleStopTimelineSampling}
-          selectedChannel={selectedChannel}
-          timelineSamplerState={selectedTimelineSamplerState}
-        />
-      ) : null}
+      <AppFooter />
+      </div>
 
-      {activeSurface === 'Alerts' ? (
-        <AlertsWorkspace
-          alerts={criticalAlerts}
-          onApprove={(alert) => handleApproveCriticalAlert(alert.messageId, alert.channelId)}
-          onDelete={(alert) => handleDeleteCriticalAlert(alert.messageId, alert.channelId)}
-          onIgnore={(alert) => handleIgnoreCriticalAlert(alert.messageId, alert.channelId)}
-          onSelectChannel={(channelId) => {
-            selectChannel(channelId)
-            setActiveSurface('Live Ops')
-          }}
-        />
-      ) : null}
-
-      {activeSurface === 'Live Ops' ? <nav className="bottom-nav mobile-only">
+      <nav className="bottom-nav mobile-only">
         <button
           className={mobilePanel === 'inbox' ? 'active' : ''}
           onClick={() => handleBottomNavChange('inbox')}
@@ -1720,210 +2596,163 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
         >
           ערוץ
         </button>
-      </nav> : null}
+      </nav>
 
-      <AppFooter />
+      {isCommandPaletteOpen ? (
+        <SurfaceDialog
+          eyebrow="פקודה מהירה"
+          title="לוח פקודות"
+          description="חפש פעולות זמינות ועבור ישירות לזרימת העבודה המתאימה."
+          onClose={() => setIsCommandPaletteOpen(false)}
+          width="medium"
+        >
+          <div className="topbar-dialog-stack">
+            <input
+              autoFocus
+              className="topbar-search-input"
+              onChange={(event) => setCommandQuery(event.target.value)}
+              placeholder="חפש פעולות, התראות, מרכז פיקוד, תמיכה..."
+              value={commandQuery}
+            />
+            <div className="topbar-action-list">
+              {filteredOperatorQuickActions.map((action) => (
+                <button key={action.id} className="topbar-action-card" onClick={action.run} type="button">
+                  <strong>{action.title}</strong>
+                  <span>{action.description}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </SurfaceDialog>
+      ) : null}
+
+      {isShortcutsOpen ? (
+        <SurfaceDialog
+          eyebrow="קיצורים"
+          title="קיצורי מפעיל"
+          description="כניסה מהירה לפעולות שכבר קיימות במרחב הזה."
+          onClose={() => setIsShortcutsOpen(false)}
+          width="medium"
+        >
+          <div className="topbar-shortcuts-grid">
+            {operatorQuickActions.map((action) => (
+              <button key={action.id} className="topbar-shortcut-tile" onClick={action.run} type="button">
+                <strong>{action.title}</strong>
+                <span>{action.description}</span>
+              </button>
+            ))}
+          </div>
+        </SurfaceDialog>
+      ) : null}
+
+      {isSupportOpen ? (
+        <SurfaceDialog
+          eyebrow="תמיכה"
+          title="פעולות תמיכה למפעיל"
+          description="כל פעולה למטה פותחת זרימה אמיתית בתוך המערכת."
+          onClose={() => setIsSupportOpen(false)}
+          width="medium"
+        >
+          <div className="topbar-action-list">
+            <button className="topbar-action-card" onClick={openIssueReport} type="button">
+              <strong>דווח על תקלה</strong>
+              <span>פתח את חלון הדיווח ושלח תקלה חיה להנהלת Ghost.</span>
+            </button>
+            <button
+              className="topbar-action-card"
+              onClick={() => {
+                closeTopbarOverlays()
+                setIsAlertsCenterOpen(true)
+              }}
+              type="button"
+            >
+              <strong>התראות קריטיות</strong>
+              <span>סקור, אשר, התעלם או עבור ישירות לערוץ שנפגע.</span>
+            </button>
+            <button
+              className="topbar-action-card"
+              onClick={() => {
+                closeTopbarOverlays()
+                setActiveTopbarNav('Command Center')
+              }}
+              type="button"
+            >
+              <strong>פתח מרכז פיקוד</strong>
+              <span>עבור לערוצים, מבצעים והגדרות סביבת העבודה.</span>
+            </button>
+          </div>
+        </SurfaceDialog>
+      ) : null}
+
+      {activeAccountDialog === 'profile' ? (
+        <SurfaceDialog
+          eyebrow="פרופיל"
+          title={fullName}
+          description="סשן מפעיל מאומת פעיל."
+          onClose={() => setActiveAccountDialog(null)}
+          width="narrow"
+        >
+          <div className="topbar-dialog-stack">
+            <div className="topbar-info-row"><span>ארגון</span><strong>{organizationName || 'גוסט'}</strong></div>
+            <div className="topbar-info-row"><span>תפקיד</span><strong>{formatRoleLabel(currentUserRole)}</strong></div>
+            <div className="topbar-info-row"><span>ערוצים</span><strong>{channels.length}</strong></div>
+            <div className="topbar-info-row"><span>ערוצים חיים</span><strong>{totalLiveFeeds}</strong></div>
+          </div>
+        </SurfaceDialog>
+      ) : null}
+
+      {activeAccountDialog === 'team' ? (
+        <SurfaceDialog
+          eyebrow="צוות"
+          title="מפעילים וחברים זמינים"
+          description="נתוני חברים חיים שנאספו מרשימת הערוצים הנוכחית."
+          onClose={() => setActiveAccountDialog(null)}
+          width="medium"
+        >
+          <div className="topbar-chip-list">
+            {operatorMembers.length > 0 ? operatorMembers.map((member) => <span key={member} className="topbar-chip">{member}</span>) : <p>אין חברים זמינים.</p>}
+          </div>
+        </SurfaceDialog>
+      ) : null}
+
+      {activeAccountDialog === 'audit' ? (
+        <SurfaceDialog
+          eyebrow="בקרה"
+          title="פעילות אחרונה במרחב"
+          description="תעבורת ההודעות האחרונה שזמינה למפעיל המאומת הנוכחי."
+          onClose={() => setActiveAccountDialog(null)}
+          width="medium"
+        >
+          <div className="topbar-audit-list">
+            {operatorRecentActivity.map((entry) => (
+              <article key={entry.id} className="topbar-audit-item">
+                <div className="topbar-audit-head">
+                  <strong>{entry.channelName}</strong>
+                  <span>{entry.time}</span>
+                </div>
+                <p>{formatAuthorLabel(entry.author)}: {entry.text}</p>
+              </article>
+            ))}
+          </div>
+        </SurfaceDialog>
+      ) : null}
 
       {flashAlert ? (
         <FlashAlertOverlay alert={flashAlert} onDismiss={() => setFlashAlert(null)} />
       ) : null}
 
-      {activeUtilityPanel === 'alerts' ? (
-        <SurfaceDialog
-          eyebrow="Alerts"
-          title="התראות פעילות"
-          description="פתח את משטח ההתראות המלא או עבור ישירות לערוץ שדורש טיפול."
-          onClose={() => setActiveUtilityPanel(null)}
-          width="wide"
-        >
-          <div className="command-grid">
-            <button
-              className="command-card"
-              onClick={() => {
-                setActiveSurface('Alerts')
-                setActiveUtilityPanel(null)
-              }}
-              type="button"
-            >
-              <strong>פתח התראות</strong>
-              <span>{criticalAlerts.length > 0 ? `${criticalAlerts.length} אירועים ממתינים לטיפול` : 'אין כרגע אירועים קריטיים פתוחים.'}</span>
-            </button>
-            {criticalAlerts.slice(0, 3).map((alert) => (
-              <button
-                key={alert.messageId}
-                className="command-card"
-                onClick={() => {
-                  selectChannel(alert.channelId)
-                  setActiveSurface('Live Ops')
-                  setActiveUtilityPanel(null)
-                }}
-                type="button"
-              >
-                <strong>{alert.channelName}</strong>
-                <span>{alert.operationName}: {alert.summary}</span>
-              </button>
-            ))}
-          </div>
-        </SurfaceDialog>
-      ) : null}
-
-      {activeUtilityPanel === 'support' ? (
-        <SurfaceDialog
-          eyebrow="Support"
-          title="עזרה ותמיכה"
-          description="בחר פעולה אמיתית: מעבר לדיווח תקלה, פתיחת התראות או כניסה לערוצים."
-          onClose={() => setActiveUtilityPanel(null)}
-          width="wide"
-        >
-          <div className="command-grid">
-            <button
-              className="command-card"
-              onClick={() => {
-                setIsIssueModalOpen(true)
-                setActiveUtilityPanel(null)
-              }}
-              type="button"
-            >
-              <strong>דווח על תקלה</strong>
-              <span>פתח את טופס הדיווח ושלח תקלה אמיתית לצוות הניהול.</span>
-            </button>
-            <button
-              className="command-card"
-              onClick={() => {
-                setActiveSurface('Alerts')
-                setActiveUtilityPanel(null)
-              }}
-              type="button"
-            >
-              <strong>פתח התראות</strong>
-              <span>עבור ישירות למשטח הטריאז' של ההתראות.</span>
-            </button>
-            {canAccessCommandCenter ? (
-              <button
-                className="command-card"
-                onClick={() => {
-                  setActiveSurface('Channels')
-                  setActiveUtilityPanel(null)
-                }}
-                type="button"
-              >
-                <strong>פתח ערוצים</strong>
-                <span>עבור למסך הניהול של ערוצים, חוקים ומקורות.</span>
-              </button>
-            ) : null}
-          </div>
-        </SurfaceDialog>
-      ) : null}
-
-      {activeUtilityPanel === 'shortcuts' ? (
-        <SurfaceDialog
-          eyebrow="Quick actions"
-          title="פעולות מהירות"
-          description="כל הפעולות במסך הזה מובילות לזרימות עבודה אמיתיות בלבד."
-          onClose={() => setActiveUtilityPanel(null)}
-          width="wide"
-        >
-          <div className="command-grid">
-            <button
-              className="command-card"
-              onClick={() => {
-                setActiveSurface('Channels')
-                setActiveUtilityPanel(null)
-              }}
-              type="button"
-            >
-              <strong>ניהול ערוצים</strong>
-              <span>עבור ישירות למסך הערוצים.</span>
-            </button>
-            <button
-              className="command-card"
-              onClick={() => {
-                setActiveSurface('Alerts')
-                setActiveUtilityPanel(null)
-              }}
-              type="button"
-            >
-              <strong>טריאז' התראות</strong>
-              <span>פתח את רשימת ההתראות והממצאים הפעילים.</span>
-            </button>
-            <button
-              className="command-card"
-              onClick={() => {
-                setIsIssueModalOpen(true)
-                setActiveUtilityPanel(null)
-              }}
-              type="button"
-            >
-              <strong>דיווח תקלה</strong>
-              <span>שלח דיווח מסודר לצוות הניהול.</span>
-            </button>
-            {currentUserRole === 'super_admin' && onOpenAdmin ? (
-              <button
-                className="command-card"
-                onClick={() => {
-                  onOpenAdmin()
-                  setActiveUtilityPanel(null)
-                }}
-                type="button"
-              >
-                <strong>ניהול</strong>
-                <span>מעבר לחדר הבקרה הניהולי של הסופר אדמין.</span>
-              </button>
-            ) : null}
-          </div>
-        </SurfaceDialog>
-      ) : null}
-
-      {activeUtilityPanel === 'command' ? (
-        <SurfaceDialog
-          eyebrow="לוח פקודות"
-          title="לוח פקודות"
-          description="פתח משטח מוצר אמיתי או התחל זרימת עבודה תפעולית אמיתית."
-          onClose={() => setActiveUtilityPanel(null)}
-          width="wide"
-        >
-          <div className="command-grid">
-            {navItems.filter((item) => !item.disabled).map((item) => (
-              <button
-                key={item.id}
-                className="command-card"
-                onClick={() => {
-                  setActiveSurface(item.id as AppSurface)
-                  setActiveUtilityPanel(null)
-                }}
-                type="button"
-              >
-                <strong>{item.label}</strong>
-                <span>
-                  {item.id === 'Overview'
-                    ? 'פס מצב, אירועים, לוח כשירות ושינויים אחרונים'
-                    : item.id === 'Live Ops'
-                      ? 'מרחב העבודה החי סביב משטח הצ׳אט שלא השתנה'
-                      : item.id === 'Channels'
-                        ? 'ניהול ערוצים, חוקים ומקורות בתצורת שלושה אזורים'
-                        : 'טריאז׳ אירועים ייעודי עם ראיות ופעולות'}
-                </span>
-              </button>
-            ))}
-            {currentUserRole === 'super_admin' && onOpenAdmin ? (
-              <button
-                className="command-card"
-                onClick={() => {
-                  onOpenAdmin()
-                  setActiveUtilityPanel(null)
-                }}
-                type="button"
-              >
-                <strong>ניהול</strong>
-                <span>פתח את חדר הבקרה הניהולי של הסופר אדמין.</span>
-              </button>
-            ) : null}
-            <button className="command-card" onClick={() => { setIsIssueModalOpen(true); setActiveUtilityPanel(null) }} type="button">
-              <strong>דווח על תקלה</strong>
-              <span>שלח דיווח תקלה אמיתי לזרימת הניהול.</span>
-            </button>
-          </div>
-        </SurfaceDialog>
+      {isAlertsCenterOpen ? (
+        <CriticalAlertsCenter
+          alerts={criticalAlerts}
+          onApprove={(alert) => handleApproveCriticalAlert(alert.messageId, alert.channelId)}
+          onClose={() => setIsAlertsCenterOpen(false)}
+          onDelete={(alert) => handleDeleteCriticalAlert(alert.messageId, alert.channelId)}
+          onIgnore={(alert) => handleIgnoreCriticalAlert(alert.messageId, alert.channelId)}
+          onSelectChannel={(channelId) => {
+            selectChannel(channelId)
+            setIsAlertsCenterOpen(false)
+          }}
+        />
       ) : null}
 
       {isDeleteModalOpen ? (
@@ -1961,10 +2790,10 @@ function App({ currentUserRole, fullName, organizationName, initialSurface = 'Ov
                 rows={5}
               />
               <select value={issueSeverity} onChange={(event) => setIssueSeverity(event.target.value as 'low' | 'medium' | 'high' | 'critical')}>
-                <option value="low">נמוכה</option>
-                <option value="medium">בינונית</option>
-                <option value="high">גבוהה</option>
-                <option value="critical">קריטית</option>
+                <option value="low">low</option>
+                <option value="medium">medium</option>
+                <option value="high">high</option>
+                <option value="critical">critical</option>
               </select>
               {issueSubmitError ? <p style={{ color: '#ef4444' }}>{issueSubmitError}</p> : null}
               {issueSubmitSuccess ? <p style={{ color: '#22c55e' }}>{issueSubmitSuccess}</p> : null}

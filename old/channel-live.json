@@ -1,0 +1,54 @@
+{
+  "name": "בית",
+  "type": "personal",
+  "subtitle": "מצלמה אישית",
+  "location": "סלון",
+  "watchScope": "ניטור מותאם אישית",
+  "description": "ערוץ חדש להגדרה מהירה דרך השיחה.",
+  "memoryInterval": 30,
+  "rtspFeed": "rtsp://",
+  "linkedChannelIds": [],
+  "members": [
+    "בית"
+  ],
+  "isBlocked": false,
+  "id": "2e3b2c31-bab4-4c1c-b784-630ecd60d2f7",
+  "organizationId": "da43a574-f2a9-4629-bada-d2ed8ff856c8",
+  "createdAtIso": "2026-04-26T15:51:33.733Z",
+  "captureMode": "local_agent",
+  "cameraEnabled": false,
+  "localAgentBinding": {
+    "deviceId": "ghost-agent-c2500949",
+    "deviceName": "Office Gateway",
+    "cameraName": "Integrated Webcam",
+    "channelId": "2e3b2c31-bab4-4c1c-b784-630ecd60d2f7",
+    "boundAtIso": "2026-04-26T18:46:40.020Z"
+  },
+  "liveState": "OFFLINE",
+  "localAgentStatus": {
+    "state": "offline",
+    "lastHeartbeatAtIso": "2026-04-26T18:46:46.609Z",
+    "lastError": "סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות."
+  },
+  "updatedAtIso": "2026-04-26T18:46:46.609Z",
+  "messages": [],
+  "operations": [
+    {
+      "name": "מבצע חדש",
+      "mode": "alert",
+      "schedule": "כל 10 שניות",
+      "trigger": "למשל: לפחות שני אנשים בפריים / רכב בכניסה",
+      "action": "הנחיות נוספות לניתוח (אופציונלי).",
+      "enabled": true,
+      "parsedSchedule": {
+        "type": "interval",
+        "intervalMs": 10000
+      },
+      "id": "aa3dff33-f942-4041-a7e1-97170dcffde6",
+      "organizationId": "da43a574-f2a9-4629-bada-d2ed8ff856c8",
+      "channelId": "2e3b2c31-bab4-4c1c-b784-630ecd60d2f7",
+      "createdAtIso": "2026-04-26T15:58:39.868Z",
+      "updatedAtIso": "2026-04-26T15:58:39.868Z"
+    }
+  ]
+}

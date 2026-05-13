@@ -1,7 +1,7 @@
-import whiteIconUrl from '../../whiteicon.png'
+import { useRef, useState } from 'react'
 import { AccountMenu, type AccountMenuItem } from './account-menu'
 
-export type TopbarPrimaryNav = 'command-center' | 'ghost-live'
+export type TopbarNavItem = string
 
 interface TopbarProps {
   fullName: string
@@ -11,97 +11,170 @@ interface TopbarProps {
   totalOperations: number
   totalLiveFeeds: number
   totalUnreadAlerts: number
-  activePrimaryNav?: TopbarPrimaryNav
-  activeNav?: string
-  title: string
-  subtitle?: string
-  onPrimaryNavChange?: (item: TopbarPrimaryNav) => void
-  onNavChange?: (item: string) => void
-  onOpenAlerts?: () => void
-  onOpenNotificationsCenter?: () => void
-  onOpenQuickCommand?: () => void
-  onOpenCommandPalette?: () => void
-  onOpenHelp?: () => void
-  onOpenQuickActions?: () => void
-  onLogoAction?: () => void
-  themeMode?: 'dark' | 'light'
-  onToggleTheme?: () => void
-  onLogout: () => void
-  accountItems?: AccountMenuItem[]
-  onAccountAction?: (actionId: string) => void
-  navItems?: unknown[]
+  activeNav: TopbarNavItem
+  canAccessCommandCenter: boolean
+  navItems?: TopbarNavItem[]
+  showAccountMenu?: boolean
+  showCommandTrigger?: boolean
+  showMetrics?: boolean
+  showNotifications?: boolean
+  showSupportActions?: boolean
+  showThemeToggle?: boolean
+  accountMenuItems?: AccountMenuItem[]
+  themeMode: 'light' | 'dark'
+  onToggleTheme: () => void
+  onBrandClick: () => void
+  onCommandTrigger: () => void
+  onOpenShortcuts: () => void
+  onOpenSupport: () => void
+  onNavChange: (item: TopbarNavItem) => void
+  onOpenNotificationsCenter: () => void
+  onAccountAction: (itemId: string) => void
+  mobileLiveDesign?: boolean
 }
 
-const DEFAULT_ACCOUNT_ITEMS: AccountMenuItem[] = [
-  { id: 'notifications', label: 'Notifications', icon: 'O' },
-  { id: 'help', label: 'Help and support', icon: '?' },
-  { id: 'logout', label: 'Log out', icon: 'X', danger: true },
-]
+const NAV_ITEMS = ['Ghost Live', 'Command Center'] as const
+const LONG_PRESS_MS = 4000
 
-const PRIMARY_NAV_ITEMS: Array<{ id: TopbarPrimaryNav; label: string }> = [
-  { id: 'command-center', label: 'Command Center' },
-  { id: 'ghost-live', label: 'Ghost Live' },
-]
-
-const METRIC_LABELS = {
-  health: 'HEALTH',
-  ops: 'OPS',
-  channels: 'CHANNELS',
-  live: 'LIVE',
+function navLabel(item: string): string {
+  if (item === 'Ghost Live') {
+    return 'גוסט לייב'
+  }
+  if (item === 'Command Center') {
+    return 'מרכז פיקוד'
+  }
+  if (item === 'Super Admin') {
+    return 'סופר אדמין'
+  }
+  return item
 }
 
-const DEFAULT_GHOST_MARK = '/ghost-icon-128.png'
+function LiveMetricTile({ value }: { value: number }) {
+  const [isCharging, setIsCharging] = useState(false)
+  const pressStartRef = useRef<number | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-function HelpIcon() {
+  function startHold() {
+    pressStartRef.current = Date.now()
+    setIsCharging(true)
+    timerRef.current = setTimeout(() => setIsCharging(false), LONG_PRESS_MS + 50)
+  }
+
+  function releaseHold() {
+    const elapsed = pressStartRef.current !== null ? Date.now() - pressStartRef.current : 0
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+    setIsCharging(false)
+    pressStartRef.current = null
+    if (elapsed >= LONG_PRESS_MS) {
+      window.open('/terminal.html', '_blank', 'noopener,noreferrer')
+    }
+  }
+
+  function abortHold() {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+    setIsCharging(false)
+    pressStartRef.current = null
+  }
+
   return (
-    <svg aria-hidden="true" fill="none" viewBox="0 0 20 20">
-      <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M8.85 7.9A1.65 1.65 0 1 1 11.7 9c-.63.4-1.2.86-1.2 1.75" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <circle cx="10" cy="13.7" r=".8" fill="currentColor" />
-    </svg>
+    <button
+      aria-label={`ערוצים חיים: ${value}`}
+      className={`topbar-metric-tile topbar-metric-live${isCharging ? ' status-pill-charging' : ''}`}
+      onMouseDown={startHold}
+      onMouseLeave={abortHold}
+      onMouseUp={releaseHold}
+      onTouchEnd={releaseHold}
+      onTouchStart={startHold}
+      title="ערוצים חיים"
+      type="button"
+    >
+      <span className="topbar-metric-label">חי</span>
+      <span className="topbar-metric-value">{value}</span>
+    </button>
   )
 }
 
 function BellIcon() {
   return (
-    <svg aria-hidden="true" fill="none" viewBox="0 0 20 20">
-      <path d="M10 4.25a3.25 3.25 0 0 0-3.25 3.25v1.28c0 .68-.2 1.35-.57 1.92L5 12.5h10l-1.18-1.8a3.5 3.5 0 0 1-.57-1.92V7.5A3.25 3.25 0 0 0 10 4.25Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      <path d="M8.55 14.5a1.6 1.6 0 0 0 2.9 0" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
-    </svg>
-  )
-}
-
-function SparkleIcon() {
-  return (
-    <svg aria-hidden="true" fill="none" viewBox="0 0 20 20">
-      <path d="m10 3 1.6 4.4L16 9l-4.4 1.6L10 15l-1.6-4.4L4 9l4.4-1.6L10 3Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" />
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path
+        d="M8 1.25a4.75 4.75 0 0 0-4.75 4.75v2.4L1.75 9.9v1.6h12.5V9.9L12.75 7.4V6A4.75 4.75 0 0 0 8 1.25z"
+        stroke="currentColor"
+        strokeWidth="1.45"
+        strokeLinejoin="round"
+      />
+      <path d="M6.1 11.8a1.9 1.9 0 0 0 3.8 0" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" />
     </svg>
   )
 }
 
 function SearchIcon() {
   return (
-    <svg aria-hidden="true" fill="none" viewBox="0 0 20 20">
-      <circle cx="9" cy="9" r="4.75" stroke="currentColor" strokeWidth="1.5" />
-      <path d="m12.5 12.5 3.25 3.25" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <circle cx="7" cy="7" r="4.2" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M10.4 10.4L14 14" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
     </svg>
   )
 }
 
-function KeyboardIcon() {
+function SparkIcon() {
   return (
-    <svg aria-hidden="true" fill="none" viewBox="0 0 20 20">
-      <rect x="2.75" y="5" width="14.5" height="10" rx="2.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M5.5 8.5h.01M8.5 8.5h.01M11.5 8.5h.01M14.5 8.5h.01M5.5 11.5h6M13 11.5h1.5" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path d="M8 1.5L9.4 6.6L14.5 8L9.4 9.4L8 14.5L6.6 9.4L1.5 8L6.6 6.6L8 1.5Z" stroke="currentColor" strokeWidth="1.1" />
     </svg>
   )
 }
 
-function getHealthPercent(channelsCount: number, totalLiveFeeds: number) {
-  if (channelsCount <= 0) {
-    return 0
+function HelpIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <circle cx="8" cy="8" r="6.2" stroke="currentColor" strokeWidth="1.35" />
+      <path
+        d="M6.55 6.2A1.65 1.65 0 0 1 8 5.3c1 0 1.75.62 1.75 1.55 0 .67-.39 1.06-1 1.43-.54.33-.84.62-.84 1.24v.18"
+        stroke="currentColor"
+        strokeWidth="1.35"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="8" cy="11.75" r="0.78" fill="currentColor" />
+    </svg>
+  )
+}
+
+function ThemeIcon({ themeMode }: { themeMode: 'light' | 'dark' }) {
+  if (themeMode === 'dark') {
+    return (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+        <circle cx="8" cy="8" r="3.1" stroke="currentColor" strokeWidth="1.35" />
+        <path d="M8 1.6V3.2" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
+        <path d="M8 12.8V14.4" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
+        <path d="M1.6 8H3.2" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
+        <path d="M12.8 8H14.4" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
+        <path d="M3.48 3.48L4.62 4.62" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
+        <path d="M11.38 11.38L12.52 12.52" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
+        <path d="M11.38 4.62L12.52 3.48" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
+        <path d="M3.48 12.52L4.62 11.38" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
+      </svg>
+    )
   }
-  return Math.round((totalLiveFeeds / channelsCount) * 100)
+
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path
+        d="M10.98 2.64A5.85 5.85 0 1 0 13.36 9.9a4.95 4.95 0 1 1-2.38-7.26Z"
+        stroke="currentColor"
+        strokeWidth="1.35"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
 }
 
 export function Topbar({
@@ -112,161 +185,159 @@ export function Topbar({
   totalOperations,
   totalLiveFeeds,
   totalUnreadAlerts,
-  activePrimaryNav,
   activeNav,
-  title,
-  subtitle,
-  onPrimaryNavChange,
-  onNavChange,
-  onOpenAlerts,
-  onOpenNotificationsCenter,
-  onOpenQuickCommand,
-  onOpenCommandPalette,
-  onOpenHelp,
-  onOpenQuickActions,
-  onLogoAction,
-  themeMode = 'dark',
+  canAccessCommandCenter,
+  navItems = [...NAV_ITEMS],
+  showAccountMenu = true,
+  showCommandTrigger = true,
+  showMetrics = true,
+  showNotifications = true,
+  showSupportActions = true,
+  showThemeToggle = true,
+  accountMenuItems = [],
+  themeMode,
   onToggleTheme,
-  onLogout,
-  accountItems = DEFAULT_ACCOUNT_ITEMS,
+  onBrandClick,
+  onCommandTrigger,
+  onOpenShortcuts,
+  onOpenSupport,
+  onNavChange,
+  onOpenNotificationsCenter,
   onAccountAction,
+  mobileLiveDesign = false,
 }: TopbarProps) {
-  const healthPercent = getHealthPercent(channelsCount, totalLiveFeeds)
-  const brandMarkSrc = themeMode === 'light' ? whiteIconUrl : DEFAULT_GHOST_MARK
-  const resolvedPrimaryNav: TopbarPrimaryNav =
-    activePrimaryNav ?? (activeNav === 'Live Ops' || activeNav === 'ghost-live' ? 'ghost-live' : 'command-center')
-  const openAlerts = onOpenAlerts ?? onOpenNotificationsCenter ?? (() => undefined)
-  const openQuickCommand = onOpenQuickCommand ?? onOpenCommandPalette ?? (() => undefined)
-  const openHelp = onOpenHelp ?? (() => undefined)
-  const openQuickActions = onOpenQuickActions ?? (() => undefined)
-  const handleLogoAction = onLogoAction ?? (() => onNavChange?.('Overview'))
-
-  function handlePrimaryNavChange(item: TopbarPrimaryNav) {
-    onPrimaryNavChange?.(item)
-    if (!onPrimaryNavChange) {
-      onNavChange?.(item)
-    }
-  }
-
-  function handleAccountAction(actionId: string) {
-    if (actionId === 'notifications') {
-      openAlerts()
-      return
-    }
-    if (actionId === 'help') {
-      openHelp()
-      return
-    }
-    if (actionId === 'logout') {
-      onLogout()
-      return
-    }
-    onAccountAction?.(actionId)
-  }
+  const healthPercent = channelsCount > 0 ? Math.round((totalLiveFeeds / channelsCount) * 100) : 0
+  const brandSrc = themeMode === 'dark' ? '/whiteicon.png' : '/ghost-icon-128.png'
+  const fallbackBrandSrc = themeMode === 'dark' ? '/favicon.svg' : '/favicon-64.png'
 
   return (
-    <header
-      aria-label={subtitle ? `${title} - ${subtitle}` : title}
-      className="topbar topbar-ref"
-      data-primary-nav={resolvedPrimaryNav}
-      data-theme-mode={themeMode}
-    >
-      <div className="topbar-left-cluster">
-        <AccountMenu
-          fullName={fullName}
-          items={accountItems}
-          onAction={handleAccountAction}
-          onLogout={onLogout}
-          organizationName={organizationName}
-          themeMode={themeMode}
-          onToggleTheme={onToggleTheme}
-          role={role}
+    <header className={`topbar${mobileLiveDesign ? ' topbar-mobile-live-design' : ''}`}>
+      <button aria-label="חזרה למרחב הראשי" className="topbar-brand topbar-brand-button" onClick={onBrandClick} type="button">
+        <img
+          className={`brand-mark brand-mark-${themeMode}`}
+          src={brandSrc}
+          alt="Ghost"
+          onError={(event) => {
+            event.currentTarget.onerror = null
+            event.currentTarget.src = fallbackBrandSrc
+          }}
         />
+      </button>
 
-        <span aria-hidden className="topbar-cluster-divider" />
-
-        <div className="topbar-icon-cluster" aria-label="Global actions">
-          <button className="topbar-icon-btn" onClick={openHelp} title="Help and support" type="button">
-            <span aria-hidden className="topbar-inline-icon">
-              <HelpIcon />
-            </span>
+      <div className="topbar-center desktop-only">
+        {showCommandTrigger ? (
+          <button className="topbar-command-trigger" onClick={onCommandTrigger} type="button">
+            <SearchIcon />
+            <span>פקודה מהירה</span>
+            <kbd>Ctrl+K</kbd>
           </button>
-          <button className="topbar-icon-btn" onClick={openAlerts} title="Notifications" type="button">
-            <span aria-hidden className="topbar-inline-icon">
-              <BellIcon />
-            </span>
-          </button>
-          <button className="topbar-icon-btn" onClick={openQuickActions} title="Quick actions" type="button">
-            <span aria-hidden className="topbar-inline-icon">
-              <SparkleIcon />
-            </span>
-          </button>
-        </div>
+        ) : null}
 
-        <span aria-hidden className="topbar-cluster-divider topbar-cluster-divider-metrics" />
-
-        <div className="topbar-metrics" aria-label="System health metrics">
-          <div className="topbar-metric-tile">
-            <span className="topbar-metric-value">{healthPercent}%</span>
-            <span className="topbar-metric-label">{METRIC_LABELS.health}</span>
-          </div>
-          <div className="topbar-metric-tile">
-            <span className="topbar-metric-value">{totalOperations}</span>
-            <span className="topbar-metric-label">{METRIC_LABELS.ops}</span>
-          </div>
-          <div className="topbar-metric-tile">
-            <span className="topbar-metric-value">{channelsCount}</span>
-            <span className="topbar-metric-label">{METRIC_LABELS.channels}</span>
-          </div>
-          <div className="topbar-metric-tile">
-            <span className="topbar-metric-value">{Math.max(totalLiveFeeds, totalUnreadAlerts)}</span>
-            <span className="topbar-metric-label">{METRIC_LABELS.live}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="topbar-right-cluster">
-        <nav aria-label="Primary navigation" className="topbar-nav">
-          {PRIMARY_NAV_ITEMS.map((item) => (
+        <nav className="topbar-nav" aria-label="ניווט ראשי">
+          {navItems.map((item) => (
             <button
-              key={item.id}
-              className={`topbar-nav-item${resolvedPrimaryNav === item.id ? ' active' : ''}`}
-              onClick={() => handlePrimaryNavChange(item.id)}
+              key={item}
+              className={`topbar-nav-item${activeNav === item ? ' active' : ''}`}
+              disabled={item === 'Command Center' && !canAccessCommandCenter}
+              onClick={() => onNavChange(item)}
               type="button"
             >
-              {item.label}
+              {(navLabel(item), item)}
             </button>
           ))}
         </nav>
+      </div>
 
-        <button className="topbar-command-trigger" onClick={openQuickCommand} type="button">
-          <span className="topbar-command-prefix" aria-hidden>
-            <KeyboardIcon />
-          </span>
-          <span>Quick command</span>
-          <span className="topbar-command-icon" aria-hidden>
-            <SearchIcon />
-          </span>
-        </button>
+      <div className="topbar-actions">
+        {showMetrics ? (
+          <div className="topbar-metrics desktop-only" aria-label="מצב המערכת">
+            <LiveMetricTile value={totalLiveFeeds} />
+            <div className="topbar-metric-tile">
+              <span className="topbar-metric-label">ערוצים</span>
+              <span className="topbar-metric-value">{channelsCount}</span>
+            </div>
+            <div className="topbar-metric-tile">
+              <span className="topbar-metric-label">מבצעים</span>
+              <span className="topbar-metric-value">{totalOperations}</span>
+            </div>
+            <div className="topbar-metric-tile">
+              <span className="topbar-metric-label">בריאות</span>
+              <span className="topbar-metric-value">{healthPercent}%</span>
+            </div>
+          </div>
+        ) : null}
+
+        {showMetrics ? <div className="topbar-actions-divider desktop-only" /> : null}
 
         <button
-          aria-label={title}
-          className="topbar-logo-btn"
-          onClick={handleLogoAction}
-          title={subtitle ? `${title} - ${subtitle}` : title}
+          aria-label="חיפוש"
+          className="topbar-icon-btn topbar-search-btn mobile-only"
+          onClick={onCommandTrigger}
+          title="חיפוש"
           type="button"
         >
-          <span aria-hidden className="topbar-logo-halo" />
-          <img
-            className="brand-mark"
-            src={brandMarkSrc}
-            alt="Ghost logo"
-            onError={(event) => {
-              event.currentTarget.onerror = null
-              event.currentTarget.src = DEFAULT_GHOST_MARK
-            }}
-          />
+          <SearchIcon />
         </button>
+
+        {showSupportActions ? (
+          <button
+            aria-label="קיצורי מערכת"
+            className="topbar-icon-btn desktop-only"
+            onClick={onOpenShortcuts}
+            title="קיצורי מערכת"
+            type="button"
+          >
+            <SparkIcon />
+          </button>
+        ) : null}
+
+        {showNotifications ? (
+          <button
+            aria-label={`התראות שלא נקראו: ${totalUnreadAlerts}`}
+            className="topbar-icon-btn topbar-notifications-btn topbar-theme-btn"
+            onClick={onOpenNotificationsCenter}
+            type="button"
+          >
+            <BellIcon />
+            {totalUnreadAlerts > 0 ? <span className="notif-badge" aria-hidden>{totalUnreadAlerts > 99 ? '99+' : totalUnreadAlerts}</span> : null}
+          </button>
+        ) : null}
+
+        {showSupportActions ? (
+          <button
+            aria-label="עזרה ותמיכה"
+            className="topbar-icon-btn desktop-only"
+            onClick={onOpenSupport}
+            title="עזרה ותמיכה"
+            type="button"
+          >
+            <HelpIcon />
+          </button>
+        ) : null}
+
+        {showThemeToggle ? (
+          <button
+            aria-label={themeMode === 'light' ? 'מעבר לערכת נושא כהה' : 'מעבר לערכת נושא בהירה'}
+            className="topbar-icon-btn topbar-theme-toggle-btn"
+            onClick={onToggleTheme}
+            title={themeMode === 'light' ? 'ערכת נושא כהה' : 'ערכת נושא בהירה'}
+            type="button"
+          >
+            <ThemeIcon themeMode={themeMode} />
+          </button>
+        ) : null}
+
+        {showAccountMenu ? <div className="topbar-actions-divider" /> : null}
+
+        {showAccountMenu ? (
+          <AccountMenu
+            fullName={fullName}
+            items={accountMenuItems}
+            onSelect={onAccountAction}
+            organizationName={organizationName}
+            role={role}
+          />
+        ) : null}
       </div>
     </header>
   )

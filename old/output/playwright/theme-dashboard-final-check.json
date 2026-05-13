@@ -1,0 +1,5 @@
+{
+  "theme": "light",
+  "topbar": 1,
+  "lightShellBg": "linear-gradient(rgba(242, 247, 252, 0.66), rgba(221, 231, 241, 0.42)), none"
+}

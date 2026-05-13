@@ -1,0 +1,24 @@
+[
+  {
+    "width": 1440,
+    "height": 960,
+    "theme": "light",
+    "scrollWidth": 1425,
+    "clientWidth": 1440,
+    "hasHorizontalOverflow": false,
+    "pageScrollHeight": 1473,
+    "viewportHeight": 960,
+    "topbarHeight": 94
+  },
+  {
+    "width": 1024,
+    "height": 900,
+    "theme": "light",
+    "scrollWidth": 1009,
+    "clientWidth": 1024,
+    "hasHorizontalOverflow": false,
+    "pageScrollHeight": 1515,
+    "viewportHeight": 900,
+    "topbarHeight": 94
+  }
+]

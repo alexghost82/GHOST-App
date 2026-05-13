@@ -18,6 +18,38 @@ interface ChannelsRouterDeps {
   realtimeHub: IRealtimeHub
 }
 
+function userCanAccessChannel(
+  user: { isActive: boolean; allowedChannelIds: string[]; blockedChannelIds: string[] },
+  channelId: string,
+): boolean {
+  if (!user.isActive) {
+    return false
+  }
+  if (user.blockedChannelIds.includes(channelId)) {
+    return false
+  }
+  return user.allowedChannelIds.length === 0 || user.allowedChannelIds.includes(channelId)
+}
+
+function resolveMessageRecipientIds(
+  store: IAdminRepository,
+  organizationId: string,
+  channelId: string,
+  author: 'user' | 'ghost' | 'system',
+  senderUserId: string,
+): string[] {
+  if (author !== 'system') {
+    return [senderUserId]
+  }
+
+  const recipients = store
+    .listUsersByOrganization(organizationId)
+    .filter((user) => userCanAccessChannel(user, channelId))
+    .map((user) => user.id)
+
+  return recipients.length > 0 ? recipients : [senderUserId]
+}
+
 function publishUsageUpdated(realtimeHub: IRealtimeHub, organizationId: string, detail: Record<string, unknown> = {}): void {
   realtimeHub.publish({
     eventType: 'usage.updated',
@@ -38,7 +70,7 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
       const channels = await store.listFullChannels(organizationId)
       const enriched = await Promise.all(
         channels.map(async (channel) => {
-          const messages = await store.listMessages(organizationId, userId, channel.id, { limit: 50 })
+          const messages = await store.listMessages(organizationId, userId, channel.id)
           const operations = await store.listChannelOperations(organizationId, channel.id)
           return { ...normalizeChannelLocalAgentState(channel), messages, operations }
         }),
@@ -119,7 +151,26 @@ export function createChannelsRouter({ store, realtimeHub }: ChannelsRouterDeps)
       const { organizationId, userId } = extractTenantContext(req)
       const parsed = CreateMessageSchema.safeParse(req.body)
       if (!parsed.success) return res.status(400).json({ error: 'קלט לא תקין.', details: parsed.error.flatten() })
-      const record = await store.addMessage(organizationId, userId, req.params.id, parsed.data)
+
+      const channel = await store.getFullChannel(organizationId, req.params.id)
+      if (!channel) return res.status(404).json({ error: 'הערוץ לא נמצא.' })
+
+      const recipientIds = resolveMessageRecipientIds(
+        store,
+        organizationId,
+        channel.id,
+        parsed.data.author,
+        userId,
+      )
+
+      let record = null
+      for (const recipientId of recipientIds) {
+        const saved = await store.addMessage(organizationId, recipientId, channel.id, parsed.data)
+        if (recipientId === userId || record === null) {
+          record = saved
+        }
+      }
+
       await syncOrganizationUsage(store, organizationId)
       publishUsageUpdated(realtimeHub, organizationId, { action: 'message.created', channelId: req.params.id })
       return res.status(201).json(record)

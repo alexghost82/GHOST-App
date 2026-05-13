@@ -1,0 +1,133 @@
+{
+  "user": "slon",
+  "baseUrl": "https://ghost-test-app-b906c.web.app",
+  "draft": "refresh-check-1778423515558",
+  "afterSend": {
+    "bodyText": "פקודה מהירה\nCtrl+K\nGhost Live\nCommand Center\nחי\n1\nערוצים\n1\nמבצעים\n0\nבריאות\n100%\nאב\nאלכס בוגדנוב\nTEST\nגל\nגוסט לייב\nתיבת ניטור מאובטחת\n+\n⋮\nשיחות\n1\nusb test\nWEB\nמוגבל\n17:31\n\nrefresh-check-1778423515558\n\nusb test\n\nבמעקב·17:31\n\n⋮\nGHOST\n\nReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.\n\n02:55 PM\n×\nGHOST\n\nReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.\n\n02:56 PM\n×\nGHOST\n\nReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.\n\n02:56 PM\n×\n\n??\n\n14:56\nGHOST\n\nReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.\n\n02:56 PM\n×\nGHOST\n\nReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.\n\n02:56 PM\n×\nGHOST\n\nReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.\n\n02:57 PM\n×\n\nFdd\n\n14:23\n\nrefresh-check-1778422270276\n\n17:11\n\napi-check-1778423153893\n\n17:20\n\napi-check-1778423514233\n\n17:32\n\nrefresh-check-1778423515558\n\n17:31\nהודעה\n➤\nגרסה\nv0.8.3\nבילד\n2026.03\nמיקום\n34.7843°N 32.0853°E\nמערכת\nOK\nשעה\n17:32:25\nחי\nעזרה\nפרטיות\nתנאים",
+    "matchingRows": [
+      {
+        "text": "refresh-check-177842351555817:31",
+        "className": "message-row user"
+      }
+    ],
+    "allRows": [
+      {
+        "text": "GHOSTReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.02:55 PM×",
+        "className": "message-row system alert-report"
+      },
+      {
+        "text": "GHOSTReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.02:56 PM×",
+        "className": "message-row system alert-report"
+      },
+      {
+        "text": "GHOSTReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.02:56 PM×",
+        "className": "message-row system alert-report"
+      },
+      {
+        "text": "??14:56",
+        "className": "message-row user"
+      },
+      {
+        "text": "GHOSTReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.02:56 PM×",
+        "className": "message-row system alert-report"
+      },
+      {
+        "text": "GHOSTReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.02:56 PM×",
+        "className": "message-row system alert-report"
+      },
+      {
+        "text": "GHOSTReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.02:57 PM×",
+        "className": "message-row system alert-report"
+      },
+      {
+        "text": "Fdd14:23",
+        "className": "message-row user"
+      },
+      {
+        "text": "refresh-check-177842227027617:11",
+        "className": "message-row user"
+      },
+      {
+        "text": "api-check-177842315389317:20",
+        "className": "message-row user"
+      },
+      {
+        "text": "api-check-177842351423317:32",
+        "className": "message-row user"
+      },
+      {
+        "text": "refresh-check-177842351555817:31",
+        "className": "message-row user"
+      }
+    ]
+  },
+  "afterReload": {
+    "bodyText": "פקודה מהירה\nCtrl+K\nGhost Live\nCommand Center\nחי\n1\nערוצים\n1\nמבצעים\n0\nבריאות\n100%\nאב\nאלכס בוגדנוב\nTEST\nגל\nגוסט לייב\nתיבת ניטור מאובטחת\n+\n⋮\nשיחות\n1\nusb test\nWEB\nמוגבל\n17:31\n\nrefresh-check-1778423515558\n\nusb test\n\nבמעקב·17:31\n\n⋮\nGHOST\n\nReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.\n\n02:55 PM\n×\nGHOST\n\nReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.\n\n02:56 PM\n×\nGHOST\n\nReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.\n\n02:56 PM\n×\n\n??\n\n14:56\nGHOST\n\nReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.\n\n02:56 PM\n×\nGHOST\n\nReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.\n\n02:56 PM\n×\nGHOST\n\nReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.\n\n02:57 PM\n×\n\nFdd\n\n14:23\n\nrefresh-check-1778422270276\n\n17:11\n\napi-check-1778423153893\n\n17:20\n\napi-check-1778423514233\n\n17:32\n\nrefresh-check-1778423515558\n\n17:31\nהודעה\n➤\nגרסה\nv0.8.3\nבילד\n2026.03\nמיקום\n34.7843°N 32.0853°E\nמערכת\nOK\nשעה\n17:32:29\nחי\nעזרה\nפרטיות\nתנאים",
+    "matchingRows": [
+      {
+        "text": "refresh-check-177842351555817:31",
+        "className": "message-row user"
+      }
+    ],
+    "allRows": [
+      {
+        "text": "GHOSTReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.02:55 PM×",
+        "className": "message-row system alert-report"
+      },
+      {
+        "text": "GHOSTReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.02:56 PM×",
+        "className": "message-row system alert-report"
+      },
+      {
+        "text": "GHOSTReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.02:56 PM×",
+        "className": "message-row system alert-report"
+      },
+      {
+        "text": "??14:56",
+        "className": "message-row user"
+      },
+      {
+        "text": "GHOSTReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.02:56 PM×",
+        "className": "message-row system alert-report"
+      },
+      {
+        "text": "GHOSTReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.02:56 PM×",
+        "className": "message-row system alert-report"
+      },
+      {
+        "text": "GHOSTReport | מבצע חדש: scan failed. סריקת מבצעים נכשלה: שירות ה-AI עמוס זמנית. נסו שוב בעוד כ-30 שניות.02:57 PM×",
+        "className": "message-row system alert-report"
+      },
+      {
+        "text": "Fdd14:23",
+        "className": "message-row user"
+      },
+      {
+        "text": "refresh-check-177842227027617:11",
+        "className": "message-row user"
+      },
+      {
+        "text": "api-check-177842315389317:20",
+        "className": "message-row user"
+      },
+      {
+        "text": "api-check-177842351423317:32",
+        "className": "message-row user"
+      },
+      {
+        "text": "refresh-check-177842351555817:31",
+        "className": "message-row user"
+      }
+    ]
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 500 ()",
+    "Failed to load resource: the server responded with a status of 429 ()",
+    "Vision reply flow failed Error: ניתוח התמונה נכשל: visual analysis is unavailable because the AI quota for the configured key is exhausted. Update billing or use a key with available quota and try again.\n    at Kt (https://ghost-test-app-b906c.web.app/assets/index-DUqn69ws.js:9:109986)\n    at async jn (https://ghost-test-app-b906c.web.app/assets/index-DUqn69ws.js:10:15015)",
+    "Failed to load resource: the server responded with a status of 500 ()"
+  ],
+  "screenshots": {
+    "afterSend": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-chat-refresh-check\\after-send.png",
+    "afterReload": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-chat-refresh-check\\after-reload.png"
+  }
+}

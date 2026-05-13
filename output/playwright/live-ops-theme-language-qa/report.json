@@ -1,0 +1,165 @@
+{
+  "user": "slon",
+  "light": {
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-theme-language-qa\\light.png",
+    "theme": "light",
+    "textSample": "פקודה מהירה\nCtrl+K\nגוסט לייב\nמרכז פיקוד\nחי\n1\nערוצים\n1\nמבצעים\n0\nבריאות\n100%\nאב\nאלכס בו\nTEST\nגל\nגוסט לייב\nתיבת ניטור מאובטחת\n+\n⋮\nשיחות\n1\nב\nבית\nפעיל\n15:31\n\nאתה: ,\n\nב\nבית\n\nפעיל כעת·15:31\n\n⋮\nSystem\n\nערוץ חדש נוצר ומוכן לשיחה. אפשר לעדכן RTSP, זיכרון ומבצעים בפאנל הימני.\n\n18:45\n\n?\n\n18:52\n\n?\n\n18:54\n\nבדוק אם יש חסימה בכניסה\n\n18:54\n\nчто ты видишь?\n\n18:57\n\n,\n\n15:31\nהודעה\n➤\nפרטי ערוץ\nסגור\nב\nבית\n\nכרמיאל\n\nפעיל\nפרטי הערוץ\nנהל\nסוג\nאישי\nמיקום\nכרמיאל\nהיקף ניטור\nניטור מותאם אישית\nRTSP\nrtsp://\nחברים\nבית\nאוטומציות\n0/0\n\nלא הוגדרו אוטומציות לערוץ הזה.\n\nגרסה\nv0.8.3\nבילד\n2026.03\nמיקום\n34.7843°N 32.0853°E\nמערכת\nOK\nשעה\n19:10:30\nחי\nעזרה\nפרטיות\nתנאים",
+    "topbar": {
+      "selector": ".topbar",
+      "color": "rgb(24, 34, 41)",
+      "background": "rgba(247, 249, 251, 0.76)"
+    },
+    "inboxTitle": {
+      "selector": ".inbox-appbar-copy strong",
+      "color": "rgb(24, 34, 41)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "searchInput": {
+      "selector": ".inbox-search-input",
+      "color": "rgb(24, 34, 41)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "chatTitle": {
+      "selector": ".title-cluster-text h2",
+      "color": "rgb(24, 34, 41)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "composer": {
+      "selector": ".composer textarea",
+      "color": "rgb(24, 34, 41)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "composerShell": {
+      "selector": ".composer-shell",
+      "x": 358,
+      "y": 839,
+      "width": 686,
+      "height": 46
+    },
+    "composerInputShell": {
+      "selector": ".composer-input-shell",
+      "x": 410,
+      "y": 839,
+      "width": 634,
+      "height": 46
+    },
+    "composerTextarea": {
+      "selector": ".composer textarea",
+      "x": 427,
+      "y": 852,
+      "width": 600,
+      "height": 20
+    },
+    "detailsHeader": {
+      "selector": ".details-panel .dp-channel-name",
+      "color": "rgb(24, 34, 41)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "detailsMuted": {
+      "selector": ".details-panel .dp-field dt",
+      "color": "rgb(108, 123, 134)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "detailsValue": {
+      "selector": ".details-panel .dp-field dd",
+      "color": "rgb(24, 34, 41)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "detailsTag": {
+      "selector": ".details-panel .dp-tag",
+      "color": "rgb(24, 34, 41)",
+      "background": "color(srgb 0.96549 0.984314 1 / 0.341176)"
+    },
+    "detailsEmpty": {
+      "selector": ".details-panel .dp-empty-hint",
+      "color": "rgb(108, 123, 134)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "footer": {
+      "selector": ".app-footer",
+      "color": "rgb(24, 34, 41)",
+      "background": "rgba(247, 249, 251, 0.76)"
+    }
+  },
+  "dark": {
+    "screenshot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\live-ops-theme-language-qa\\dark.png",
+    "theme": "dark",
+    "textSample": "פקודה מהירה\nCtrl+K\nגוסט לייב\nמרכז פיקוד\nחי\n1\nערוצים\n1\nמבצעים\n0\nבריאות\n100%\nאב\nאלכס בו\nTEST\nגל\nגוסט לייב\nתיבת ניטור מאובטחת\n+\n⋮\nשיחות\n1\nב\nבית\nפעיל\n15:31\n\nאתה: ,\n\nב\nבית\n\nפעיל כעת·15:31\n\n⋮\nSystem\n\nערוץ חדש נוצר ומוכן לשיחה. אפשר לעדכן RTSP, זיכרון ומבצעים בפאנל הימני.\n\n18:45\n\n?\n\n18:52\n\n?\n\n18:54\n\nבדוק אם יש חסימה בכניסה\n\n18:54\n\nчто ты видишь?\n\n18:57\n\n,\n\n15:31\nהודעה\n➤\nפרטי ערוץ\nסגור\nב\nבית\n\nכרמיאל\n\nפעיל\nפרטי הערוץ\nנהל\nסוג\nאישי\nמיקום\nכרמיאל\nהיקף ניטור\nניטור מותאם אישית\nRTSP\nrtsp://\nחברים\nבית\nאוטומציות\n0/0\n\nלא הוגדרו אוטומציות לערוץ הזה.\n\nגרסה\nv0.8.3\nבילד\n2026.03\nמיקום\n34.7843°N 32.0853°E\nמערכת\nOK\nשעה\n19:10:31\nחי\nעזרה\nפרטיות\nתנאים",
+    "topbar": {
+      "selector": ".topbar",
+      "color": "rgba(241, 245, 249, 0.92)",
+      "background": "rgba(13, 20, 26, 0.72)"
+    },
+    "inboxTitle": {
+      "selector": ".inbox-appbar-copy strong",
+      "color": "rgb(242, 245, 248)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "searchInput": {
+      "selector": ".inbox-search-input",
+      "color": "rgb(242, 245, 248)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "chatTitle": {
+      "selector": ".title-cluster-text h2",
+      "color": "rgb(242, 245, 248)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "composer": {
+      "selector": ".composer textarea",
+      "color": "rgb(242, 245, 248)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "composerShell": {
+      "selector": ".composer-shell",
+      "x": 358,
+      "y": 839,
+      "width": 686,
+      "height": 46
+    },
+    "composerInputShell": {
+      "selector": ".composer-input-shell",
+      "x": 410,
+      "y": 839,
+      "width": 634,
+      "height": 46
+    },
+    "composerTextarea": {
+      "selector": ".composer textarea",
+      "x": 427,
+      "y": 852,
+      "width": 600,
+      "height": 20
+    },
+    "detailsHeader": {
+      "selector": ".details-panel .dp-channel-name",
+      "color": "rgb(242, 245, 248)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "detailsMuted": {
+      "selector": ".details-panel .dp-field dt",
+      "color": "rgb(209, 215, 221)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "detailsValue": {
+      "selector": ".details-panel .dp-field dd",
+      "color": "rgb(242, 245, 248)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "detailsTag": {
+      "selector": ".details-panel .dp-tag",
+      "color": "rgb(242, 245, 248)",
+      "background": "color(srgb 0.520123 0.537468 0.566376 / 0.259608)"
+    },
+    "detailsEmpty": {
+      "selector": ".details-panel .dp-empty-hint",
+      "color": "rgb(209, 215, 221)",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "footer": {
+      "selector": ".app-footer",
+      "color": "rgba(241, 245, 249, 0.92)",
+      "background": "rgba(13, 20, 26, 0.72)"
+    }
+  }
+}

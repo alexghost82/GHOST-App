@@ -1,0 +1,126 @@
+{
+  "login": {
+    "light": {
+      "screenshot": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-full-qa/login-light.png",
+      "state": {
+        "path": "/",
+        "theme": "light",
+        "bodyText": "INIT::secure_bridge uplink=ready\nAUTH::operator handoff pending\nSCAN::zone-alpha anomaly_score=0.07\nTRACE::vision_proxy route=stabilized\nINTEL::channel-delta heartbeat=ok\nOPS::queue depth=2 retries=0 timeout=30s\nMEM::retention window=120m status=active\nPIPE::critical_alerts unread=0 pending=0\nMODEL::vision-chat provider=online\nNET::jitter=2ms packet_loss=0%\nFORENSICS::archive stream encrypted(AES256)\nWATCH::pattern_match result=clear\n\nSECURE ACCESS\n\nSign In\n\nEnter your user and passkey to continue to Ghost.\n\nuser\npasskey\nSign In",
+        ".login-screen": true,
+        ".login-card": true,
+        ".login-submit": true
+      }
+    },
+    "dark": {
+      "screenshot": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-full-qa/login-dark.png",
+      "state": {
+        "path": "/",
+        "theme": "dark",
+        "bodyText": "INIT::secure_bridge uplink=ready\nAUTH::operator handoff pending\nSCAN::zone-alpha anomaly_score=0.07\nTRACE::vision_proxy route=stabilized\nINTEL::channel-delta heartbeat=ok\nOPS::queue depth=2 retries=0 timeout=30s\nMEM::retention window=120m status=active\nPIPE::critical_alerts unread=0 pending=0\nMODEL::vision-chat provider=online\nNET::jitter=2ms packet_loss=0%\nFORENSICS::archive stream encrypted(AES256)\nWATCH::pattern_match result=clear\n\nSECURE ACCESS\n\nSign In\n\nEnter your user and passkey to continue to Ghost.\n\nuser\npasskey\nSign In",
+        ".login-screen": true,
+        ".login-card": true,
+        ".login-submit": true
+      }
+    }
+  },
+  "operator": {
+    "light": {
+      "live": {
+        "screenshot": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-full-qa/operator-live-light.png",
+        "state": {
+          "path": "/",
+          "theme": "light",
+          "bodyText": "SS\nשיחות\nצ׳אט\nערוץ\n✦\n✦\n✦\nסיכום מוצפן\nאין עדיין הודעות\n\nהתחל את השיחה או בקש ניתוח מצלמה חדש מהערוץ הזה.\n\nגוסט\nלייב\nערוצים\nהתראות\nחשבון\nפרטיות\nעזרה\nשעה\n17:24:04\nמערכת\nOK\nבילד\n2026.03\nגרסה\nv0.8.3",
+          ".operator-mobile-app-shell": true,
+          ".topbar": true,
+          ".operator-mobile-primary-nav": true,
+          ".app-footer": true
+        }
+      },
+      "alerts": {
+        "screenshot": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-full-qa/operator-alerts-light.png",
+        "state": {
+          "path": "/",
+          "theme": "light",
+          "bodyText": "SS\n\nהתראות\n\nהתראות קריטיות\n\nסקור, אשר או עבור ישירות לערוץ שנפגע.\n\nהתראות\n\nהתראות קריטיות\n0 פתוחות\n0 אושרו\n0 הושתקו\n\nתקין\n\nכרגע אין התראות קריטיות במערכת.\n\nגוסט\nלייב\nערוצים\nהתראות\nחשבון\nפרטיות\nעזרה\nשעה\n17:24:05\nמערכת\nOK\nבילד\n2026.03\nגרסה\nv0.8.3",
+          ".operator-mobile-alerts-screen": true,
+          ".operator-mobile-primary-nav": true
+        }
+      }
+    },
+    "dark": {
+      "live": {
+        "screenshot": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-full-qa/operator-live-dark.png",
+        "state": {
+          "path": "/",
+          "theme": "dark",
+          "bodyText": "SS\nשיחות\nצ׳אט\nערוץ\n✦\n✦\n✦\nסיכום מוצפן\nאין עדיין הודעות\n\nהתחל את השיחה או בקש ניתוח מצלמה חדש מהערוץ הזה.\n\nגוסט\nלייב\nערוצים\nהתראות\nחשבון\nפרטיות\nעזרה\nשעה\n17:24:15\nמערכת\nOK\nבילד\n2026.03\nגרסה\nv0.8.3",
+          ".operator-mobile-app-shell": true,
+          ".topbar": true,
+          ".operator-mobile-primary-nav": true,
+          ".app-footer": true
+        }
+      },
+      "alerts": {
+        "screenshot": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-full-qa/operator-alerts-dark.png",
+        "state": {
+          "path": "/",
+          "theme": "dark",
+          "bodyText": "SS\n\nהתראות\n\nהתראות קריטיות\n\nסקור, אשר או עבור ישירות לערוץ שנפגע.\n\nהתראות\n\nהתראות קריטיות\n0 פתוחות\n0 אושרו\n0 הושתקו\n\nתקין\n\nכרגע אין התראות קריטיות במערכת.\n\nגוסט\nלייב\nערוצים\nהתראות\nחשבון\nפרטיות\nעזרה\nשעה\n17:24:16\nמערכת\nOK\nבילד\n2026.03\nגרסה\nv0.8.3",
+          ".operator-mobile-alerts-screen": true,
+          ".operator-mobile-primary-nav": true
+        }
+      }
+    }
+  },
+  "superAdmin": {
+    "light": {
+      "overview": {
+        "screenshot": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-full-qa/super-admin-overview-light.png",
+        "state": {
+          "path": "/",
+          "theme": "light",
+          "bodyText": "עא\n\nסופר אדמין\n\nסקירה\n\nעריכת הארגון, מגבלות ותקרות, ויצירת ארגון חדש.\n\nפרטי ארגון\nשם ארגון\nסטטוס\nפעיל\nמושהה\nמגבלות ותקרות\nמספר ערוצים\nהודעות לערוץ בחודש\nחיוב חודשי\nתקרת עלות סוכנים\nתקרת עלות בינה מלאכותית\nתקרת עלות ממשק\nנתוני שימוש חיים\nערוצים\n2\nמבצעים\n0\nהודעות יוצאות\n3\nהודעות נכנסות\n1\nעלות בינה מלאכותית\n$0.00\nעלות ממשק\n$0.00\nשמור שינויים בארגוןמחיקה לוגית לארגון\nסקירה\nארגונים\n2\nמשתמשים\n3\nתקלות\nעוד",
+          ".sa-mobile-shell-host": true,
+          ".sa-mobile-shell": true,
+          ".sa-mobile-primary-nav": true
+        }
+      },
+      "organizations": {
+        "screenshot": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-full-qa/super-admin-organizations-light.png",
+        "state": {
+          "path": "/",
+          "theme": "light",
+          "bodyText": "עא\nSuspended\n\nSuper Admin\n\nActive organizations\n\nChoose an active organization and open the relevant management flow.\n\nActive organizations\n\n1 total\n\nבר לב\nבר לב\n\nפעיל\n\nCHANNELS\n1\nOPERATIONS\n1\nSENT\n3\nRECEIVED\n5\nOpen overview\nOpen Ghost Live\nסקירה\nארגונים\n2\nמשתמשים\n1\nתקלות\nעוד",
+          ".sa-mobile-shell": true,
+          ".sa-mobile-chip-list": true,
+          ".mobile-surface-card": true
+        }
+      }
+    },
+    "dark": {
+      "overview": {
+        "screenshot": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-full-qa/super-admin-overview-dark.png",
+        "state": {
+          "path": "/",
+          "theme": "dark",
+          "bodyText": "עא\n\nסופר אדמין\n\nסקירה\n\nעריכת הארגון, מגבלות ותקרות, ויצירת ארגון חדש.\n\nפרטי ארגון\nשם ארגון\nסטטוס\nפעיל\nמושהה\nמגבלות ותקרות\nמספר ערוצים\nהודעות לערוץ בחודש\nחיוב חודשי\nתקרת עלות סוכנים\nתקרת עלות בינה מלאכותית\nתקרת עלות ממשק\nנתוני שימוש חיים\nערוצים\n2\nמבצעים\n0\nהודעות יוצאות\n3\nהודעות נכנסות\n1\nעלות בינה מלאכותית\n$0.00\nעלות ממשק\n$0.00\nשמור שינויים בארגוןמחיקה לוגית לארגון\nסקירה\nארגונים\n2\nמשתמשים\n3\nתקלות\nעוד",
+          ".sa-mobile-shell-host": true,
+          ".sa-mobile-shell": true,
+          ".sa-mobile-primary-nav": true
+        }
+      },
+      "organizations": {
+        "screenshot": "/Users/alexandr.bogdanov/Documents/GitHub/GHOST-App/output/playwright/mobile-full-qa/super-admin-organizations-dark.png",
+        "state": {
+          "path": "/",
+          "theme": "dark",
+          "bodyText": "עא\nSuspended\n\nSuper Admin\n\nActive organizations\n\nChoose an active organization and open the relevant management flow.\n\nActive organizations\n\n1 total\n\nבר לב\nבר לב\n\nפעיל\n\nCHANNELS\n1\nOPERATIONS\n1\nSENT\n3\nRECEIVED\n5\nOpen overview\nOpen Ghost Live\nסקירה\nארגונים\n2\nמשתמשים\n1\nתקלות\nעוד",
+          ".sa-mobile-shell": true,
+          ".sa-mobile-chip-list": true,
+          ".mobile-surface-card": true
+        }
+      }
+    }
+  }
+}

@@ -4,14 +4,14 @@ import { getDatabase } from 'firebase/database'
 import { getAnalytics, isSupported } from 'firebase/analytics'
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY ?? '',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ?? '',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID ?? '',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ?? '',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ?? '',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID ?? '',
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID ?? '',
-  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL ?? '',
+  apiKey: 'AIzaSyBuF9AcPj7W4iRhVuQAuyW00026i4NlhKs',
+  authDomain: 'ghost-test-app-b906c.firebaseapp.com',
+  projectId: 'ghost-test-app-b906c',
+  storageBucket: 'ghost-test-app-b906c.firebasestorage.app',
+  messagingSenderId: '213626798667',
+  appId: '1:213626798667:web:99ffd3db67cb9a7adf43ce',
+  measurementId: 'G-WBPL66B3TD',
+  databaseURL: 'https://ghost-test-app-b906c-default-rtdb.firebaseio.com',
 }
 
 const firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]

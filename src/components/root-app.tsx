@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import '../App.css'
+import '../styles/mobile-shell.css'
 import App from '../App'
 import { LoginPage } from './login-page'
 import { SuperAdminPanel } from './super-admin-panel'
@@ -6,13 +8,8 @@ import type { AuthProfile } from '../types/admin'
 import { ghostAccessRequest, loginRequest, meRequest } from '../services/auth-api'
 import { clearAuthSession, readAuthProfile, readAuthSession, writeAuthTokens } from '../utils/auth-session'
 
-type SuperAdminShellView = 'operator' | 'admin'
-type SuperAdminOperatorSurface = 'Overview' | 'Live Ops'
-type ThemeMode = 'dark' | 'light'
-
 const SUPER_ADMIN_COMBO = new Set(['g', 'a'])
-const THEME_STORAGE_KEY = 'ghost_theme_mode'
-const DESKTOP_WEB_BREAKPOINT = 900
+const THEME_STORAGE_KEY = 'ghost-ui-theme'
 
 const LOCAL_SUPER_ADMIN_PROFILE: AuthProfile = {
   userId: 'local-super-admin',
@@ -22,14 +19,6 @@ const LOCAL_SUPER_ADMIN_PROFILE: AuthProfile = {
   username: 'omeradmin',
   firstName: 'Ghost',
   lastName: 'Admin',
-}
-
-function AmbientUiEffects() {
-  return (
-    <div className="ambient-ui" aria-hidden="true">
-      <div className="ambient-ui__noise" />
-    </div>
-  )
 }
 
 /**
@@ -51,28 +40,6 @@ function tryPickupImpersonation(): AuthProfile | null {
   }
 }
 
-function canElementConsumeWheel(element: HTMLElement, deltaY: number): boolean {
-  const styles = window.getComputedStyle(element)
-  const overflowY = styles.overflowY
-  const isScrollable =
-    ['auto', 'scroll', 'overlay'].includes(overflowY) &&
-    element.scrollHeight > element.clientHeight + 1
-
-  if (!isScrollable) {
-    return false
-  }
-
-  if (deltaY > 0) {
-    return element.scrollTop + element.clientHeight < element.scrollHeight - 1
-  }
-
-  if (deltaY < 0) {
-    return element.scrollTop > 0
-  }
-
-  return false
-}
-
 export function RootApp() {
   const [profile, setProfile] = useState<AuthProfile | null>(() => {
     const impersonated = tryPickupImpersonation()
@@ -83,105 +50,42 @@ export function RootApp() {
     return readAuthProfile()
   })
   const [authError, setAuthError] = useState('')
-  const [superAdminShellView, setSuperAdminShellView] = useState<SuperAdminShellView>('admin')
-  const [superAdminOperatorSurface, setSuperAdminOperatorSurface] = useState<SuperAdminOperatorSurface>('Overview')
-  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
-    if (typeof window === 'undefined') {
-      return 'dark'
-    }
+  const [themeMode, setThemeMode] = useState<'light' | 'dark'>(() => {
     try {
-      const stored = window.localStorage.getItem(THEME_STORAGE_KEY)
-      if (stored === 'dark' || stored === 'light') {
-        return stored
-      }
+      const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
+      return storedTheme === 'dark' ? 'dark' : 'light'
     } catch {
-      // ignore storage errors
+      return 'light'
     }
-    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
   })
   const pressedKeysRef = useRef(new Set<string>())
   const comboFiredRef = useRef(false)
 
   useEffect(() => {
-    if (typeof document === 'undefined') {
-      return
-    }
     document.documentElement.dataset.theme = themeMode
     document.documentElement.style.colorScheme = themeMode
     try {
       window.localStorage.setItem(THEME_STORAGE_KEY, themeMode)
     } catch {
-      // ignore storage errors
+      // Ignore storage failures and keep the active in-memory theme.
     }
   }, [themeMode])
 
   useEffect(() => {
-    function handleDesktopWheel(event: WheelEvent) {
-      if (window.innerWidth < DESKTOP_WEB_BREAKPOINT) {
-        return
-      }
-
-      if (event.defaultPrevented || event.ctrlKey || event.deltaY === 0) {
-        return
-      }
-
-      if (
-        event.target instanceof HTMLElement &&
-        (event.target.closest('input, textarea, select, [contenteditable=\"true\"]') ||
-          event.target.closest('.account-dropdown.account-dropdown-floating'))
-      ) {
-        return
-      }
-
-      let current =
-        event.target instanceof HTMLElement ? event.target : event.target instanceof Node ? event.target.parentElement : null
-
-      while (current && current !== document.body) {
-        if (canElementConsumeWheel(current, event.deltaY)) {
-          return
-        }
-        current = current.parentElement
-      }
-
-      const scroller = document.scrollingElement ?? document.documentElement
-      const maxScrollTop = Math.max(0, scroller.scrollHeight - window.innerHeight)
-      if (maxScrollTop <= 0) {
-        return
-      }
-
-      const nextScrollTop = Math.max(0, Math.min(maxScrollTop, scroller.scrollTop + event.deltaY))
-      if (nextScrollTop === scroller.scrollTop) {
-        return
-      }
-
-      scroller.scrollTop = nextScrollTop
-      event.preventDefault()
-    }
-
-    window.addEventListener('wheel', handleDesktopWheel, { passive: false })
-    return () => window.removeEventListener('wheel', handleDesktopWheel)
-  }, [])
-
-  function toggleTheme() {
-    setThemeMode((current) => (current === 'dark' ? 'light' : 'dark'))
-  }
-
-  useEffect(() => {
     function checkSuperAdminCombo() {
-      if (!import.meta.env.DEV) {
-        return
-      }
       if (comboFiredRef.current) return
       for (const key of SUPER_ADMIN_COMBO) {
         if (!pressedKeysRef.current.has(key)) return
       }
       comboFiredRef.current = true
       setProfile(LOCAL_SUPER_ADMIN_PROFILE)
-      setSuperAdminShellView('admin')
     }
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLSelectElement) {
+        return
+      }
+      if (typeof event.key !== 'string' || event.key.length === 0) {
         return
       }
       const key = event.key.toLowerCase()
@@ -191,6 +95,9 @@ export function RootApp() {
     }
 
     function handleKeyUp(event: KeyboardEvent) {
+      if (typeof event.key !== 'string' || event.key.length === 0) {
+        return
+      }
       const key = event.key.toLowerCase()
       pressedKeysRef.current.delete(key)
       if (pressedKeysRef.current.size === 0) {
@@ -225,7 +132,6 @@ export function RootApp() {
       const payload = await loginRequest(username, password)
       writeAuthTokens(payload.accessToken, payload.refreshToken, payload.profile)
       setProfile(payload.profile)
-      setSuperAdminShellView(payload.profile.role === 'super_admin' ? 'admin' : 'operator')
       setAuthError('')
       return true
     } catch (error) {
@@ -239,7 +145,6 @@ export function RootApp() {
       const payload = await ghostAccessRequest()
       writeAuthTokens(payload.accessToken, payload.refreshToken, payload.profile)
       setProfile(payload.profile)
-      setSuperAdminShellView(payload.profile.role === 'super_admin' ? 'admin' : 'operator')
       setAuthError('')
     } catch {
       setAuthError('כניסת ghost נכשלה.')
@@ -249,72 +154,35 @@ export function RootApp() {
   function handleLogout() {
     clearAuthSession()
     setProfile(null)
-    setSuperAdminShellView('admin')
-    setSuperAdminOperatorSurface('Overview')
+  }
+
+  function handleToggleTheme() {
+    setThemeMode((currentTheme) => (currentTheme === 'light' ? 'dark' : 'light'))
   }
 
   if (!profile) {
     return (
-      <>
-        <AmbientUiEffects />
-        <LoginPage
-          onAuthenticate={handleAuthenticate}
-          onGhostAccess={handleGhostAccess}
-          onToggleTheme={toggleTheme}
-          themeMode={themeMode}
-          externalErrorMessage={authError}
-        />
-      </>
+      <LoginPage
+        onAuthenticate={handleAuthenticate}
+        onGhostAccess={handleGhostAccess}
+        externalErrorMessage={authError}
+      />
     )
   }
 
   if (profile.role === 'super_admin') {
-    return (
-      <>
-        <AmbientUiEffects />
-        {superAdminShellView === 'admin' ? (
-          <SuperAdminPanel
-            onLogout={handleLogout}
-            onOpenCommandCenter={() => {
-              setSuperAdminOperatorSurface('Overview')
-              setSuperAdminShellView('operator')
-            }}
-            onOpenGhostLive={() => {
-              setSuperAdminOperatorSurface('Live Ops')
-              setSuperAdminShellView('operator')
-            }}
-            profile={profile}
-            onToggleTheme={toggleTheme}
-            themeMode={themeMode}
-          />
-        ) : (
-          <App
-            currentUserRole={profile.role}
-            fullName={[profile.firstName, profile.lastName].filter(Boolean).join(' ') || profile.username}
-            initialSurface={superAdminOperatorSurface}
-            onLogout={handleLogout}
-            onOpenAdmin={() => setSuperAdminShellView('admin')}
-            organizationName={profile.organizationName || ''}
-            onToggleTheme={toggleTheme}
-            themeMode={themeMode}
-          />
-        )}
-      </>
-    )
+    return <SuperAdminPanel onLogout={handleLogout} onToggleTheme={handleToggleTheme} profile={profile} themeMode={themeMode} />
   }
 
   const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(' ') || profile.username
   return (
-    <>
-      <AmbientUiEffects />
-      <App
-        currentUserRole={profile.role}
-        fullName={fullName}
-        organizationName={profile.organizationName || ''}
-        onLogout={handleLogout}
-        onToggleTheme={toggleTheme}
-        themeMode={themeMode}
-      />
-    </>
+    <App
+      currentUserRole={profile.role}
+      fullName={fullName}
+      onLogout={handleLogout}
+      onToggleTheme={handleToggleTheme}
+      organizationName={profile.organizationName || ''}
+      themeMode={themeMode}
+    />
   )
 }

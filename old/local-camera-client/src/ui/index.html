@@ -1,0 +1,2303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GHOST Camera Agent</title>
+  <style>
+    :root {
+      --shell-bg: #d9dbd1;
+      --header-bg: #f0f2f5;
+      --surface: #ffffff;
+      --surface-muted: #f7f7f7;
+      --surface-alt: #fafafa;
+      --border: #d1d7db;
+      --text: #0a0a0a;
+      --muted: #667781;
+      --pill-bg: rgba(255, 255, 255, 0.72);
+      --shadow: 0 10px 26px rgba(11, 20, 26, 0.08);
+      --success: #1f8f66;
+      --success-soft: #d9f4ea;
+      --warning: #b7791f;
+      --warning-soft: #fff2db;
+      --danger: #b83248;
+      --danger-soft: #fde5ea;
+      --info: #245d8d;
+      --info-soft: #e4f1fb;
+      --accent: #0a0a0a;
+      --font-ui: "Rubik", "Segoe UI", "Arial", sans-serif;
+      --font-he: "Miriam Libre", "Arial", sans-serif;
+      --radius-lg: 22px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.46), transparent 26%),
+        linear-gradient(180deg, #d9dbd1 0%, #d3d5cd 100%);
+      color: var(--text);
+      font-family: var(--font-ui);
+      overflow: hidden;
+    }
+
+    body {
+      padding: 18px;
+    }
+
+    body[dir="rtl"] {
+      font-family: var(--font-he);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .window {
+      width: min(1240px, 100%);
+      height: calc(100vh - 36px);
+      margin: 0 auto;
+      border-radius: 28px;
+      overflow: hidden;
+      background: var(--surface);
+      box-shadow: 0 18px 42px rgba(11, 20, 26, 0.12);
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      border: 1px solid rgba(10, 10, 10, 0.08);
+    }
+
+    .window-header {
+      min-height: 74px;
+      padding: 14px 18px;
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .brand-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.05;
+    }
+
+    .brand-subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .header-spacer {
+      flex: 1;
+    }
+
+    .step-pill {
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 7px 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .lang-switcher {
+      display: inline-flex;
+      gap: 6px;
+      padding: 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .lang-button {
+      min-width: 48px;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .lang-button.active {
+      background: #0a0a0a;
+      color: #ffffff;
+    }
+
+    .status-tray {
+      min-height: 70px;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(245, 245, 245, 0.9));
+      display: grid;
+      align-content: center;
+    }
+
+    .status-card {
+      min-height: 44px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      display: grid;
+      align-content: center;
+      gap: 2px;
+    }
+
+    .status-card.hidden {
+      visibility: hidden;
+    }
+
+    .status-title {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .status-text {
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+
+    .status-info {
+      background: var(--info-soft);
+      border-color: rgba(36, 93, 141, 0.18);
+    }
+
+    .status-success {
+      background: var(--success-soft);
+      border-color: rgba(31, 143, 102, 0.18);
+    }
+
+    .status-error {
+      background: var(--danger-soft);
+      border-color: rgba(184, 50, 72, 0.18);
+    }
+
+    .content {
+      min-height: 0;
+      overflow: auto;
+      background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.45), transparent 22%),
+        linear-gradient(180deg, #f7f8f6 0%, #f0f2ee 100%);
+    }
+
+    .view {
+      min-height: 100%;
+      padding: 22px;
+    }
+
+    .view[hidden] {
+      display: none !important;
+    }
+
+    .wizard-page {
+      max-width: 980px;
+      margin: 0 auto;
+      min-height: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(280px, 360px);
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .page-main,
+    .page-side,
+    .panel,
+    .chart-card,
+    .gauge-card,
+    .rules-card,
+    .sidebar-card {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(10, 10, 10, 0.08);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .page-main,
+    .page-side {
+      padding: 22px;
+    }
+
+    .page-main {
+      display: grid;
+      align-content: space-between;
+      gap: 22px;
+      min-height: 560px;
+    }
+
+    .page-side {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+      background: rgba(245, 246, 247, 0.92);
+    }
+
+    .section-head {
+      display: grid;
+      gap: 8px;
+      max-width: 560px;
+    }
+
+    .section-kicker {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1;
+    }
+
+    .section-text {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--muted);
+      max-width: 560px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 16px;
+      max-width: 560px;
+    }
+
+    label {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text);
+      min-height: 50px;
+      padding: 0 14px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #0a0a0a;
+      box-shadow: 0 0 0 3px rgba(10, 10, 10, 0.06);
+    }
+
+    .fixed-note {
+      min-height: 74px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px dashed rgba(10, 10, 10, 0.14);
+      background: rgba(255, 255, 255, 0.66);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      display: flex;
+      align-items: center;
+      overflow-wrap: anywhere;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      min-height: 52px;
+    }
+
+    .actions button {
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .button-primary {
+      background: #0a0a0a;
+      color: #ffffff;
+    }
+
+    .button-secondary {
+      background: #ffffff;
+      color: var(--text);
+      border-color: var(--border) !important;
+    }
+
+    .button-danger {
+      background: #7b1029;
+      color: #ffffff;
+    }
+
+    .button-wide {
+      min-width: 180px;
+    }
+
+    button:disabled,
+    input:disabled,
+    select:disabled {
+      opacity: 0.64;
+      cursor: not-allowed;
+    }
+
+    .side-stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .hint-card {
+      display: grid;
+      gap: 8px;
+      padding: 16px;
+      border-radius: 16px;
+      background: #ffffff;
+      border: 1px solid rgba(10, 10, 10, 0.06);
+    }
+
+    .hint-card strong {
+      font-size: 13px;
+    }
+
+    .hint-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .dashboard-shell {
+      display: grid;
+      gap: 14px;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .dashboard-top {
+      display: grid;
+      gap: 10px;
+      padding: 14px 16px;
+      background: rgba(240, 242, 245, 0.92);
+      border: 1px solid rgba(10, 10, 10, 0.08);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .dashboard-title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .dashboard-title-block {
+      display: grid;
+      gap: 4px;
+    }
+
+    .dashboard-title {
+      margin: 0;
+      font-size: 23px;
+      line-height: 1.04;
+    }
+
+    .dashboard-subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.42;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: var(--pill-bg);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .tag.success {
+      background: var(--success-soft);
+      color: var(--success);
+      border-color: rgba(31, 143, 102, 0.16);
+    }
+
+    .tag.warning {
+      background: var(--warning-soft);
+      color: var(--warning);
+      border-color: rgba(183, 121, 31, 0.16);
+    }
+
+    .tag.danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+      border-color: rgba(184, 50, 72, 0.16);
+    }
+
+    .tag.info {
+      background: var(--info-soft);
+      color: var(--info);
+      border-color: rgba(36, 93, 141, 0.16);
+    }
+
+    .dashboard-grid {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1.75fr) minmax(280px, 320px);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .dashboard-main {
+      display: grid;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .dashboard-sidebar {
+      display: grid;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .gauges-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .gauge-card,
+    .chart-card,
+    .rules-card,
+    .sidebar-card {
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .gauge-head,
+    .chart-head,
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.2;
+    }
+
+    .card-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.38;
+    }
+
+    .gauge-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 118px;
+    }
+
+    .gauge-svg {
+      width: 108px;
+      height: 108px;
+      flex-shrink: 0;
+    }
+
+    .gauge-track {
+      fill: none;
+      stroke: #e8ebee;
+      stroke-width: 12;
+    }
+
+    .gauge-progress {
+      fill: none;
+      stroke-linecap: round;
+      stroke-width: 12;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+
+    .gauge-progress.success {
+      stroke: var(--success);
+    }
+
+    .gauge-progress.warning {
+      stroke: var(--warning);
+    }
+
+    .gauge-progress.danger {
+      stroke: var(--danger);
+    }
+
+    .gauge-progress.info {
+      stroke: var(--info);
+    }
+
+    .gauge-center-label {
+      font-size: 10px;
+      fill: var(--muted);
+      text-anchor: middle;
+    }
+
+    .gauge-center-value {
+      font-size: 19px;
+      font-weight: 700;
+      fill: var(--text);
+      text-anchor: middle;
+    }
+
+    .gauge-meta {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .gauge-value {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .gauge-subvalue {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .bars {
+      height: 108px;
+      display: flex;
+      align-items: end;
+      gap: 3px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(10, 10, 10, 0.06);
+      min-width: 0;
+    }
+
+    .bar {
+      flex: 1;
+      min-width: 5px;
+      border-radius: 999px 999px 4px 4px;
+      background: linear-gradient(180deg, #111111, #5a5a5a);
+      opacity: 0.92;
+    }
+
+    .bar.zero {
+      opacity: 0.18;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 8px;
+    }
+
+    .timeline-track {
+      height: 14px;
+      display: flex;
+      gap: 3px;
+    }
+
+    .timeline-segment {
+      flex: 1;
+      border-radius: 999px;
+      background: #dfe4e8;
+      min-width: 8px;
+    }
+
+    .timeline-segment.success {
+      background: var(--success);
+    }
+
+    .timeline-segment.warning {
+      background: var(--warning);
+    }
+
+    .timeline-segment.danger {
+      background: var(--danger);
+    }
+
+    .timeline-segment.info {
+      background: var(--info);
+    }
+
+    .timeline-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .legend-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: var(--surface-alt);
+      border: 1px solid rgba(10, 10, 10, 0.08);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+
+    .rules-table {
+      display: grid;
+      gap: 8px;
+    }
+
+    .rules-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) 100px 130px 82px;
+      gap: 10px;
+      align-items: center;
+      padding: 9px 11px;
+      border-radius: 12px;
+      border: 1px solid rgba(10, 10, 10, 0.08);
+      background: rgba(250, 250, 250, 0.92);
+      min-width: 0;
+    }
+
+    .rules-row.header {
+      background: transparent;
+      border-style: dashed;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .rule-cell {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .rule-name {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .sidebar-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .sidebar-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(10, 10, 10, 0.06);
+    }
+
+    .sidebar-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .sidebar-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .sidebar-value {
+      text-align: end;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    body[dir="rtl"] .sidebar-value {
+      text-align: start;
+    }
+
+    .empty-state {
+      min-height: 84px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border-radius: 12px;
+      border: 1px dashed rgba(10, 10, 10, 0.12);
+      color: var(--muted);
+      padding: 12px;
+      background: rgba(250, 250, 250, 0.8);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .dashboard-sidebar .actions {
+      gap: 8px;
+      min-height: 0;
+    }
+
+    .dashboard-sidebar .actions button {
+      min-height: 40px;
+      padding: 0 14px;
+      font-size: 13px;
+    }
+
+    .dashboard-sidebar .fixed-note {
+      min-height: 56px;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .mini-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .mini-list-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .mini-index {
+      width: 18px;
+      color: var(--text);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 1180px) {
+      .dashboard-grid,
+      .wizard-page,
+      .gauges-grid,
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 820px) {
+      body {
+        padding: 10px;
+      }
+
+      .window {
+        height: calc(100vh - 20px);
+      }
+
+      .window-header {
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .header-spacer {
+        display: none;
+      }
+
+      .rules-row {
+        grid-template-columns: 1fr;
+      }
+
+      .gauge-wrap {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .actions button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="window">
+    <header class="window-header">
+      <div class="brand">
+        <div class="brand-eyebrow" id="brandEyebrow">Ghost Local Client</div>
+        <h1 class="brand-title">GHOST Camera Agent</h1>
+        <p class="brand-subtitle" id="brandSubtitle"></p>
+      </div>
+      <div class="header-spacer"></div>
+      <div id="stepPill" class="step-pill"></div>
+      <div class="lang-switcher" aria-label="Language switcher">
+        <button class="lang-button" data-lang="ru" type="button">RU</button>
+        <button class="lang-button" data-lang="en" type="button">EN</button>
+        <button class="lang-button" data-lang="he" type="button">HE</button>
+      </div>
+    </header>
+
+    <section class="status-tray">
+      <div id="statusCard" class="status-card hidden">
+        <div id="statusTitle" class="status-title"></div>
+        <div id="statusText" class="status-text"></div>
+      </div>
+    </section>
+
+    <main class="content">
+      <section id="viewConnect" class="view">
+        <div class="wizard-page">
+          <div class="page-main">
+            <div class="section-head">
+              <div class="section-kicker" id="connectKicker"></div>
+              <h2 class="section-title" id="connectTitle"></h2>
+              <p class="section-text" id="connectText"></p>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                <span id="orgLabel"></span>
+                <input id="orgName" type="text" autocomplete="off">
+              </label>
+
+              <label>
+                <span id="deviceLabel"></span>
+                <input id="deviceName" type="text" autocomplete="off" value="Office Gateway">
+              </label>
+
+              <div class="fixed-note" id="backendNote"></div>
+            </div>
+
+            <div class="actions">
+              <button id="connectBtn" class="button-primary button-wide" type="button"></button>
+            </div>
+          </div>
+
+          <aside class="page-side">
+            <div class="hint-card">
+              <strong id="connectHintTitle"></strong>
+              <p id="connectHintBody"></p>
+            </div>
+            <div class="hint-card">
+              <strong id="connectStepTitle"></strong>
+              <div class="mini-list">
+                <div class="mini-list-item"><span class="mini-index">1</span><span id="connectStepOne"></span></div>
+                <div class="mini-list-item"><span class="mini-index">2</span><span id="connectStepTwo"></span></div>
+                <div class="mini-list-item"><span class="mini-index">3</span><span id="connectStepThree"></span></div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="viewChannel" class="view" hidden>
+        <div class="wizard-page">
+          <div class="page-main">
+            <div class="section-head">
+              <div class="section-kicker" id="channelKicker"></div>
+              <h2 class="section-title" id="channelTitle"></h2>
+              <p class="section-text" id="channelText"></p>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                <span id="channelLabel"></span>
+                <select id="channelSelect"></select>
+              </label>
+
+              <div class="fixed-note" id="channelNote"></div>
+            </div>
+
+            <div class="actions">
+              <button id="backToConnectBtn" class="button-secondary" type="button"></button>
+              <button id="toCameraBtn" class="button-primary button-wide" type="button"></button>
+            </div>
+          </div>
+
+          <aside class="page-side">
+            <div class="hint-card">
+              <strong id="channelHintTitle"></strong>
+              <p id="channelHintBody"></p>
+            </div>
+            <div class="hint-card">
+              <strong id="channelMetaTitle"></strong>
+              <p id="channelMetaBody"></p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="viewCamera" class="view" hidden>
+        <div class="wizard-page">
+          <div class="page-main">
+            <div class="section-head">
+              <div class="section-kicker" id="cameraKicker"></div>
+              <h2 class="section-title" id="cameraTitle"></h2>
+              <p class="section-text" id="cameraText"></p>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                <span id="cameraLabel"></span>
+                <select id="cameraSelect"></select>
+              </label>
+
+              <div class="fixed-note" id="cameraNote"></div>
+            </div>
+
+            <div class="actions">
+              <button id="backToChannelBtn" class="button-secondary" type="button"></button>
+              <button id="refreshCamerasBtn" class="button-secondary" type="button"></button>
+              <button id="saveBtn" class="button-primary button-wide" type="button"></button>
+            </div>
+          </div>
+
+          <aside class="page-side">
+            <div class="hint-card">
+              <strong id="cameraHintTitle"></strong>
+              <p id="cameraHintBody"></p>
+            </div>
+            <div class="hint-card">
+              <strong id="cameraSafetyTitle"></strong>
+              <p id="cameraSafetyBody"></p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="viewDashboard" class="view" hidden>
+        <div class="dashboard-shell">
+          <section class="dashboard-top">
+            <div class="dashboard-title-row">
+              <div class="dashboard-title-block">
+                <div class="section-kicker" id="dashboardKicker"></div>
+                <h2 class="dashboard-title" id="dashboardTitle"></h2>
+                <p class="dashboard-subtitle" id="dashboardSubtitle"></p>
+              </div>
+              <div class="tag-row" id="identityTags"></div>
+            </div>
+
+            <div class="tag-row" id="statusTags"></div>
+          </section>
+
+          <div class="dashboard-grid">
+            <div class="dashboard-main">
+              <section class="gauges-grid" id="gaugesGrid"></section>
+
+              <section class="charts-grid">
+                <article class="chart-card">
+                  <div class="chart-head">
+                    <div>
+                      <h3 class="card-title" id="scanChartTitle"></h3>
+                      <p class="card-note" id="scanChartNote"></p>
+                    </div>
+                  </div>
+                  <div id="scanBars" class="bars"></div>
+                </article>
+
+                <article class="chart-card">
+                  <div class="chart-head">
+                    <div>
+                      <h3 class="card-title" id="healthChartTitle"></h3>
+                      <p class="card-note" id="healthChartNote"></p>
+                    </div>
+                  </div>
+                  <div class="timeline">
+                    <div id="healthTimeline" class="timeline-track"></div>
+                    <div id="healthLegend" class="timeline-legend"></div>
+                  </div>
+                </article>
+              </section>
+
+              <article class="rules-card">
+                <div class="card-head">
+                  <div>
+                    <h3 class="card-title" id="rulesTitle"></h3>
+                    <p class="card-note" id="rulesNote"></p>
+                  </div>
+                </div>
+                <div id="rulesTable" class="rules-table"></div>
+              </article>
+            </div>
+
+            <aside class="dashboard-sidebar">
+              <article class="sidebar-card">
+                <div class="card-head">
+                  <div>
+                    <h3 class="card-title" id="bindingTitle"></h3>
+                    <p class="card-note" id="bindingNote"></p>
+                  </div>
+                </div>
+                <div id="bindingRows" class="sidebar-list"></div>
+              </article>
+
+              <article class="sidebar-card">
+                <div class="card-head">
+                  <div>
+                    <h3 class="card-title" id="activityTitle"></h3>
+                    <p class="card-note" id="activityNote"></p>
+                  </div>
+                </div>
+                <div id="activityRows" class="sidebar-list"></div>
+              </article>
+
+              <article class="sidebar-card">
+                <div class="card-head">
+                  <div>
+                    <h3 class="card-title" id="actionsTitle"></h3>
+                    <p class="card-note" id="actionsNote"></p>
+                  </div>
+                </div>
+                <div class="actions">
+                  <button id="rebindBtn" class="button-secondary" type="button"></button>
+                  <button id="unbindBtn" class="button-danger" type="button"></button>
+                </div>
+                <div id="dashboardNote" class="fixed-note"></div>
+              </article>
+            </aside>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'https://ghost-test-app-b906c.web.app'
+    const LANGUAGE_STORAGE_KEY = 'ghost-local-client-language'
+    const POLL_INTERVAL_MS = 5000
+    const HEARTBEAT_BUDGET_SECONDS = 45
+
+    const i18n = {
+      en: {
+        dir: 'ltr',
+        appSubtitle: 'Local USB camera bridge for GHOST channels',
+        statusInfo: 'Client status',
+        statusSuccess: 'Ready',
+        statusError: 'Error',
+        viewConnect: 'Step 1 / Connect',
+        viewChannel: 'Step 2 / Channel',
+        viewCamera: 'Step 3 / Camera',
+        viewDashboard: 'Dashboard',
+        connectKicker: 'Setup',
+        connectTitle: 'Connect the client',
+        connectText: 'Enter the organization name and bring this desktop client online for channel binding.',
+        orgLabel: 'Organization',
+        orgPlaceholder: 'Enter organization name',
+        deviceLabel: 'Device name',
+        backendNote: 'Server is fixed in this production client: ' + API_BASE_URL,
+        connectBtn: 'Connect',
+        connectBusy: 'Connecting...',
+        connectHintTitle: 'Connection',
+        connectHintBody: 'The client uses the live GHOST backend, restores the device identity, and loads the personal channels for this organization.',
+        connectStepTitle: 'What happens next',
+        connectStepOne: 'Connect this client to the organization.',
+        connectStepTwo: 'Choose which personal channel this computer will serve.',
+        connectStepThree: 'Bind one local USB camera and keep the worker online.',
+        channelKicker: 'Binding',
+        channelTitle: 'Choose a channel',
+        channelText: 'Select the personal channel that should use this local camera client.',
+        channelLabel: 'Channel',
+        channelNote: 'Only personal channels are shown here.',
+        channelHintTitle: 'Channel routing',
+        channelHintBody: 'Once a local client is bound, remote chat and capture requests route through this machine instead of the dashboard camera.',
+        channelMetaTitle: 'Selection',
+        channelMetaBody: 'Choose one channel and continue to camera selection.',
+        cameraKicker: 'Binding',
+        cameraTitle: 'Choose a camera',
+        cameraText: 'Select one local USB camera and save the binding for this channel.',
+        cameraLabel: 'USB camera',
+        cameraNoteReady: 'Choose a camera and save the binding.',
+        cameraNoteLoading: 'Refreshing local USB cameras...',
+        cameraHintTitle: 'Camera access',
+        cameraHintBody: 'The worker can only capture from one camera at a time. Close other apps if the device is busy.',
+        cameraSafetyTitle: 'Binding rule',
+        cameraSafetyBody: 'One running client serves exactly one channel and one USB camera.',
+        backBtn: 'Back',
+        nextBtn: 'Continue',
+        refreshBtn: 'Refresh cameras',
+        saveBtn: 'Save binding',
+        saveBusy: 'Saving...',
+        dashboardKicker: 'Operations',
+        dashboardTitle: 'Local client dashboard',
+        dashboardSubtitle: 'Live operational view of this workstation, its bound channel, and the configured rules.',
+        scanChartTitle: 'Scan activity',
+        scanChartNote: 'Current session scan volume',
+        healthChartTitle: 'Health timeline',
+        healthChartNote: 'Recent worker and agent states',
+        rulesTitle: 'Rules',
+        rulesNote: 'Rules shown here come directly from the bound channel record.',
+        bindingTitle: 'Binding',
+        bindingNote: 'Saved client identity and channel binding',
+        activityTitle: 'Activity',
+        activityNote: 'Runtime and refresh timestamps from this session',
+        actionsTitle: 'Actions',
+        actionsNote: 'Keep the worker online, rebind safely, or disconnect the client.',
+        rebindBtn: 'Rebind channel',
+        unbindBtn: 'Disconnect client',
+        gaugeHeartbeat: 'Heartbeat',
+        gaugeRuntime: 'Runtime',
+        gaugeRules: 'Rules',
+        gaugeHeartbeatNote: 'Freshness within 45-second online window',
+        gaugeRuntimeNote: 'Worker state and current uptime',
+        gaugeRulesNote: 'Enabled rules vs total configured rules',
+        chartEmpty: 'Waiting for live session data.',
+        rulesEmpty: 'No rules are configured for this channel yet.',
+        noChannels: 'No personal channels available',
+        noCameras: 'No USB cameras detected',
+        connectNeedOrg: 'Enter the organization name first.',
+        chooseChannel: 'Choose a channel first.',
+        chooseCamera: 'Choose a camera first.',
+        connectLoading: 'Connecting to GHOST and loading channels...',
+        connectReady: 'Connected. Continue to channel selection.',
+        refreshLoading: 'Refreshing local USB cameras...',
+        refreshReady: 'Camera list updated.',
+        saveLoading: 'Saving binding and starting the worker...',
+        saveReady: 'Binding saved. The dashboard is now live.',
+        disconnectLoading: 'Disconnecting client...',
+        disconnectReady: 'Client disconnected. The setup flow is ready again.',
+        rebindLoading: 'Loading channels for rebind...',
+        rebindReady: 'Choose a new channel for this client.',
+        state_starting: 'Starting',
+        state_online: 'Online',
+        state_scanning: 'Scanning',
+        state_degraded: 'Degraded',
+        state_offline: 'Offline',
+        state_connected: 'Connected',
+        state_live: 'Live',
+        state_sync: 'Sync',
+        source_browser: 'Browser camera',
+        source_local_agent: 'Local client',
+        notAvailable: 'Not available',
+        none: 'None',
+        enabled: 'Enabled',
+        disabled: 'Disabled',
+        mode_alert: 'Alert',
+        mode_report: 'Report',
+        mode_rating: 'Rating',
+        mode_assessment: 'Assessment',
+        labelClient: 'Client',
+        labelAgent: 'Agent',
+        labelChannel: 'Channel',
+        labelSource: 'Source',
+        labelCamera: 'Camera',
+        labelDevice: 'Device',
+        labelHeartbeatFreshness: 'Freshness',
+        labelRuntimeUptime: 'Uptime',
+        labelRuleCoverage: 'Coverage',
+        bindingOrg: 'Organization',
+        bindingChannel: 'Channel',
+        bindingCamera: 'Camera',
+        bindingDevice: 'Device',
+        bindingDeviceId: 'Device ID',
+        bindingBoundAt: 'Bound at',
+        activityHeartbeat: 'Last heartbeat',
+        activityScan: 'Last scan',
+        activityRuntime: 'Runtime',
+        activityRefresh: 'Dashboard refresh',
+        activityError: 'Last error',
+        activityScans: 'Scans this session',
+        schedule: 'Schedule',
+        ruleName: 'Rule',
+        ruleMode: 'Mode',
+        ruleSchedule: 'Schedule',
+        ruleState: 'State',
+        noteFresh: 'Live data refreshed at {time}.',
+        noteError: 'Partial dashboard data: {error}',
+        legendOnline: 'online',
+        legendScanning: 'scanning',
+        legendDegraded: 'degraded',
+        legendOffline: 'offline',
+        metricSeconds: '{value}s',
+        metricHours: '{value}h',
+      },
+      ru: {
+        dir: 'ltr',
+        appSubtitle: 'Локальный мост USB-камеры для каналов GHOST',
+        statusInfo: 'Состояние клиента',
+        statusSuccess: 'Готово',
+        statusError: 'Ошибка',
+        viewConnect: 'Шаг 1 / Подключение',
+        viewChannel: 'Шаг 2 / Канал',
+        viewCamera: 'Шаг 3 / Камера',
+        viewDashboard: 'Панель',
+        connectKicker: 'Настройка',
+        connectTitle: 'Подключить клиент',
+        connectText: 'Введите имя организации и выведите этот настольный клиент в онлайн для привязки канала.',
+        orgLabel: 'Организация',
+        orgPlaceholder: 'Введите имя организации',
+        deviceLabel: 'Имя устройства',
+        backendNote: 'Сервер жёстко зафиксирован в production-клиенте: ' + API_BASE_URL,
+        connectBtn: 'Подключить',
+        connectBusy: 'Подключение...',
+        connectHintTitle: 'Подключение',
+        connectHintBody: 'Клиент использует live GHOST backend, восстанавливает идентичность устройства и загружает персональные каналы организации.',
+        connectStepTitle: 'Что будет дальше',
+        connectStepOne: 'Подключите этот клиент к организации.',
+        connectStepTwo: 'Выберите персональный канал для этого компьютера.',
+        connectStepThree: 'Привяжите одну локальную USB-камеру и держите worker онлайн.',
+        channelKicker: 'Привязка',
+        channelTitle: 'Выбор канала',
+        channelText: 'Выберите персональный канал, который должен обслуживаться этим локальным клиентом.',
+        channelLabel: 'Канал',
+        channelNote: 'Здесь показываются только персональные каналы.',
+        channelHintTitle: 'Маршрутизация',
+        channelHintBody: 'После привязки локального клиента удалённый чат и захват кадров идут через этот компьютер, а не через камеру дашборда.',
+        channelMetaTitle: 'Выбор',
+        channelMetaBody: 'Выберите один канал и перейдите к выбору камеры.',
+        cameraKicker: 'Привязка',
+        cameraTitle: 'Выбор камеры',
+        cameraText: 'Выберите одну локальную USB-камеру и сохраните привязку для этого канала.',
+        cameraLabel: 'USB-камера',
+        cameraNoteReady: 'Выберите камеру и сохраните привязку.',
+        cameraNoteLoading: 'Обновляется список локальных USB-камер...',
+        cameraHintTitle: 'Доступ к камере',
+        cameraHintBody: 'Worker может захватывать только одну камеру за раз. Если устройство занято, закройте другие приложения.',
+        cameraSafetyTitle: 'Правило привязки',
+        cameraSafetyBody: 'Один запущенный клиент обслуживает ровно один канал и одну USB-камеру.',
+        backBtn: 'Назад',
+        nextBtn: 'Дальше',
+        refreshBtn: 'Обновить камеры',
+        saveBtn: 'Сохранить привязку',
+        saveBusy: 'Сохранение...',
+        dashboardKicker: 'Операции',
+        dashboardTitle: 'Приборная панель клиента',
+        dashboardSubtitle: 'Живая оперативная картина рабочего места, привязанного канала и настроенных правил.',
+        scanChartTitle: 'Активность сканов',
+        scanChartNote: 'Объём сканирования в текущей сессии',
+        healthChartTitle: 'Лента здоровья',
+        healthChartNote: 'Недавние состояния worker и agent',
+        rulesTitle: 'Правила',
+        rulesNote: 'Правила здесь берутся напрямую из записи привязанного канала.',
+        bindingTitle: 'Привязка',
+        bindingNote: 'Сохранённая идентичность клиента и привязка канала',
+        activityTitle: 'Активность',
+        activityNote: 'Runtime и временные метки обновления в текущей сессии',
+        actionsTitle: 'Действия',
+        actionsNote: 'Держите worker онлайн, безопасно перепривязывайте канал или отключайте клиент.',
+        rebindBtn: 'Перепривязать канал',
+        unbindBtn: 'Отключить клиент',
+        gaugeHeartbeat: 'Heartbeat',
+        gaugeRuntime: 'Runtime',
+        gaugeRules: 'Правила',
+        gaugeHeartbeatNote: 'Свежесть в пределах 45 секунд',
+        gaugeRuntimeNote: 'Состояние worker и текущее время работы',
+        gaugeRulesNote: 'Активные правила против общего количества',
+        chartEmpty: 'Ожидание живых данных сессии.',
+        rulesEmpty: 'Для этого канала правила пока не настроены.',
+        noChannels: 'Персональные каналы недоступны',
+        noCameras: 'USB-камеры не найдены',
+        connectNeedOrg: 'Сначала введите имя организации.',
+        chooseChannel: 'Сначала выберите канал.',
+        chooseCamera: 'Сначала выберите камеру.',
+        connectLoading: 'Подключение к GHOST и загрузка каналов...',
+        connectReady: 'Подключено. Переходите к выбору канала.',
+        refreshLoading: 'Обновляется список локальных USB-камер...',
+        refreshReady: 'Список камер обновлён.',
+        saveLoading: 'Сохраняется привязка и запускается worker...',
+        saveReady: 'Привязка сохранена. Панель уже живая.',
+        disconnectLoading: 'Отключение клиента...',
+        disconnectReady: 'Клиент отключён. Мастер настройки снова готов.',
+        rebindLoading: 'Загружаются каналы для перепривязки...',
+        rebindReady: 'Выберите новый канал для этого клиента.',
+        state_starting: 'Запуск',
+        state_online: 'Онлайн',
+        state_scanning: 'Сканирование',
+        state_degraded: 'Деградация',
+        state_offline: 'Оффлайн',
+        state_connected: 'Подключён',
+        state_live: 'Live',
+        state_sync: 'Sync',
+        source_browser: 'Камера браузера',
+        source_local_agent: 'Локальный клиент',
+        notAvailable: 'Недоступно',
+        none: 'Нет',
+        enabled: 'Активно',
+        disabled: 'Выключено',
+        mode_alert: 'Оповещение',
+        mode_report: 'Отчёт',
+        mode_rating: 'Оценка',
+        mode_assessment: 'Анализ',
+        labelClient: 'Клиент',
+        labelAgent: 'Агент',
+        labelChannel: 'Канал',
+        labelSource: 'Источник',
+        labelCamera: 'Камера',
+        labelDevice: 'Устройство',
+        labelHeartbeatFreshness: 'Свежесть',
+        labelRuntimeUptime: 'Аптайм',
+        labelRuleCoverage: 'Покрытие',
+        bindingOrg: 'Организация',
+        bindingChannel: 'Канал',
+        bindingCamera: 'Камера',
+        bindingDevice: 'Устройство',
+        bindingDeviceId: 'ID устройства',
+        bindingBoundAt: 'Привязано',
+        activityHeartbeat: 'Последний heartbeat',
+        activityScan: 'Последний скан',
+        activityRuntime: 'Runtime',
+        activityRefresh: 'Обновление панели',
+        activityError: 'Последняя ошибка',
+        activityScans: 'Сканов за сессию',
+        schedule: 'Расписание',
+        ruleName: 'Правило',
+        ruleMode: 'Режим',
+        ruleSchedule: 'Расписание',
+        ruleState: 'Состояние',
+        noteFresh: 'Live-данные обновлены в {time}.',
+        noteError: 'Панель загружена частично: {error}',
+        legendOnline: 'онлайн',
+        legendScanning: 'сканирование',
+        legendDegraded: 'деградация',
+        legendOffline: 'оффлайн',
+        metricSeconds: '{value}с',
+        metricHours: '{value}ч',
+      },
+      he: {
+        dir: 'rtl',
+        appSubtitle: 'גשר מצלמת USB מקומית לערוצי GHOST',
+        statusInfo: 'סטטוס לקוח',
+        statusSuccess: 'מוכן',
+        statusError: 'שגיאה',
+        viewConnect: 'שלב 1 / חיבור',
+        viewChannel: 'שלב 2 / ערוץ',
+        viewCamera: 'שלב 3 / מצלמה',
+        viewDashboard: 'לוח בקרה',
+        connectKicker: 'הגדרה',
+        connectTitle: 'חבר את הלקוח',
+        connectText: 'הזן את שם הארגון והעלה את לקוח הדסקטופ הזה לאונליין לצורך קישור ערוץ.',
+        orgLabel: 'ארגון',
+        orgPlaceholder: 'הזן שם ארגון',
+        deviceLabel: 'שם התקן',
+        backendNote: 'השרת מקובע בלקוח הייצור הזה: ' + API_BASE_URL,
+        connectBtn: 'התחבר',
+        connectBusy: 'מתחבר...',
+        connectHintTitle: 'חיבור',
+        connectHintBody: 'הלקוח משתמש ב-backend החי של GHOST, משחזר את זהות ההתקן וטוען את הערוצים האישיים של הארגון.',
+        connectStepTitle: 'מה קורה בהמשך',
+        connectStepOne: 'חבר את הלקוח הזה לארגון.',
+        connectStepTwo: 'בחר איזה ערוץ אישי המחשב הזה ישרת.',
+        connectStepThree: 'קשר מצלמת USB מקומית אחת והשאר את ה-worker אונליין.',
+        channelKicker: 'קישור',
+        channelTitle: 'בחר ערוץ',
+        channelText: 'בחר את הערוץ האישי שצריך לקבל שירות מלקוח המצלמה המקומי הזה.',
+        channelLabel: 'ערוץ',
+        channelNote: 'כאן מוצגים רק ערוצים אישיים.',
+        channelHintTitle: 'ניתוב',
+        channelHintBody: 'אחרי קישור לקוח מקומי, צ׳אט מרוחק ובקשות צילום ינותבו דרך המחשב הזה ולא דרך מצלמת הדשבורד.',
+        channelMetaTitle: 'בחירה',
+        channelMetaBody: 'בחר ערוץ אחד והמשך לבחירת מצלמה.',
+        cameraKicker: 'קישור',
+        cameraTitle: 'בחר מצלמה',
+        cameraText: 'בחר מצלמת USB מקומית אחת ושמור את הקישור עבור הערוץ הזה.',
+        cameraLabel: 'מצלמת USB',
+        cameraNoteReady: 'בחר מצלמה ושמור את הקישור.',
+        cameraNoteLoading: 'מרענן את רשימת מצלמות ה-USB המקומיות...',
+        cameraHintTitle: 'גישה למצלמה',
+        cameraHintBody: 'ה-worker יכול לצלם ממצלמה אחת בלבד בכל רגע. אם ההתקן תפוס, סגור אפליקציות אחרות.',
+        cameraSafetyTitle: 'כלל קישור',
+        cameraSafetyBody: 'לקוח רץ אחד משרת בדיוק ערוץ אחד ומצלמת USB אחת.',
+        backBtn: 'חזרה',
+        nextBtn: 'המשך',
+        refreshBtn: 'רענן מצלמות',
+        saveBtn: 'שמור קישור',
+        saveBusy: 'שומר...',
+        dashboardKicker: 'תפעול',
+        dashboardTitle: 'לוח הבקרה של הלקוח',
+        dashboardSubtitle: 'תצוגת תפעול חיה של תחנת העבודה, הערוץ המקושר והחוקים המוגדרים.',
+        scanChartTitle: 'פעילות סריקות',
+        scanChartNote: 'נפח סריקות בסשן הנוכחי',
+        healthChartTitle: 'ציר בריאות',
+        healthChartNote: 'מצבים אחרונים של ה-worker וה-agent',
+        rulesTitle: 'חוקים',
+        rulesNote: 'החוקים כאן מגיעים ישירות מרשומת הערוץ המקושר.',
+        bindingTitle: 'קישור',
+        bindingNote: 'זהות הלקוח השמורה וקישור הערוץ',
+        activityTitle: 'פעילות',
+        activityNote: 'נתוני runtime וזמני רענון מתוך הסשן הנוכחי',
+        actionsTitle: 'פעולות',
+        actionsNote: 'השאר את ה-worker אונליין, בצע קישור מחדש בבטחה או נתק את הלקוח.',
+        rebindBtn: 'קשר ערוץ מחדש',
+        unbindBtn: 'נתק לקוח',
+        gaugeHeartbeat: 'Heartbeat',
+        gaugeRuntime: 'Runtime',
+        gaugeRules: 'חוקים',
+        gaugeHeartbeatNote: 'טריות במסגרת חלון אונליין של 45 שניות',
+        gaugeRuntimeNote: 'סטטוס worker וזמן ריצה נוכחי',
+        gaugeRulesNote: 'חוקים פעילים מתוך כלל החוקים',
+        chartEmpty: 'ממתין לנתוני סשן חיים.',
+        rulesEmpty: 'עדיין לא הוגדרו חוקים לערוץ הזה.',
+        noChannels: 'אין ערוצים אישיים זמינים',
+        noCameras: 'לא זוהו מצלמות USB',
+        connectNeedOrg: 'יש להזין תחילה את שם הארגון.',
+        chooseChannel: 'יש לבחור תחילה ערוץ.',
+        chooseCamera: 'יש לבחור תחילה מצלמה.',
+        connectLoading: 'מתחבר ל-GHOST וטוען ערוצים...',
+        connectReady: 'החיבור הצליח. המשך לבחירת ערוץ.',
+        refreshLoading: 'מרענן את מצלמות ה-USB המקומיות...',
+        refreshReady: 'רשימת המצלמות עודכנה.',
+        saveLoading: 'שומר את הקישור ומפעיל את ה-worker...',
+        saveReady: 'הקישור נשמר. לוח הבקרה כבר חי.',
+        disconnectLoading: 'מנתק את הלקוח...',
+        disconnectReady: 'הלקוח נותק. תהליך ההגדרה מוכן מחדש.',
+        rebindLoading: 'טוען ערוצים לקישור מחדש...',
+        rebindReady: 'בחר ערוץ חדש עבור הלקוח הזה.',
+        state_starting: 'מתחיל',
+        state_online: 'אונליין',
+        state_scanning: 'סורק',
+        state_degraded: 'מוחלש',
+        state_offline: 'אופליין',
+        state_connected: 'מחובר',
+        state_live: 'חי',
+        state_sync: 'סנכרון',
+        source_browser: 'מצלמת דפדפן',
+        source_local_agent: 'לקוח מקומי',
+        notAvailable: 'לא זמין',
+        none: 'אין',
+        enabled: 'פעיל',
+        disabled: 'מושבת',
+        mode_alert: 'התראה',
+        mode_report: 'דוח',
+        mode_rating: 'דירוג',
+        mode_assessment: 'הערכה',
+        labelClient: 'לקוח',
+        labelAgent: 'Agent',
+        labelChannel: 'ערוץ',
+        labelSource: 'מקור',
+        labelCamera: 'מצלמה',
+        labelDevice: 'התקן',
+        labelHeartbeatFreshness: 'טריות',
+        labelRuntimeUptime: 'זמן ריצה',
+        labelRuleCoverage: 'כיסוי',
+        bindingOrg: 'ארגון',
+        bindingChannel: 'ערוץ',
+        bindingCamera: 'מצלמה',
+        bindingDevice: 'התקן',
+        bindingDeviceId: 'מזהה התקן',
+        bindingBoundAt: 'נקשר ב',
+        activityHeartbeat: 'Heartbeat אחרון',
+        activityScan: 'סריקה אחרונה',
+        activityRuntime: 'Runtime',
+        activityRefresh: 'רענון לוח',
+        activityError: 'שגיאה אחרונה',
+        activityScans: 'סריקות בסשן',
+        schedule: 'תזמון',
+        ruleName: 'חוק',
+        ruleMode: 'מצב',
+        ruleSchedule: 'תזמון',
+        ruleState: 'סטטוס',
+        noteFresh: 'הנתונים החיים רועננו ב-{time}.',
+        noteError: 'הלוח נטען חלקית: {error}',
+        legendOnline: 'אונליין',
+        legendScanning: 'סריקה',
+        legendDegraded: 'מוחלש',
+        legendOffline: 'אופליין',
+        metricSeconds: '{value}ש׳',
+        metricHours: '{value}ש׳',
+      },
+    }
+
+    const state = {
+      language: localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'ru',
+      view: 'connect',
+      connectSession: null,
+      channels: [],
+      cameras: [],
+      busy: { connect: false, cameras: false, save: false, rebind: false },
+      pollId: null,
+      requestSeq: 0,
+      dashboardRequestSeq: 0,
+    }
+
+    const refs = {
+      statusCard: document.getElementById('statusCard'),
+      statusTitle: document.getElementById('statusTitle'),
+      statusText: document.getElementById('statusText'),
+      stepPill: document.getElementById('stepPill'),
+      orgName: document.getElementById('orgName'),
+      deviceName: document.getElementById('deviceName'),
+      channelSelect: document.getElementById('channelSelect'),
+      cameraSelect: document.getElementById('cameraSelect'),
+      channelNote: document.getElementById('channelNote'),
+      cameraNote: document.getElementById('cameraNote'),
+      connectBtn: document.getElementById('connectBtn'),
+      backToConnectBtn: document.getElementById('backToConnectBtn'),
+      toCameraBtn: document.getElementById('toCameraBtn'),
+      backToChannelBtn: document.getElementById('backToChannelBtn'),
+      refreshCamerasBtn: document.getElementById('refreshCamerasBtn'),
+      saveBtn: document.getElementById('saveBtn'),
+      identityTags: document.getElementById('identityTags'),
+      statusTags: document.getElementById('statusTags'),
+      gaugesGrid: document.getElementById('gaugesGrid'),
+      scanBars: document.getElementById('scanBars'),
+      healthTimeline: document.getElementById('healthTimeline'),
+      healthLegend: document.getElementById('healthLegend'),
+      rulesTable: document.getElementById('rulesTable'),
+      bindingRows: document.getElementById('bindingRows'),
+      activityRows: document.getElementById('activityRows'),
+      dashboardNote: document.getElementById('dashboardNote'),
+      rebindBtn: document.getElementById('rebindBtn'),
+      unbindBtn: document.getElementById('unbindBtn'),
+      viewConnect: document.getElementById('viewConnect'),
+      viewChannel: document.getElementById('viewChannel'),
+      viewCamera: document.getElementById('viewCamera'),
+      viewDashboard: document.getElementById('viewDashboard'),
+    }
+
+    function tr(key, vars = {}) {
+      let value = (i18n[state.language] && i18n[state.language][key]) || i18n.en[key] || key
+      for (const [name, replacement] of Object.entries(vars)) {
+        value = value.replaceAll(`{${name}}`, replacement)
+      }
+      return value
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;')
+    }
+
+    function formatDateTime(value) {
+      if (!value) return tr('notAvailable')
+      const date = new Date(value)
+      if (Number.isNaN(date.getTime())) return String(value)
+      const locale = state.language === 'he' ? 'he-IL' : state.language === 'ru' ? 'ru-RU' : 'en-US'
+      return date.toLocaleString(locale, {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      })
+    }
+
+    function formatDuration(startedAtIso) {
+      if (!startedAtIso) return tr('notAvailable')
+      const diffMs = Date.now() - Date.parse(startedAtIso)
+      if (!Number.isFinite(diffMs) || diffMs < 0) return tr('notAvailable')
+      const totalSeconds = Math.floor(diffMs / 1000)
+      const hours = Math.floor(totalSeconds / 3600)
+      const minutes = Math.floor((totalSeconds % 3600) / 60)
+      if (hours > 0) return `${hours}h ${minutes}m`
+      return `${minutes}m ${totalSeconds % 60}s`
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value))
+    }
+
+    function labelState(value) {
+      const normalized = String(value || '').toLowerCase()
+      if (!normalized) return tr('notAvailable')
+      return i18n[state.language][`state_${normalized}`] || i18n.en[`state_${normalized}`] || String(value)
+    }
+
+    function labelMode(value) {
+      const normalized = String(value || '').toLowerCase()
+      return i18n[state.language][`mode_${normalized}`] || i18n.en[`mode_${normalized}`] || String(value || tr('notAvailable'))
+    }
+
+    function labelSource(value) {
+      const normalized = String(value || '').toLowerCase()
+      return i18n[state.language][`source_${normalized}`] || i18n.en[`source_${normalized}`] || String(value || tr('notAvailable'))
+    }
+
+    function toneForState(value) {
+      const normalized = String(value || '').toLowerCase()
+      if (normalized === 'online' || normalized === 'connected' || normalized === 'live') return 'success'
+      if (normalized === 'scanning' || normalized === 'sync') return 'info'
+      if (normalized === 'degraded') return 'warning'
+      return 'danger'
+    }
+
+    function showStatus(message, tone = 'info') {
+      refs.statusCard.className = `status-card status-${tone}`
+      refs.statusTitle.textContent = tone === 'error' ? tr('statusError') : tone === 'success' ? tr('statusSuccess') : tr('statusInfo')
+      refs.statusText.textContent = message
+    }
+
+    function nextRequestId() {
+      state.requestSeq += 1
+      return state.requestSeq
+    }
+
+    function clearStatus() {
+      refs.statusCard.className = 'status-card hidden'
+      refs.statusTitle.textContent = ''
+      refs.statusText.textContent = ''
+    }
+
+    function setView(view) {
+      state.view = view
+      refs.viewConnect.hidden = view !== 'connect'
+      refs.viewChannel.hidden = view !== 'channel'
+      refs.viewCamera.hidden = view !== 'camera'
+      refs.viewDashboard.hidden = view !== 'dashboard'
+      refs.stepPill.textContent = tr(`view${view.charAt(0).toUpperCase()}${view.slice(1)}`)
+    }
+
+    function renderSelect(select, items, emptyLabel) {
+      select.innerHTML = ''
+      if (!items.length) {
+        const option = document.createElement('option')
+        option.value = ''
+        option.textContent = emptyLabel
+        select.appendChild(option)
+        return
+      }
+
+      items.forEach((item) => {
+        const option = document.createElement('option')
+        option.value = item.value
+        option.textContent = item.label
+        if (item.selected) option.selected = true
+        if (item.channelName) option.dataset.channelName = item.channelName
+        select.appendChild(option)
+      })
+    }
+
+    function applyLanguage() {
+      const locale = i18n[state.language] || i18n.en
+      document.documentElement.lang = state.language
+      document.body.dir = locale.dir
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, state.language)
+
+      document.getElementById('brandSubtitle').textContent = tr('appSubtitle')
+      document.getElementById('connectKicker').textContent = tr('connectKicker')
+      document.getElementById('connectTitle').textContent = tr('connectTitle')
+      document.getElementById('connectText').textContent = tr('connectText')
+      document.getElementById('orgLabel').textContent = tr('orgLabel')
+      refs.orgName.placeholder = tr('orgPlaceholder')
+      document.getElementById('deviceLabel').textContent = tr('deviceLabel')
+      document.getElementById('backendNote').textContent = tr('backendNote')
+      document.getElementById('connectHintTitle').textContent = tr('connectHintTitle')
+      document.getElementById('connectHintBody').textContent = tr('connectHintBody')
+      document.getElementById('connectStepTitle').textContent = tr('connectStepTitle')
+      document.getElementById('connectStepOne').textContent = tr('connectStepOne')
+      document.getElementById('connectStepTwo').textContent = tr('connectStepTwo')
+      document.getElementById('connectStepThree').textContent = tr('connectStepThree')
+
+      document.getElementById('channelKicker').textContent = tr('channelKicker')
+      document.getElementById('channelTitle').textContent = tr('channelTitle')
+      document.getElementById('channelText').textContent = tr('channelText')
+      document.getElementById('channelLabel').textContent = tr('channelLabel')
+      document.getElementById('channelHintTitle').textContent = tr('channelHintTitle')
+      document.getElementById('channelHintBody').textContent = tr('channelHintBody')
+      document.getElementById('channelMetaTitle').textContent = tr('channelMetaTitle')
+      document.getElementById('channelMetaBody').textContent = tr('channelMetaBody')
+
+      document.getElementById('cameraKicker').textContent = tr('cameraKicker')
+      document.getElementById('cameraTitle').textContent = tr('cameraTitle')
+      document.getElementById('cameraText').textContent = tr('cameraText')
+      document.getElementById('cameraLabel').textContent = tr('cameraLabel')
+      document.getElementById('cameraHintTitle').textContent = tr('cameraHintTitle')
+      document.getElementById('cameraHintBody').textContent = tr('cameraHintBody')
+      document.getElementById('cameraSafetyTitle').textContent = tr('cameraSafetyTitle')
+      document.getElementById('cameraSafetyBody').textContent = tr('cameraSafetyBody')
+
+      document.getElementById('dashboardKicker').textContent = tr('dashboardKicker')
+      document.getElementById('dashboardTitle').textContent = tr('dashboardTitle')
+      document.getElementById('dashboardSubtitle').textContent = tr('dashboardSubtitle')
+      document.getElementById('scanChartTitle').textContent = tr('scanChartTitle')
+      document.getElementById('scanChartNote').textContent = tr('scanChartNote')
+      document.getElementById('healthChartTitle').textContent = tr('healthChartTitle')
+      document.getElementById('healthChartNote').textContent = tr('healthChartNote')
+      document.getElementById('rulesTitle').textContent = tr('rulesTitle')
+      document.getElementById('rulesNote').textContent = tr('rulesNote')
+      document.getElementById('bindingTitle').textContent = tr('bindingTitle')
+      document.getElementById('bindingNote').textContent = tr('bindingNote')
+      document.getElementById('activityTitle').textContent = tr('activityTitle')
+      document.getElementById('activityNote').textContent = tr('activityNote')
+      document.getElementById('actionsTitle').textContent = tr('actionsTitle')
+      document.getElementById('actionsNote').textContent = tr('actionsNote')
+
+      refs.connectBtn.textContent = state.busy.connect ? tr('connectBusy') : tr('connectBtn')
+      refs.backToConnectBtn.textContent = tr('backBtn')
+      refs.toCameraBtn.textContent = tr('nextBtn')
+      refs.backToChannelBtn.textContent = tr('backBtn')
+      refs.refreshCamerasBtn.textContent = tr('refreshBtn')
+      refs.saveBtn.textContent = state.busy.save ? tr('saveBusy') : tr('saveBtn')
+      refs.rebindBtn.textContent = tr('rebindBtn')
+      refs.unbindBtn.textContent = tr('unbindBtn')
+      refs.channelNote.textContent = tr('channelNote')
+      refs.cameraNote.textContent = state.busy.cameras ? tr('cameraNoteLoading') : tr('cameraNoteReady')
+
+      document.querySelectorAll('.lang-button').forEach((button) => {
+        button.classList.toggle('active', button.dataset.lang === state.language)
+      })
+
+      refs.stepPill.textContent = tr(`view${state.view.charAt(0).toUpperCase()}${state.view.slice(1)}`)
+    }
+
+    function makeTag(label, tone = 'info') {
+      return `<span class="tag ${tone}">${escapeHtml(label)}</span>`
+    }
+
+    function makeSidebarRow(label, value) {
+      return `
+        <div class="sidebar-row">
+          <div class="sidebar-label">${escapeHtml(label)}</div>
+          <div class="sidebar-value">${escapeHtml(value || tr('notAvailable'))}</div>
+        </div>
+      `
+    }
+
+    function makeGauge(label, value, note, ratio, tone, centerText) {
+      const safeRatio = clamp(ratio, 0, 1)
+      const radius = 46
+      const circumference = 2 * Math.PI * radius
+      const dashOffset = circumference * (1 - safeRatio)
+      return `
+        <article class="gauge-card">
+          <div class="gauge-head">
+            <div>
+              <h3 class="card-title">${escapeHtml(label)}</h3>
+              <p class="card-note">${escapeHtml(note)}</p>
+            </div>
+            ${makeTag(value, tone)}
+          </div>
+          <div class="gauge-wrap">
+            <svg class="gauge-svg" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="gauge-track" cx="60" cy="60" r="${radius}"></circle>
+              <circle
+                class="gauge-progress ${tone}"
+                cx="60"
+                cy="60"
+                r="${radius}"
+                stroke-dasharray="${circumference.toFixed(2)}"
+                stroke-dashoffset="${dashOffset.toFixed(2)}"
+              ></circle>
+              <text class="gauge-center-label" x="60" y="52">${escapeHtml(label)}</text>
+              <text class="gauge-center-value" x="60" y="72">${escapeHtml(centerText)}</text>
+            </svg>
+            <div class="gauge-meta">
+              <div class="gauge-value">${escapeHtml(value)}</div>
+              <div class="gauge-subvalue">${escapeHtml(note)}</div>
+            </div>
+          </div>
+        </article>
+      `
+    }
+
+    function makeEmptyState(message) {
+      return `<div class="empty-state">${escapeHtml(message)}</div>`
+    }
+
+    function extractScanBars(sessionTelemetry) {
+      const recent = sessionTelemetry.slice(-24)
+      if (!recent.length) return []
+      return recent.map((point, index) => {
+        const previous = recent[index - 1]
+        return Math.max(0, (point.scannedOperations || 0) - (previous?.scannedOperations || 0))
+      })
+    }
+
+    function renderScanBars(sessionTelemetry) {
+      const bars = extractScanBars(sessionTelemetry)
+      if (!bars.length) {
+        refs.scanBars.innerHTML = makeEmptyState(tr('chartEmpty'))
+        return
+      }
+
+      const maxValue = Math.max(...bars, 1)
+      refs.scanBars.innerHTML = bars.map((value) => {
+        const height = value > 0 ? `${Math.max(16, (value / maxValue) * 100)}%` : '10%'
+        return `<div class="bar ${value === 0 ? 'zero' : ''}" style="height:${height}" title="${escapeHtml(String(value))}"></div>`
+      }).join('')
+    }
+
+    function runtimeTone(sample) {
+      if (!sample) return 'danger'
+      if (sample.runtimeStatus === 'degraded' || sample.hasError) return 'warning'
+      if (sample.runtimeStatus === 'scanning') return 'info'
+      if (sample.runtimeStatus === 'online' || sample.localAgentState === 'connected') return 'success'
+      return 'danger'
+    }
+
+    function renderHealthTimeline(sessionTelemetry) {
+      const recent = sessionTelemetry.slice(-30)
+      if (!recent.length) {
+        refs.healthTimeline.innerHTML = makeEmptyState(tr('chartEmpty'))
+        refs.healthLegend.innerHTML = ''
+        return
+      }
+
+      refs.healthTimeline.innerHTML = recent.map((sample) => {
+        return `<div class="timeline-segment ${runtimeTone(sample)}" title="${escapeHtml(labelState(sample.runtimeStatus))}"></div>`
+      }).join('')
+
+      refs.healthLegend.innerHTML = [
+        { key: 'legendOnline', tone: 'success' },
+        { key: 'legendScanning', tone: 'info' },
+        { key: 'legendDegraded', tone: 'warning' },
+        { key: 'legendOffline', tone: 'danger' },
+      ].map((item) => `
+        <span class="legend-pill">
+          <span class="legend-dot timeline-segment ${item.tone}"></span>
+          <span>${escapeHtml(tr(item.key))}</span>
+        </span>
+      `).join('')
+    }
+
+    function renderRules(channel) {
+      const rules = Array.isArray(channel?.operations) ? channel.operations : []
+      if (!rules.length) {
+        refs.rulesTable.innerHTML = makeEmptyState(tr('rulesEmpty'))
+        return
+      }
+
+      refs.rulesTable.innerHTML = `
+        <div class="rules-row header">
+          <div class="rule-cell">${escapeHtml(tr('ruleName'))}</div>
+          <div class="rule-cell">${escapeHtml(tr('ruleMode'))}</div>
+          <div class="rule-cell">${escapeHtml(tr('ruleSchedule'))}</div>
+          <div class="rule-cell">${escapeHtml(tr('ruleState'))}</div>
+        </div>
+        ${rules.map((rule) => `
+          <div class="rules-row">
+            <div class="rule-cell rule-name">${escapeHtml(rule.name)}</div>
+            <div class="rule-cell">${escapeHtml(labelMode(rule.mode))}</div>
+            <div class="rule-cell">${escapeHtml(rule.schedule || tr('notAvailable'))}</div>
+            <div class="rule-cell">${makeTag(rule.enabled ? tr('enabled') : tr('disabled'), rule.enabled ? 'success' : 'danger')}</div>
+          </div>
+        `).join('')}
+      `
+    }
+
+    function renderDashboard(data) {
+      const saved = data.saved
+      const runtime = data.runtime
+      const channel = data.channel
+      const telemetry = Array.isArray(data.sessionTelemetry) ? data.sessionTelemetry : []
+      const agentState = channel?.localAgentStatus?.state || 'offline'
+      const channelState = channel?.liveState || 'OFFLINE'
+      const runtimeState = runtime?.status || 'offline'
+      const freshness = telemetry.length > 0
+        ? telemetry[telemetry.length - 1].heartbeatFreshnessSec
+        : null
+
+      setView('dashboard')
+
+      refs.identityTags.innerHTML = [
+        makeTag(`${tr('bindingChannel')}: ${saved?.channelName || tr('notAvailable')}`, 'info'),
+        makeTag(`${tr('labelCamera')}: ${saved?.cameraName || tr('notAvailable')}`, 'info'),
+        makeTag(`${tr('labelDevice')}: ${saved?.deviceName || tr('notAvailable')}`, 'info'),
+        makeTag(`${tr('labelSource')}: ${labelSource(channel?.captureMode || 'local_agent')}`, 'info'),
+      ].join('')
+
+      refs.statusTags.innerHTML = [
+        makeTag(`${tr('labelClient')}: ${labelState(runtimeState)}`, toneForState(runtimeState)),
+        makeTag(`${tr('labelAgent')}: ${labelState(agentState)}`, toneForState(agentState)),
+        makeTag(`${tr('labelChannel')}: ${labelState(channelState)}`, toneForState(channelState)),
+      ].join('')
+
+      const enabledRules = Array.isArray(channel?.operations)
+        ? channel.operations.filter((rule) => rule.enabled).length
+        : 0
+      const totalRules = Array.isArray(channel?.operations) ? channel.operations.length : 0
+      const heartbeatRatio = freshness === null ? 0 : clamp(1 - (freshness / HEARTBEAT_BUDGET_SECONDS), 0, 1)
+      const heartbeatTone = freshness === null ? 'danger' : freshness <= 15 ? 'success' : freshness <= HEARTBEAT_BUDGET_SECONDS ? 'warning' : 'danger'
+      const uptimeHours = runtime?.startedAtIso ? clamp((Date.now() - Date.parse(runtime.startedAtIso)) / (12 * 60 * 60 * 1000), 0, 1) : 0
+      const runtimeToneValue = toneForState(runtimeState)
+      const ruleTone = totalRules > 0 && enabledRules === totalRules ? 'success' : enabledRules > 0 ? 'warning' : 'danger'
+
+      refs.gaugesGrid.innerHTML = [
+        makeGauge(
+          tr('gaugeHeartbeat'),
+          freshness === null ? tr('notAvailable') : tr('metricSeconds', { value: String(freshness) }),
+          tr('gaugeHeartbeatNote'),
+          heartbeatRatio,
+          heartbeatTone,
+          freshness === null ? '--' : String(freshness),
+        ),
+        makeGauge(
+          tr('gaugeRuntime'),
+          labelState(runtimeState),
+          `${tr('gaugeRuntimeNote')} · ${formatDuration(runtime?.startedAtIso)}`,
+          uptimeHours,
+          runtimeToneValue,
+          formatDuration(runtime?.startedAtIso).replace(/\s+/g, ''),
+        ),
+        makeGauge(
+          tr('gaugeRules'),
+          `${enabledRules}/${totalRules}`,
+          tr('gaugeRulesNote'),
+          totalRules > 0 ? enabledRules / totalRules : 0,
+          ruleTone,
+          `${enabledRules}/${totalRules}`,
+        ),
+      ].join('')
+
+      renderScanBars(telemetry)
+      renderHealthTimeline(telemetry)
+      renderRules(channel)
+
+      refs.bindingRows.innerHTML = [
+        [tr('bindingOrg'), saved?.organizationName],
+        [tr('bindingChannel'), saved?.channelName],
+        [tr('bindingCamera'), saved?.cameraName],
+        [tr('bindingDevice'), saved?.deviceName],
+        [tr('bindingDeviceId'), saved?.deviceId],
+        [tr('bindingBoundAt'), formatDateTime(saved?.boundAtIso)],
+      ].map(([label, value]) => makeSidebarRow(label, value)).join('')
+
+      refs.activityRows.innerHTML = [
+        [tr('activityHeartbeat'), formatDateTime(runtime?.lastHeartbeatAtIso || channel?.localAgentStatus?.lastHeartbeatAtIso)],
+        [tr('activityScan'), formatDateTime(runtime?.lastScanAtIso)],
+        [tr('activityRuntime'), formatDuration(runtime?.startedAtIso)],
+        [tr('activityScans'), String(runtime?.scannedOperations ?? 0)],
+        [tr('activityRefresh'), formatDateTime(data.fetchedAtIso)],
+        [tr('activityError'), data.error || runtime?.lastError || channel?.localAgentStatus?.lastError || tr('none')],
+      ].map(([label, value]) => makeSidebarRow(label, value)).join('')
+
+      refs.dashboardNote.textContent = data.error
+        ? tr('noteError', { error: data.error })
+        : tr('noteFresh', { time: formatDateTime(data.fetchedAtIso) })
+    }
+
+    function fillChannels(channels, priorBinding) {
+      state.channels = channels.filter((channel) => channel.type === 'personal')
+      renderSelect(
+        refs.channelSelect,
+        state.channels.map((channel) => ({
+          value: channel.id,
+          channelName: channel.name,
+          label: `${channel.name} · ${labelSource(channel.captureMode || 'browser')}`,
+          selected: priorBinding?.channelId === channel.id,
+        })),
+        tr('noChannels'),
+      )
+    }
+
+    async function loadCameras() {
+      const requestId = nextRequestId()
+      state.busy.cameras = true
+      applyLanguage()
+      try {
+        const cameras = await window.ghostAPI.getCameras()
+        if (requestId !== state.requestSeq) {
+          return
+        }
+        state.cameras = Array.isArray(cameras) ? cameras : []
+        renderSelect(
+          refs.cameraSelect,
+          state.cameras.map((camera, index) => ({
+            value: camera.name,
+            label: camera.label,
+            selected: index === 0,
+          })),
+          tr('noCameras'),
+        )
+      } finally {
+        if (requestId === state.requestSeq) {
+          state.busy.cameras = false
+          applyLanguage()
+        }
+      }
+    }
+
+    async function loadDashboardOrSetup() {
+      const requestId = ++state.dashboardRequestSeq
+      const data = await window.ghostAPI.getDashboardData()
+      if (requestId !== state.dashboardRequestSeq) {
+        return
+      }
+      if (data?.saved) {
+        renderDashboard(data)
+        return
+      }
+
+      if (state.view === 'dashboard' || (!state.connectSession && state.view === 'connect')) {
+        setView('connect')
+      }
+    }
+
+    async function prepareRebindFlow(savedConfig) {
+      const requestId = nextRequestId()
+      const saved = savedConfig || await window.ghostAPI.loadConfig()
+      if (!saved) {
+        setView('connect')
+        return
+      }
+
+      refs.orgName.value = saved.organizationName || refs.orgName.value
+      refs.deviceName.value = saved.deviceName || refs.deviceName.value
+
+      state.busy.rebind = true
+      showStatus(tr('rebindLoading'), 'info')
+      try {
+        const connectSession = await window.ghostAPI.connectAgent({
+          apiBaseUrl: API_BASE_URL,
+          organizationName: saved.organizationName,
+          deviceName: saved.deviceName || 'Office Gateway',
+          deviceId: saved.deviceId,
+        })
+        if (requestId !== state.requestSeq) {
+          return
+        }
+        state.connectSession = connectSession
+        fillChannels(state.connectSession.channels || [], {
+          channelId: saved.channelId,
+        })
+        setView('channel')
+        showStatus(tr('rebindReady'), 'success')
+      } catch (error) {
+        setView('connect')
+        showStatus(error?.message || tr('statusError'), 'error')
+      } finally {
+        state.busy.rebind = false
+      }
+    }
+
+    document.querySelectorAll('.lang-button').forEach((button) => {
+      button.addEventListener('click', () => {
+        state.language = button.dataset.lang
+        applyLanguage()
+        if (state.view === 'dashboard') {
+          void loadDashboardOrSetup()
+        }
+      })
+    })
+
+    refs.connectBtn.addEventListener('click', async () => {
+      const requestId = nextRequestId()
+      const organizationName = refs.orgName.value.trim()
+      if (!organizationName) {
+        showStatus(tr('connectNeedOrg'), 'error')
+        return
+      }
+
+      state.busy.connect = true
+      applyLanguage()
+      showStatus(tr('connectLoading'), 'info')
+
+      try {
+        const connectSession = await window.ghostAPI.connectAgent({
+          apiBaseUrl: API_BASE_URL,
+          organizationName,
+          deviceName: refs.deviceName.value.trim() || 'Office Gateway',
+        })
+        if (requestId !== state.requestSeq) {
+          return
+        }
+        state.connectSession = connectSession
+        fillChannels(state.connectSession.channels || [], state.connectSession.priorBinding)
+        setView('channel')
+        showStatus(tr('connectReady'), 'success')
+      } catch (error) {
+        if (requestId === state.requestSeq) {
+          showStatus(error?.message || tr('statusError'), 'error')
+        }
+      } finally {
+        if (requestId === state.requestSeq) {
+          state.busy.connect = false
+          applyLanguage()
+        }
+      }
+    })
+
+    refs.backToConnectBtn.addEventListener('click', () => {
+      setView('connect')
+      clearStatus()
+    })
+
+    refs.toCameraBtn.addEventListener('click', async () => {
+      if (!refs.channelSelect.value) {
+        showStatus(tr('chooseChannel'), 'error')
+        return
+      }
+      showStatus(tr('refreshLoading'), 'info')
+      try {
+        await loadCameras()
+        setView('camera')
+        showStatus(tr('refreshReady'), 'success')
+      } catch (error) {
+        showStatus(error?.message || tr('statusError'), 'error')
+      }
+    })
+
+    refs.backToChannelBtn.addEventListener('click', () => {
+      setView('channel')
+      clearStatus()
+    })
+
+    refs.refreshCamerasBtn.addEventListener('click', async () => {
+      showStatus(tr('refreshLoading'), 'info')
+      try {
+        await loadCameras()
+        showStatus(tr('refreshReady'), 'success')
+      } catch (error) {
+        showStatus(error?.message || tr('statusError'), 'error')
+      }
+    })
+
+    refs.saveBtn.addEventListener('click', async () => {
+      if (!state.connectSession) {
+        showStatus(tr('connectNeedOrg'), 'error')
+        return
+      }
+      if (!refs.channelSelect.value) {
+        showStatus(tr('chooseChannel'), 'error')
+        return
+      }
+      if (!refs.cameraSelect.value) {
+        showStatus(tr('chooseCamera'), 'error')
+        return
+      }
+
+      state.busy.save = true
+      applyLanguage()
+      showStatus(tr('saveLoading'), 'info')
+
+      try {
+        const selectedOption = refs.channelSelect.selectedOptions[0]
+        await window.ghostAPI.saveBinding({
+          organizationId: state.connectSession.organizationId,
+          organizationName: state.connectSession.organizationName,
+          apiBaseUrl: API_BASE_URL,
+          accessToken: state.connectSession.accessToken,
+          refreshToken: state.connectSession.refreshToken,
+          username: state.connectSession.profile.username,
+          deviceId: state.connectSession.deviceId,
+          deviceName: refs.deviceName.value.trim() || 'Office Gateway',
+          channelId: selectedOption.value,
+          channelName: selectedOption.dataset.channelName,
+          cameraName: refs.cameraSelect.value,
+          boundAtIso: new Date().toISOString(),
+        })
+        showStatus(tr('saveReady'), 'success')
+        await loadDashboardOrSetup()
+      } catch (error) {
+        showStatus(error?.message || tr('statusError'), 'error')
+      } finally {
+        state.busy.save = false
+        applyLanguage()
+      }
+    })
+
+    refs.rebindBtn.addEventListener('click', async () => {
+      await prepareRebindFlow()
+    })
+
+    refs.unbindBtn.addEventListener('click', async () => {
+      showStatus(tr('disconnectLoading'), 'info')
+      try {
+        await window.ghostAPI.unbindAgent()
+        state.connectSession = null
+        state.channels = []
+        state.cameras = []
+        renderSelect(refs.channelSelect, [], tr('noChannels'))
+        renderSelect(refs.cameraSelect, [], tr('noCameras'))
+        setView('connect')
+        showStatus(tr('disconnectReady'), 'success')
+      } catch (error) {
+        showStatus(error?.message || tr('statusError'), 'error')
+      }
+    })
+
+    async function bootstrap() {
+      applyLanguage()
+      renderSelect(refs.channelSelect, [], tr('noChannels'))
+      renderSelect(refs.cameraSelect, [], tr('noCameras'))
+      setView('connect')
+
+      const saved = await window.ghostAPI.loadConfig()
+      if (saved) {
+        refs.orgName.value = saved.organizationName || ''
+        refs.deviceName.value = saved.deviceName || refs.deviceName.value
+      }
+
+      await loadDashboardOrSetup()
+
+      if (state.pollId) {
+        clearInterval(state.pollId)
+      }
+      state.pollId = setInterval(() => {
+        if (state.view === 'dashboard') {
+          void loadDashboardOrSetup()
+        }
+      }, POLL_INTERVAL_MS)
+
+      if (typeof window.ghostAPI.onTrayAction === 'function') {
+        window.ghostAPI.onTrayAction((action) => {
+          if (action === 'rebind') {
+            void prepareRebindFlow()
+          }
+        })
+      }
+    }
+
+    void bootstrap()
+  </script>
+</body>
+</html>

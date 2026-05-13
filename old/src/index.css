@@ -1,0 +1,292 @@
+@import url('https://fonts.googleapis.com/css2?family=Miriam+Libre:wght@400;700&family=Rubik:wght@400;500;700&display=swap');
+
+:root {
+  --white: #ffffff;
+  --neutral-50: #fafafa;
+  --neutral-100: #f5f5f5;
+  --neutral-200: #e5e5e5;
+  --neutral-300: #d4d4d4;
+  --neutral-400: #a1a1a1;
+  --neutral-500: #737373;
+  --neutral-600: #525252;
+  --neutral-700: #404040;
+  --neutral-800: #262626;
+  --neutral-950: #0a0a0a;
+  --border: #dedede;
+  /* צל עדין בסגנון כלי עבודה enterprise */
+  --soft-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+  --font-hebrew: 'Rubik', 'Segoe UI', sans-serif;
+  --font-latin: 'Rubik', 'Segoe UI', sans-serif;
+
+  /* scale מרווחים קשיח (4–24 בלבד) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* רדיוסים אחידים — פינות עדינות (פחות "עגול" מברירת המחדל הקודמת) */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* WhatsApp-Web style surfaces (Ghost neutral palette) */
+  --wa-header-bg: #13171f;
+  --wa-sidebar-bg: #13171f;
+  --wa-chat-bg: #efeae2;
+  --wa-divider: rgba(120, 143, 170, 0.18);
+  --wa-row-hover: #182231;
+  --wa-row-selected: #1d2938;
+  --wa-bubble-out: #0a0a0a;
+  --wa-bubble-out-text: #ffffff;
+  --wa-bubble-in: #ffffff;
+  --wa-bubble-in-text: #111111;
+  --wa-meta-text: #9fb0c3;
+  --wa-unread-bg: #0a0a0a;
+  --wa-icon: #c7d3e0;
+  --wa-icon-hover: #f4f8fc;
+  --wa-composer-bg: #f0f2f5;
+  --wa-input-bg: #ffffff;
+  --wa-shell-bg: #0c1015;
+  --wa-frame-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+
+  /* טיפוגרפיה היררכית */
+  --font-title-1: 21px;
+  --font-section: 17px;
+  --font-body: 14px;
+  --font-meta: 11px;
+  --line-height-tight: 1.35;
+  --line-height-body: 1.5;
+
+  color: #d9e2ee;
+  background: var(--wa-shell-bg);
+  font-family: var(--font-latin);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: var(--line-height-body);
+  font-size: var(--font-body);
+  font-weight: 400;
+
+  --theme-app-bg: #081019;
+  --theme-app-bg-soft: #101a28;
+  --theme-app-text: #d9e2ee;
+  --theme-panel-bg: rgba(14, 20, 30, 0.72);
+  --theme-panel-bg-strong: rgba(12, 18, 28, 0.84);
+  --theme-panel-border: rgba(176, 214, 245, 0.16);
+  --theme-panel-border-strong: rgba(186, 224, 255, 0.24);
+  --theme-panel-shadow: 0 24px 56px rgba(2, 6, 16, 0.34);
+  --theme-panel-highlight: rgba(255, 255, 255, 0.06);
+  --theme-button-bg: rgba(16, 23, 34, 0.74);
+  --theme-button-hover: rgba(35, 51, 73, 0.82);
+  --theme-input-bg: rgba(10, 16, 24, 0.84);
+  --theme-input-border: rgba(132, 153, 180, 0.24);
+  --theme-accent: #75d6ff;
+  --theme-accent-soft: rgba(117, 214, 255, 0.16);
+}
+
+html[data-theme='light'] {
+  --theme-app-bg: #eef3f8;
+  --theme-app-bg-soft: #dfe8f1;
+  --theme-app-text: #111827;
+  --theme-panel-bg: rgba(255, 255, 255, 0.62);
+  --theme-panel-bg-strong: rgba(255, 255, 255, 0.8);
+  --theme-panel-border: rgba(154, 175, 198, 0.28);
+  --theme-panel-border-strong: rgba(122, 155, 189, 0.36);
+  --theme-panel-shadow: 0 18px 42px rgba(47, 74, 105, 0.14);
+  --theme-panel-highlight: rgba(255, 255, 255, 0.72);
+  --theme-button-bg: rgba(255, 255, 255, 0.58);
+  --theme-button-hover: rgba(255, 255, 255, 0.78);
+  --theme-input-bg: #e8edf3;
+  --theme-input-border: #c4d0dc;
+  --theme-accent: #2563eb;
+  --theme-accent-soft: rgba(37, 99, 235, 0.12);
+}
+
+html {
+  direction: rtl;
+  background: var(--theme-app-bg);
+  color: var(--theme-app-text);
+  -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--theme-app-bg);
+  color: var(--theme-app-text);
+  overscroll-behavior: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+h1,
+h2,
+h3,
+strong {
+  color: var(--neutral-950);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#root {
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+}
+
+#root > :not(.ambient-ui) {
+  position: relative;
+  z-index: 1;
+}
+
+.ambient-ui {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ambient-ui::before,
+.ambient-ui::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ambient-ui::before {
+  background:
+    radial-gradient(circle at 14% 18%, rgba(142, 233, 255, 0.1), transparent 20%),
+    radial-gradient(circle at 78% 10%, rgba(143, 164, 255, 0.08), transparent 18%),
+    radial-gradient(circle at 52% 68%, rgba(255, 255, 255, 0.04), transparent 24%);
+  filter: blur(22px);
+  opacity: 0.88;
+  animation: ghost-ambient-drift 24s ease-in-out infinite alternate;
+}
+
+html[data-theme='light'] {
+  color-scheme: light;
+}
+
+html[data-theme='light'] .ambient-ui::before {
+  background:
+    radial-gradient(circle at 14% 18%, rgba(96, 165, 250, 0.18), transparent 22%),
+    radial-gradient(circle at 78% 10%, rgba(56, 189, 248, 0.12), transparent 18%),
+    radial-gradient(circle at 52% 68%, rgba(255, 255, 255, 0.52), transparent 30%);
+  filter: blur(36px);
+  opacity: 0.24;
+}
+
+html[data-theme='light'] .ambient-ui::after {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.8), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 58%);
+  opacity: 0.14;
+}
+
+html[data-theme='light'] .ambient-ui__noise {
+  opacity: 0.003;
+  mix-blend-mode: multiply;
+}
+
+.ambient-ui::after {
+  inset: 8% 10%;
+  border-radius: 48px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(210, 244, 255, 0.06), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent 58%);
+  filter: blur(54px);
+  opacity: 0.5;
+}
+
+.ambient-ui__noise {
+  position: fixed;
+  pointer-events: none;
+}
+
+.ambient-ui__noise {
+  inset: 0;
+  opacity: 0.032;
+  mix-blend-mode: overlay;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(0, 0, 0, 0.36) 0 1px, transparent 1px),
+    radial-gradient(circle at 72% 44%, rgba(255, 255, 255, 0.34) 0 1px, transparent 1px);
+  background-size: 17px 17px, 23px 23px;
+}
+
+@keyframes ghost-ambient-drift {
+  0% {
+    transform: translate3d(-1.5%, -1%, 0) scale(1);
+    opacity: 0.78;
+  }
+  50% {
+    transform: translate3d(1.2%, 1.8%, 0) scale(1.03);
+    opacity: 0.96;
+  }
+  100% {
+    transform: translate3d(-0.6%, 2.4%, 0) scale(1.05);
+    opacity: 0.84;
+  }
+}
+
+::selection {
+  background: var(--neutral-200);
+}
+
+@media (max-width: 980px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  html,
+  body,
+  #root {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  body {
+    min-height: 100dvh;
+    overscroll-behavior-y: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-ui::before {
+    animation: none;
+  }
+}

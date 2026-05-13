@@ -1,0 +1,10 @@
+{
+  "initialTheme": "light",
+  "loginToggleCount": 1,
+  "afterLoginToggleTheme": "dark",
+  "topbarCount": 1,
+  "themeBtnCount": 1,
+  "profile": null,
+  "dashboardThemeBefore": "dark",
+  "dashboardThemeAfter": "light"
+}

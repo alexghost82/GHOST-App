@@ -4,6 +4,7 @@ import type {
   CaptureWorkItem,
   Channel,
   LocalAgentConnectResponse,
+  LocalAgentProvisioningConsumeResponse,
   MessagePayload,
   Operation,
   OperationScanResult,
@@ -42,6 +43,24 @@ export class GhostApiClient {
     return payload
   }
 
+  static async consumeProvisioningSession(
+    apiBaseUrl: string,
+    token: string,
+    deviceName: string,
+    deviceId?: string,
+  ): Promise<LocalAgentProvisioningConsumeResponse> {
+    const response = await fetch(`${apiBaseUrl.replace(/\/+$/, '')}/api/local-agent/provisioning-sessions/consume`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, deviceName, deviceId }),
+    })
+    const payload = await response.json() as LocalAgentProvisioningConsumeResponse & { error?: string }
+    if (!response.ok) {
+      throw new Error(payload.error || `Provisioning failed with HTTP ${response.status}`)
+    }
+    return payload
+  }
+
   getSession(): { accessToken: string; refreshToken: string } {
     return { accessToken: this.accessToken, refreshToken: this.refreshToken }
   }
@@ -58,22 +77,42 @@ export class GhostApiClient {
     channelId: string
     deviceId: string
     deviceName: string
-    cameraName: string
+    cameraId: string
+    cameraLabel: string
+    cameraSourceType: 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
+    cameraName?: string
   }): Promise<{ channel: AgentChannelSummary }> {
     return this.post('/api/local-agent/bind', input)
   }
 
-  async unbindChannel(channelId: string, deviceId: string): Promise<void> {
-    await this.post('/api/local-agent/unbind', { channelId, deviceId })
+  async unbindChannel(channelId: string, deviceId: string, cameraId?: string): Promise<void> {
+    await this.post('/api/local-agent/unbind', {
+      channelId,
+      deviceId,
+      ...(cameraId ? { cameraId } : {}),
+    })
   }
 
   async sendHeartbeat(input: {
     channelId: string
     deviceId: string
     deviceName: string
-    cameraName: string
+    cameraId: string
+    cameraLabel: string
+    cameraSourceType: 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
+    cameraName?: string
     status: 'online' | 'scanning' | 'degraded' | 'offline'
     message?: string
+    cameras?: Array<{
+      cameraId: string
+      cameraLabel: string
+      sourceType: 'usb-dshow' | 'rtsp' | 'hikvision-sdk'
+      status: 'online' | 'degraded' | 'offline'
+      lastCaptureAtIso?: string
+      lastSuccessfulCaptureAtIso?: string
+      lastError?: string
+      latencyMs?: number
+    }>
   }): Promise<void> {
     await this.post('/api/local-agent/heartbeat', input)
   }
@@ -85,9 +124,16 @@ export class GhostApiClient {
     return response.work ?? null
   }
 
-  async submitCaptureResult(workId: string, deviceId: string, frameDataUrl: string, capturedAtIso: string): Promise<void> {
+  async submitCaptureResult(
+    workId: string,
+    deviceId: string,
+    cameraId: string,
+    frameDataUrl: string,
+    capturedAtIso: string,
+  ): Promise<void> {
     await this.post(`/api/local-agent/work/${encodeURIComponent(workId)}/result`, {
       deviceId,
+      cameraId,
       frameDataUrl,
       capturedAtIso,
     })

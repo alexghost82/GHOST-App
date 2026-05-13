@@ -1,0 +1,63 @@
+{
+  "data": {
+    "rect": {
+      "x": 12,
+      "y": 70,
+      "width": 322,
+      "height": 638,
+      "bottom": 708
+    },
+    "viewport": {
+      "width": 375,
+      "height": 812
+    },
+    "itemCount": 11,
+    "items": [
+      {
+        "text": "+צור ארגון",
+        "height": 44
+      },
+      {
+        "text": "⌂סקירה",
+        "height": 44
+      },
+      {
+        "text": "⏸ארגון מושהה",
+        "height": 44
+      },
+      {
+        "text": "◫משתמשים",
+        "height": 44
+      },
+      {
+        "text": "₪תשלומים",
+        "height": 44
+      },
+      {
+        "text": "◔שימוש",
+        "height": 44
+      },
+      {
+        "text": "⚠תקלות",
+        "height": 44
+      },
+      {
+        "text": "✦אירועים חיים",
+        "height": 44
+      },
+      {
+        "text": "◉התראות",
+        "height": 44
+      },
+      {
+        "text": "?עזרה ותמיכה",
+        "height": 44
+      },
+      {
+        "text": "⏻יציאה מהמערכת",
+        "height": 49
+      }
+    ]
+  },
+  "shot": "C:\\Users\\User\\Documents\\GitHub\\GHOST-App\\output\\playwright\\account-dropdown-compact-check.png"
+}
