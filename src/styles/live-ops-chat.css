@@ -3172,11 +3172,12 @@ html:not([data-theme='dark']) .app-shell.surface-live-ops .message-row.ghost .me
 
   .app-shell.operator-mobile-live-shell.surface-live-ops .chat-panel.chat-panel-mobile-design .message-stream {
     flex: 1 1 auto;
-    padding: 8px 17px 0 !important;
+    padding: 8px 17px calc(232px + env(safe-area-inset-bottom)) !important;
     display: flex;
     flex-direction: column;
     min-height: 0;
     overflow-x: hidden;
+    scroll-padding-bottom: calc(232px + env(safe-area-inset-bottom));
   }
 
   .app-shell.operator-mobile-live-shell.surface-live-ops .chat-panel.chat-panel-mobile-design.chat-panel-empty .message-stream {

@@ -172,7 +172,14 @@ export class FirestoreAdminRepository implements IAdminRepository {
       if (!current) throw new Error('הארגון לא נמצא.')
       const updated = updater(current)
       this.cache.organizations.set(organizationId, updated)
-      void adminDb.collection(COLLECTIONS.organizations).doc(organizationId).set(updated)
+      void adminDb.collection(COLLECTIONS.organizations).doc(organizationId).update(stripUndefinedDeep(updated)).catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : String(error)
+        if (message.includes('No document to update')) {
+          this.cache.organizations.delete(organizationId)
+          return
+        }
+        console.warn(`[firestore] organization update failed for ${organizationId}: ${message}`)
+      })
       return updated
     })
   }

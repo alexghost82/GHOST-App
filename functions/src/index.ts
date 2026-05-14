@@ -23,6 +23,7 @@ setGlobalOptions({
 /**
  * מאתחל את ה-app פעם אחת עם Firestore + Firebase Realtime Hub.
  * Cold start בלבד — instance נשמר לבקשות הבאות.
+ * deploy marker: post-firestore-cleanup refresh
  */
 function getApp(): Promise<ReturnType<typeof createApp>> {
   if (appPromise) return appPromise

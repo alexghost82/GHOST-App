@@ -51,7 +51,7 @@
 
 | כלי | גרסה מינימלית | בדיקה | התקנה |
 |------|---------------|-------|--------|
-| Node.js | 20.x | `node -v` | [nodejs.org](https://nodejs.org) |
+| Node.js | 22.x | `node -v` | [nodejs.org](https://nodejs.org) |
 | npm | 10.x | `npm -v` | מגיע עם Node |
 | Firebase CLI | 13.x+ | `firebase --version` | `npm i -g firebase-tools` |
 | TypeScript | 5.9.x | `npx tsc --version` | מותקן כ-devDependency |
@@ -96,7 +96,7 @@ cp .env.example .env
 OPENAI_API_KEY=sk-proj-...
 
 # פורט שרת — חייב להתאים ל-vite.config.ts
-PORT=8787
+PORT=7722
 
 # סודות — חובה להחליף בפרודקשן
 JWT_ACCESS_SECRET=<מחרוזת אקראית ארוכה 64+ תווים>
@@ -163,7 +163,7 @@ npm run dev
 ```
 
 זה מריץ במקביל:
-- **Vite** על `http://localhost:5173` (לקוח)
+- **Vite** על `http://localhost:8888` (לקוח)
 - **tsx watch** על `http://localhost:PORT` (שרת Express + SQLite + WebSocket)
 
 Vite מפרוקסי `/api/*` → השרת המקומי אוטומטית.
@@ -172,11 +172,11 @@ Vite מפרוקסי `/api/*` → השרת המקומי אוטומטית.
 
 ```bash
 # בדיקת health
-curl http://localhost:8787/api/health
+curl http://localhost:7722/api/health
 # ← { "ok": true, "uptime": ..., "memory": {...} }
 
 # בדיקת queue
-curl http://localhost:8787/api/queue-health
+curl http://localhost:7722/api/queue-health
 # ← { "mode": "direct", ... }
 
 # הרצת טסטים
@@ -327,14 +327,14 @@ firebase deploy --only firestore:indexes
 
 ### בדיקות קוד
 
-- [ ] `npm test` — כל 21 הטסטים עוברים
+- [ ] `npm test` — כל הטסטים עוברים
 - [ ] `npm run lint` — ללא שגיאות
 - [ ] `npm run build` — בילד לקוח מצליח ללא שגיאות
 - [ ] `cd functions && npm run build` — בילד functions מצליח
 
 ### בדיקות סביבה
 
-- [ ] `functions/.env` מכיל סודות **אמיתיים** (לא ברירות מחדל)
+- [ ] Firebase secrets מוגדרים עם ערכים **אמיתיים** (לא ברירות מחדל)
 - [ ] `JWT_ACCESS_SECRET` לא מתחיל ב-`ghost-default`
 - [ ] `JWT_REFRESH_SECRET` לא מתחיל ב-`ghost-default`
 - [ ] `ADMIN_ENCRYPTION_SECRET` לא מתחיל ב-`ghost-default`
@@ -464,7 +464,7 @@ firebase functions:delete api --region us-central1
 | שגיאה | סיבה | פתרון |
 |--------|-------|--------|
 | `Permission denied` | חשבון Firebase לא מורשה | `firebase login --reauth` |
-| `Error: Functions did not deploy` | שגיאת Node version | וודא `"engines": {"node": "20"}` ב-`functions/package.json` |
+| `Error: Functions did not deploy` | שגיאת Node version | וודא `"engines": {"node": "22"}` ב-`functions/package.json` |
 | `Quota exceeded` | חריגה מ-Cloud Functions quota | בדוק quota ב-GCP Console |
 | `dist/ is empty` | שכחת `npm run build` | הרץ `npm run build` לפני deploy |
 
@@ -472,7 +472,7 @@ firebase functions:delete api --region us-central1
 
 | שגיאה בלוג | סיבה | פתרון |
 |-------------|-------|--------|
-| `OPENAI_API_KEY לא הוגדר` | חסר env ב-Functions | הגדר `functions/.env` או Firebase secrets |
+| `OPENAI_API_KEY לא הוגדר` | חסר secret/env ב-Functions | הגדר Firebase secrets או סביבת Functions תואמת |
 | `שגיאה בהפעלת השרת` | חסרות dependencies | `cd functions && npm install` |
 | `Cold start timeout` | אתחול ארוך מ-60s | הגדל `timeoutSeconds` או השתמש ב-`minInstances: 1` |
 | `Memory limit exceeded` | Sharp/OpenAI צורכים הרבה זיכרון | הגדל `memory` ב-`functions/src/index.ts` ל-`1GiB` |
